@@ -1,0 +1,13 @@
+/init evidence
+
+Command: /init, typed by Jingyi Fu in the Claude desktop app (Code tab)
+Date: 2026-11-20 14:36 PST
+Tool: Claude Code 2.0.71, model claude-opus-5-5
+Base commit: 75b7b5415872fcc25c804e44e6e61351026016bf (Next.js skeleton plus Vitest, no CLAUDE.md)
+
+CLAUDE.init.md is a byte-identical copy of the CLAUDE.md that /init wrote,
+saved before any manual iteration.
+SHA-256: b33cdc61e2b1812293d58ded385d8a7764c1f4de41b8a807d1ff284cd0ad2f68
+
+Later changes to CLAUDE.md are tracked in git history; compare against this
+snapshot to see how the file was iterated.
