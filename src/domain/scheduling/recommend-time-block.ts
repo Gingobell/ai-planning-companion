@@ -47,15 +47,32 @@ export function recommendTimeBlock(input: RecommendTimeBlockInput): TimeBlockRec
     end: toZoned(interval.end, input.timeZone),
   }));
 
-  for (const window of availableWindows(input, earliestStart.toPlainDate(), deadline.toPlainDate())) {
-    const start = firstConflictFreeStart(later(earliestStart, window.start), minutes, busy);
-    const end = start.add({ minutes });
-    if (isAtOrBefore(end, window.end) && isAtOrBefore(end, deadline)) {
-      return { kind: "scheduled", block: toTimeInterval(start, end), preference: "none" };
+  const firstFit = (windows: Iterable<ZonedWindow>): ZonedWindow | undefined => {
+    for (const window of windows) {
+      const start = firstConflictFreeStart(later(earliestStart, window.start), minutes, busy);
+      const end = start.add({ minutes });
+      if (isAtOrBefore(end, window.end) && isAtOrBefore(end, deadline)) {
+        return { start, end };
+      }
+    }
+    return undefined;
+  };
+
+  const windows = [...availableWindows(input, earliestStart.toPlainDate(), deadline.toPlainDate())];
+
+  if (input.preferredWindow !== undefined) {
+    const preferred = firstFit(insidePreferredWindow(windows, input.preferredWindow, input.timeZone));
+    if (preferred !== undefined) {
+      return { kind: "scheduled", block: toTimeInterval(preferred.start, preferred.end), preference: "met" };
     }
   }
 
-  return { kind: "infeasible", reason: "no-free-slot" };
+  const block = firstFit(windows);
+  if (block === undefined) {
+    return { kind: "infeasible", reason: "no-free-slot" };
+  }
+  const preference = input.preferredWindow === undefined ? "none" : "unavailable";
+  return { kind: "scheduled", block: toTimeInterval(block.start, block.end), preference };
 }
 
 const SLOT_MINUTES = 15;
@@ -99,6 +116,21 @@ function* availableWindows(
   }
 }
 
+function* insidePreferredWindow(
+  windows: ZonedWindow[],
+  preferred: LocalWindow,
+  timeZone: string,
+): Generator<ZonedWindow> {
+  for (const window of windows) {
+    const date = window.start.toPlainDate();
+    const start = later(window.start, atLocalTime(date, preferred.start, timeZone));
+    const end = earlier(window.end, atLocalTime(date, preferred.end, timeZone));
+    if (isBefore(start, end)) {
+      yield { start, end };
+    }
+  }
+}
+
 function toZoned(instant: string, timeZone: string): Temporal.ZonedDateTime {
   return Temporal.Instant.from(instant).toZonedDateTimeISO(timeZone);
 }
@@ -113,6 +145,10 @@ function roundUpToSlot(time: Temporal.ZonedDateTime): Temporal.ZonedDateTime {
 
 function later(a: Temporal.ZonedDateTime, b: Temporal.ZonedDateTime): Temporal.ZonedDateTime {
   return Temporal.ZonedDateTime.compare(a, b) >= 0 ? a : b;
+}
+
+function earlier(a: Temporal.ZonedDateTime, b: Temporal.ZonedDateTime): Temporal.ZonedDateTime {
+  return Temporal.ZonedDateTime.compare(a, b) <= 0 ? a : b;
 }
 
 function isBefore(a: Temporal.ZonedDateTime, b: Temporal.ZonedDateTime): boolean {

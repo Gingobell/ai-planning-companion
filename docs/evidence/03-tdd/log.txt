@@ -225,3 +225,12 @@ AssertionError: expected { kind: 'scheduled', …(2) } to match object { block: 
       Tests  3 failed | 14 passed (17)
 exit code: 1
 
+=== Cycle 5 AC5 green ===
+Time: 2026-11-20 21:12 PST
+Base commit: 986d504
+$ npx vitest run
+ RUN  v4.1.12 /Users/gin/Desktop/CS6983/project3/ai-planning-companion
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+exit code: 0
+
