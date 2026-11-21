@@ -202,4 +202,47 @@ describe("recommendTimeBlock", () => {
       });
     });
   });
+
+  // Expected instants are written as literal UTC strings so these tests do not depend on the
+  // same timezone conversion as the code under test.
+  describe("AC6: timezone and DST transition days", () => {
+    const sunday = { 7: [{ start: "09:00", end: "17:00" }] };
+
+    it("maps 09:00 to PDT (UTC-7) on the spring-forward day", () => {
+      const result = recommendTimeBlock({
+        ...baseInput,
+        now: "2027-03-14T08:00:00Z",
+        task: { estimatedMinutes: 60, deadline: "2027-03-15T00:00:00Z" },
+        availability: sunday,
+      });
+      expect(result).toMatchObject({
+        block: { start: "2027-03-14T16:00:00Z", end: "2027-03-14T17:00:00Z" },
+      });
+    });
+
+    it("maps 09:00 to PST (UTC-8) on the fall-back day", () => {
+      const result = recommendTimeBlock({
+        ...baseInput,
+        now: "2026-11-01T07:00:00Z",
+        task: { estimatedMinutes: 60, deadline: "2026-11-02T01:00:00Z" },
+        availability: sunday,
+      });
+      expect(result).toMatchObject({
+        block: { start: "2026-11-01T17:00:00Z", end: "2026-11-01T18:00:00Z" },
+      });
+    });
+
+    it("keeps a block across the skipped hour at 120 real minutes", () => {
+      const result = recommendTimeBlock({
+        ...baseInput,
+        now: "2027-03-14T08:00:00Z",
+        task: { estimatedMinutes: 120, deadline: "2027-03-15T00:00:00Z" },
+        availability: { 7: [{ start: "01:00", end: "05:00" }] },
+      });
+      // 01:00 PST is 09:00Z; two real hours later is 11:00Z, which reads 04:00 PDT locally.
+      expect(result).toMatchObject({
+        block: { start: "2027-03-14T09:00:00Z", end: "2027-03-14T11:00:00Z" },
+      });
+    });
+  });
 });

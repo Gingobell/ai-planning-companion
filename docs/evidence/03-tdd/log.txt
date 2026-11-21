@@ -243,3 +243,21 @@ $ npx vitest run
       Tests  17 passed (17)
 exit code: 0
 
+=== Cycle 6 AC6 tests (passed on first run, not a red step) ===
+Time: 2026-11-20 21:34 PST
+Base commit: 4b901b1
+$ npx vitest run
+ RUN  v4.1.12 /Users/gin/Desktop/CS6983/project3/ai-planning-companion
+ Test Files  1 passed (1)
+      Tests  20 passed (20)
+exit code: 0
+
+Note: the three AC6 tests passed as soon as they were written. The behavior already existed because
+the Plan-mode decision to use Temporal keeps wall-clock times and instants separate, so this is not
+counted as a red step and there is no green commit. To show the tests can still catch DST bugs, each
+was checked against a temporary mutation of the implementation (reverted, never committed):
+  A. local times converted with a fixed UTC-8 offset  -> "maps 09:00 to PDT ... spring-forward" failed
+  B. local times converted with a fixed UTC-7 offset  -> "maps 09:00 to PST ... fall-back" failed
+  C. block length added on the wall clock, not in real time -> "keeps a block ... 120 real minutes" failed
+After reverting, the full suite passed again (20 tests). Refactor: skipped, no implementation change.
+
