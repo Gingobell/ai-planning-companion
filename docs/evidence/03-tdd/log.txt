@@ -186,3 +186,42 @@ $ npx vitest run
       Tests  14 passed (14)
 exit code: 0
 
+=== Cycle 4 AC4 refactor ===
+Skipped: the green change is one guard and one fallback return; no duplication or naming issue to fix.
+
+=== Cycle 5 AC5 red ===
+Time: 2026-11-20 21:11 PST
+Base commit: 00d6b49
+$ npx vitest run
+    182|       expect(result).toEqual({
+       |                      ^
+    183|         kind: "scheduled",
+    184|         block: { start: local("2026-11-23T09:00"), end: local("2026-11…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+ FAIL  src/domain/scheduling/recommend-time-block.test.ts > recommendTimeBlock > AC5: confirmed time-of-day preference > never places a preferred block over a fixed commitment
+AssertionError: expected { kind: 'scheduled', …(2) } to match object { block: { …(2) }, preference: 'met' }
+(1 matching property omitted from actual)
+- Expected
++ Received
+  {
+    "block": {
+-     "end": "2026-11-24T04:00:00Z",
+-     "start": "2026-11-24T03:00:00Z",
++     "end": "2026-11-23T18:00:00Z",
++     "start": "2026-11-23T17:00:00Z",
+    },
+-   "preference": "met",
++   "preference": "none",
+  }
+ ❯ src/domain/scheduling/recommend-time-block.test.ts:199:22
+    197|         }),
+    198|       );
+    199|       expect(result).toMatchObject({
+       |                      ^
+    200|         block: { start: local("2026-11-23T19:00"), end: local("2026-11…
+    201|         preference: "met",
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+ Test Files  1 failed (1)
+      Tests  3 failed | 14 passed (17)
+exit code: 1
+

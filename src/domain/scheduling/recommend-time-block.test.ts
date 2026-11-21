@@ -152,4 +152,54 @@ describe("recommendTimeBlock", () => {
       expect(input).toEqual(snapshot);
     });
   });
+
+  describe("AC5: confirmed time-of-day preference", () => {
+    const longMonday = { 1: [{ start: "09:00", end: "21:00" }] };
+    const evening = { start: "18:00", end: "21:00" };
+
+    it("uses the preferred window over an earlier free slot", () => {
+      const result = recommendTimeBlock(
+        withDeadline({ availability: longMonday, preferredWindow: evening }),
+      );
+      expect(result).toEqual({
+        kind: "scheduled",
+        block: { start: local("2026-11-23T18:00"), end: local("2026-11-23T19:00") },
+        preference: "met",
+      });
+    });
+
+    it("falls back to the earliest slot and marks the preference unavailable", () => {
+      const result = recommendTimeBlock(
+        withDeadline({
+          task: { estimatedMinutes: 60, deadline: local("2026-11-23T21:00") },
+          availability: longMonday,
+          preferredWindow: evening,
+          fixedCommitments: [
+            { start: local("2026-11-23T18:00"), end: local("2026-11-23T21:00") },
+          ],
+        }),
+      );
+      expect(result).toEqual({
+        kind: "scheduled",
+        block: { start: local("2026-11-23T09:00"), end: local("2026-11-23T10:00") },
+        preference: "unavailable",
+      });
+    });
+
+    it("never places a preferred block over a fixed commitment", () => {
+      const result = recommendTimeBlock(
+        withDeadline({
+          availability: longMonday,
+          preferredWindow: evening,
+          fixedCommitments: [
+            { start: local("2026-11-23T18:00"), end: local("2026-11-23T19:00") },
+          ],
+        }),
+      );
+      expect(result).toMatchObject({
+        block: { start: local("2026-11-23T19:00"), end: local("2026-11-23T20:00") },
+        preference: "met",
+      });
+    });
+  });
 });
