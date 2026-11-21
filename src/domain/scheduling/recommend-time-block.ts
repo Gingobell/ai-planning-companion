@@ -37,20 +37,15 @@ export function recommendTimeBlock(input: RecommendTimeBlockInput): TimeBlockRec
   const deadline = toZoned(input.task.deadline, input.timeZone);
   const earliestStart = roundUpToSlot(toZoned(input.now, input.timeZone));
 
+  const minutes = input.task.estimatedMinutes;
   const busy = [...input.fixedCommitments, ...input.existingBlocks].map((interval) => ({
     start: toZoned(interval.start, input.timeZone),
     end: toZoned(interval.end, input.timeZone),
   }));
 
   for (const window of availableWindows(input, earliestStart.toPlainDate(), deadline.toPlainDate())) {
-    let start = later(earliestStart, window.start);
-    let end = start.add({ minutes: input.task.estimatedMinutes });
-    let conflict = busy.find((b) => isBefore(b.start, end) && isBefore(start, b.end));
-    while (conflict !== undefined) {
-      start = conflict.end;
-      end = start.add({ minutes: input.task.estimatedMinutes });
-      conflict = busy.find((b) => isBefore(b.start, end) && isBefore(start, b.end));
-    }
+    const start = firstConflictFreeStart(later(earliestStart, window.start), minutes, busy);
+    const end = start.add({ minutes });
     if (isAtOrBefore(end, window.end) && isAtOrBefore(end, deadline)) {
       return { kind: "scheduled", block: toTimeInterval(start, end), preference: "none" };
     }
@@ -64,6 +59,25 @@ const SLOT_MINUTES = 15;
 interface ZonedWindow {
   start: Temporal.ZonedDateTime;
   end: Temporal.ZonedDateTime;
+}
+
+// Pushes the start past every busy interval it would overlap. Touching edges are not overlaps.
+function firstConflictFreeStart(
+  candidate: Temporal.ZonedDateTime,
+  minutes: number,
+  busy: ZonedWindow[],
+): Temporal.ZonedDateTime {
+  let start = candidate;
+  let conflict = busy.find((b) => overlaps(b, { start, end: start.add({ minutes }) }));
+  while (conflict !== undefined) {
+    start = conflict.end;
+    conflict = busy.find((b) => overlaps(b, { start, end: start.add({ minutes }) }));
+  }
+  return start;
+}
+
+function overlaps(a: ZonedWindow, b: ZonedWindow): boolean {
+  return isBefore(a.start, b.end) && isBefore(b.start, a.end);
 }
 
 function* availableWindows(
