@@ -35,7 +35,11 @@ export function recommendTimeBlock(input: RecommendTimeBlockInput): TimeBlockRec
   }
 
   const deadline = toZoned(input.task.deadline, input.timeZone);
-  const earliestStart = roundUpToSlot(toZoned(input.now, input.timeZone));
+  const now = toZoned(input.now, input.timeZone);
+  if (isAtOrBefore(deadline, now)) {
+    return { kind: "infeasible", reason: "deadline-passed" };
+  }
+  const earliestStart = roundUpToSlot(now);
 
   const minutes = input.task.estimatedMinutes;
   const busy = [...input.fixedCommitments, ...input.existingBlocks].map((interval) => ({
@@ -51,7 +55,7 @@ export function recommendTimeBlock(input: RecommendTimeBlockInput): TimeBlockRec
     }
   }
 
-  throw new Error("not implemented");
+  return { kind: "infeasible", reason: "no-free-slot" };
 }
 
 const SLOT_MINUTES = 15;
