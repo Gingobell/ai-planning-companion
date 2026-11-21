@@ -39,40 +39,31 @@ export function recommendTimeBlock(input: RecommendTimeBlockInput): TimeBlockRec
   if (isAtOrBefore(deadline, now)) {
     return { kind: "infeasible", reason: "deadline-passed" };
   }
-  const earliestStart = roundUpToSlot(now);
-
-  const minutes = input.task.estimatedMinutes;
-  const busy = [...input.fixedCommitments, ...input.existingBlocks].map((interval) => ({
-    start: toZoned(interval.start, input.timeZone),
-    end: toZoned(interval.end, input.timeZone),
-  }));
-
-  const firstFit = (windows: Iterable<ZonedWindow>): ZonedWindow | undefined => {
-    for (const window of windows) {
-      const start = firstConflictFreeStart(later(earliestStart, window.start), minutes, busy);
-      const end = start.add({ minutes });
-      if (isAtOrBefore(end, window.end) && isAtOrBefore(end, deadline)) {
-        return { start, end };
-      }
-    }
-    return undefined;
+  const search: SlotSearch = {
+    earliestStart: roundUpToSlot(now),
+    deadline,
+    minutes: input.task.estimatedMinutes,
+    busy: [...input.fixedCommitments, ...input.existingBlocks].map((interval) => ({
+      start: toZoned(interval.start, input.timeZone),
+      end: toZoned(interval.end, input.timeZone),
+    })),
   };
-
-  const windows = [...availableWindows(input, earliestStart.toPlainDate(), deadline.toPlainDate())];
+  const windows = [
+    ...availableWindows(input, search.earliestStart.toPlainDate(), deadline.toPlainDate()),
+  ];
 
   if (input.preferredWindow !== undefined) {
-    const preferred = firstFit(insidePreferredWindow(windows, input.preferredWindow, input.timeZone));
+    const preferred = firstFit(insidePreferredWindow(windows, input.preferredWindow, input.timeZone), search);
     if (preferred !== undefined) {
-      return { kind: "scheduled", block: toTimeInterval(preferred.start, preferred.end), preference: "met" };
+      return scheduled(preferred, "met");
     }
   }
 
-  const block = firstFit(windows);
+  const block = firstFit(windows, search);
   if (block === undefined) {
     return { kind: "infeasible", reason: "no-free-slot" };
   }
-  const preference = input.preferredWindow === undefined ? "none" : "unavailable";
-  return { kind: "scheduled", block: toTimeInterval(block.start, block.end), preference };
+  return scheduled(block, input.preferredWindow === undefined ? "none" : "unavailable");
 }
 
 const SLOT_MINUTES = 15;
@@ -80,6 +71,31 @@ const SLOT_MINUTES = 15;
 interface ZonedWindow {
   start: Temporal.ZonedDateTime;
   end: Temporal.ZonedDateTime;
+}
+
+interface SlotSearch {
+  earliestStart: Temporal.ZonedDateTime;
+  deadline: Temporal.ZonedDateTime;
+  minutes: number;
+  busy: ZonedWindow[];
+}
+
+type Preference = Extract<TimeBlockRecommendation, { kind: "scheduled" }>["preference"];
+
+function scheduled(block: ZonedWindow, preference: Preference): TimeBlockRecommendation {
+  return { kind: "scheduled", block: toTimeInterval(block.start, block.end), preference };
+}
+
+// Returns the earliest conflict-free block that fits inside one of the windows and ends by the deadline.
+function firstFit(windows: Iterable<ZonedWindow>, search: SlotSearch): ZonedWindow | undefined {
+  for (const window of windows) {
+    const start = firstConflictFreeStart(later(search.earliestStart, window.start), search.minutes, search.busy);
+    const end = start.add({ minutes: search.minutes });
+    if (isAtOrBefore(end, window.end) && isAtOrBefore(end, search.deadline)) {
+      return { start, end };
+    }
+  }
+  return undefined;
 }
 
 // Pushes the start past every busy interval it would overlap. Touching edges are not overlaps.
