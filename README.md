@@ -80,7 +80,9 @@ npx vitest run src/domain/scheduling
 | Dates and timezones | `temporal-polyfill` | In use |
 | Tests | Vitest (unit and integration), Playwright (end-to-end) | Vitest in use, Playwright planned |
 | Database | PostgreSQL | Planned |
-| Authentication, LLM, Mac companion | To be decided | Planned |
+| LLM in the app | Google Gemini API, behind a provider-neutral adapter | Planned |
+| Mac companion | Electron thin shell (global shortcut, small chat window, notifications) | Planned |
+| Authentication | To be decided | Planned |
 | Hosting and CI | Vercel, GitHub Actions | Planned |
 
 [CLAUDE.md](CLAUDE.md) records each decision and the reason behind it.

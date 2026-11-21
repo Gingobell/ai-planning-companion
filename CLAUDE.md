@@ -8,7 +8,7 @@ AI Planning Companion is a conversational planning assistant built by Jingyi Fu 
 
 @docs/product/PRD.md
 
-Current phase: HW4. The repository contains a Next.js skeleton with Vitest. The first domain feature, time block recommendation (US-02, US-06), is being built with TDD. LLM, database, authentication, reminders and the Mac companion are not built yet.
+Current phase: HW4 is complete. The repository contains a Next.js skeleton with Vitest and the first domain feature, time block recommendation (US-02, US-06), built with TDD. Chat, LLM integration, database, authentication, reminders and the Mac companion are not built yet.
 
 ## Commands
 
@@ -34,8 +34,8 @@ This project uses Next.js 16.4.6 and React 19.3, which have breaking changes com
 | E2E tests | Playwright | Planned for P3 |
 | Database | PostgreSQL | Planned, provider not chosen |
 | Authentication | Managed provider (Auth.js or Clerk) | Not chosen |
-| LLM | Provider not chosen | Not chosen |
-| Mac companion | Framework not chosen | Not chosen |
+| LLM (in the app) | Google Gemini API behind a provider-neutral adapter | Chosen, not in repo |
+| Mac companion | Electron thin shell: global shortcut, small window loading the web chat, notifications | Chosen, not in repo |
 | Hosting and CI | Vercel, GitHub Actions | Planned for P3 |
 
 Do not add a dependency for an undecided layer without an explicit team decision recorded in this file.
@@ -44,6 +44,7 @@ Do not add a dependency for an undecided layer without an explicit team decision
 
 - **Domain core is framework-free.** Planning rules live in `src/domain/` as pure TypeScript functions with no imports from Next.js, React, the database or an LLM SDK. Route handlers, server actions and UI call into the domain; the domain never calls out.
 - **The application validates, the assistant proposes.** LLM output is treated as a proposal. Every proposed task, deadline or time block passes the same domain validation as a direct user edit before it is saved.
+- **The LLM sits behind an adapter.** The app calls the model through one small provider-neutral interface, so Gemini can be swapped without touching the domain or the UI. Development itself is done with Claude Code; Gemini is only the model the product calls at runtime.
 - **Saved records are the source of truth.** Task status, deadlines and time blocks come from stored records, never from conversation history.
 - **Deadlines are never invented.** A task without an external deadline or a user-agreed target date stays unscheduled, and scheduling functions return an explicit "needs deadline" result instead of guessing.
 - **Results instead of exceptions for expected outcomes.** Domain functions return discriminated unions (for example `{ kind: "scheduled" } | { kind: "infeasible"; reason }`) for expected cases such as no fit before a deadline. Exceptions are reserved for programming errors.
@@ -52,7 +53,7 @@ Do not add a dependency for an undecided layer without an explicit team decision
 Current layout:
 
 - App Router under `src/app/` (`layout.tsx`, `page.tsx`, `globals.css`). Layout props use the generated global `LayoutProps<"/">` type.
-- Domain code goes under `src/domain/<area>/`, with tests next to the code as `*.test.ts`. No domain code exists yet.
+- Domain code goes under `src/domain/<area>/`, with tests next to the code as `*.test.ts`. The first area is `src/domain/scheduling/` (`recommend-time-block.ts`).
 - Import alias `@/*` maps to `./src/*` in `tsconfig.json` and in `vitest.config.mts` (`.mts` so Vite loads it as ESM).
 - `next.config.ts` enables `cacheComponents` and `partialPrefetching`, and wires Tailwind CSS v4 through a Turbopack loader rule (`@tailwindcss/turbopack`) for `*.css` instead of PostCSS. `globals.css` uses `@import "tailwindcss"` and `@theme inline` tokens.
 
