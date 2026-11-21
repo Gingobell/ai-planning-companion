@@ -30,3 +30,42 @@ $ npx vitest run
       Tests  1 passed (1)
 exit code: 0
 
+=== Cycle 1 AC3 refactor ===
+Skipped: the green change is a three-line guard with nothing worth restructuring yet.
+
+=== Cycle 2 AC1 red ===
+Time: 2026-11-20 17:06 PST
+Base commit: 760ef07
+$ npx vitest run
+     34|   throw new Error("not implemented");
+       |         ^
+     35| }
+     36|
+ ❯ src/domain/scheduling/recommend-time-block.test.ts:55:22
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+ FAIL  src/domain/scheduling/recommend-time-block.test.ts > recommendTimeBlock > AC1: earliest feasible block > makes the block exactly as long as the estimate
+Error: not implemented
+ ❯ recommendTimeBlock src/domain/scheduling/recommend-time-block.ts:34:9
+     32|     return { kind: "needs-deadline" };
+     33|   }
+     34|   throw new Error("not implemented");
+       |         ^
+     35| }
+     36|
+ ❯ src/domain/scheduling/recommend-time-block.test.ts:60:22
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+ FAIL  src/domain/scheduling/recommend-time-block.test.ts > recommendTimeBlock > AC1: earliest feasible block > uses the next available weekday when today has no availability
+Error: not implemented
+ ❯ recommendTimeBlock src/domain/scheduling/recommend-time-block.ts:34:9
+     32|     return { kind: "needs-deadline" };
+     33|   }
+     34|   throw new Error("not implemented");
+       |         ^
+     35| }
+     36|
+ ❯ src/domain/scheduling/recommend-time-block.test.ts:69:22
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+ Test Files  1 failed (1)
+      Tests  5 failed | 1 passed (6)
+exit code: 1
+
