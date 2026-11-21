@@ -29,6 +29,7 @@ This project uses Next.js 16.4.6 and React 19.3, which have breaking changes com
 | --- | --- | --- |
 | Web app | Next.js 16 App Router, React 19, TypeScript strict | In repo |
 | Styling | Tailwind CSS v4 via Turbopack loader | In repo |
+| Dates and timezones | `temporal-polyfill` (Temporal API) | In repo |
 | Unit and integration tests | Vitest 4 | In repo |
 | E2E tests | Playwright | Planned for P3 |
 | Database | PostgreSQL | Planned, provider not chosen |
@@ -46,7 +47,7 @@ Do not add a dependency for an undecided layer without an explicit team decision
 - **Saved records are the source of truth.** Task status, deadlines and time blocks come from stored records, never from conversation history.
 - **Deadlines are never invented.** A task without an external deadline or a user-agreed target date stays unscheduled, and scheduling functions return an explicit "needs deadline" result instead of guessing.
 - **Results instead of exceptions for expected outcomes.** Domain functions return discriminated unions (for example `{ kind: "scheduled" } | { kind: "infeasible"; reason }`) for expected cases such as no fit before a deadline. Exceptions are reserved for programming errors.
-- **Time handling.** Store instants in UTC and compute calendar logic in the user's IANA timezone. The timezone library is chosen in the Plan mode session for the time block feature and recorded here.
+- **Time handling.** Store instants in UTC and compute calendar logic in the user's IANA timezone. Use `Temporal` imported from `temporal-polyfill` for all date and time math in the domain; do not use `Date` arithmetic. Reason: Node 25 and TypeScript 5.9 have no native `Temporal`, and the Temporal API separates wall-clock times from instants, which keeps DST transition days correct. The polyfill can be swapped for the native global once the runtime supports it.
 
 Current layout:
 
