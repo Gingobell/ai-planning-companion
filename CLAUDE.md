@@ -53,7 +53,7 @@ Current layout:
 
 - App Router under `src/app/` (`layout.tsx`, `page.tsx`, `globals.css`). Layout props use the generated global `LayoutProps<"/">` type.
 - Domain code goes under `src/domain/<area>/`, with tests next to the code as `*.test.ts`. No domain code exists yet.
-- Import alias `@/*` maps to `./src/*` in `tsconfig.json` and in `vitest.config.ts`.
+- Import alias `@/*` maps to `./src/*` in `tsconfig.json` and in `vitest.config.mts` (`.mts` so Vite loads it as ESM).
 - `next.config.ts` enables `cacheComponents` and `partialPrefetching`, and wires Tailwind CSS v4 through a Turbopack loader rule (`@tailwindcss/turbopack`) for `*.css` instead of PostCSS. `globals.css` uses `@import "tailwindcss"` and `@theme inline` tokens.
 
 ## Coding conventions
