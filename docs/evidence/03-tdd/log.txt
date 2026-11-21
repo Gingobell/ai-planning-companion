@@ -141,3 +141,39 @@ $ npx vitest run
       Tests  10 passed (10)
 exit code: 0
 
+=== Cycle 4 AC4 red ===
+Time: 2026-11-20 20:57 PST
+Base commit: 76c241f
+$ npx vitest run
+     54|   throw new Error("not implemented");
+       |         ^
+     55| }
+     56|
+ ❯ src/domain/scheduling/recommend-time-block.test.ts:128:22
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+ FAIL  src/domain/scheduling/recommend-time-block.test.ts > recommendTimeBlock > AC4: infeasible requests are reported, not bent > returns deadline-passed when the deadline is already behind now
+Error: not implemented
+ ❯ recommendTimeBlock src/domain/scheduling/recommend-time-block.ts:54:9
+     52|   }
+     53|
+     54|   throw new Error("not implemented");
+       |         ^
+     55| }
+     56|
+ ❯ src/domain/scheduling/recommend-time-block.test.ts:140:22
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+ FAIL  src/domain/scheduling/recommend-time-block.test.ts > recommendTimeBlock > AC4: infeasible requests are reported, not bent > leaves the input, including the deadline, unchanged when infeasible
+Error: not implemented
+ ❯ recommendTimeBlock src/domain/scheduling/recommend-time-block.ts:54:9
+     52|   }
+     53|
+     54|   throw new Error("not implemented");
+       |         ^
+     55| }
+     56|
+ ❯ src/domain/scheduling/recommend-time-block.test.ts:151:7
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+ Test Files  1 failed (1)
+      Tests  4 failed | 10 passed (14)
+exit code: 1
+

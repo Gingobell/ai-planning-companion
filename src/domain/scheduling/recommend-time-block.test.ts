@@ -115,4 +115,41 @@ describe("recommendTimeBlock", () => {
       });
     });
   });
+
+  describe("AC4: infeasible requests are reported, not bent", () => {
+    it("returns no-free-slot when nothing fits before the deadline", () => {
+      const result = recommendTimeBlock(
+        withDeadline({ task: { estimatedMinutes: 60, deadline: local("2026-11-23T09:30") } }),
+      );
+      expect(result).toEqual({ kind: "infeasible", reason: "no-free-slot" });
+    });
+
+    it("returns no-free-slot when every window before the deadline is booked", () => {
+      const result = recommendTimeBlock(
+        withDeadline({
+          task: { estimatedMinutes: 60, deadline: local("2026-11-23T17:00") },
+          fixedCommitments: [
+            { start: local("2026-11-23T09:00"), end: local("2026-11-23T17:00") },
+          ],
+        }),
+      );
+      expect(result).toEqual({ kind: "infeasible", reason: "no-free-slot" });
+    });
+
+    it("returns deadline-passed when the deadline is already behind now", () => {
+      const result = recommendTimeBlock(
+        withDeadline({ task: { estimatedMinutes: 60, deadline: local("2026-11-23T07:00") } }),
+      );
+      expect(result).toEqual({ kind: "infeasible", reason: "deadline-passed" });
+    });
+
+    it("leaves the input, including the deadline, unchanged when infeasible", () => {
+      const input = withDeadline({
+        task: { estimatedMinutes: 60, deadline: local("2026-11-23T09:30") },
+      });
+      const snapshot = structuredClone(input);
+      recommendTimeBlock(input);
+      expect(input).toEqual(snapshot);
+    });
+  });
 });
