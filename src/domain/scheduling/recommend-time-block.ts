@@ -37,9 +37,20 @@ export function recommendTimeBlock(input: RecommendTimeBlockInput): TimeBlockRec
   const deadline = toZoned(input.task.deadline, input.timeZone);
   const earliestStart = roundUpToSlot(toZoned(input.now, input.timeZone));
 
+  const busy = [...input.fixedCommitments, ...input.existingBlocks].map((interval) => ({
+    start: toZoned(interval.start, input.timeZone),
+    end: toZoned(interval.end, input.timeZone),
+  }));
+
   for (const window of availableWindows(input, earliestStart.toPlainDate(), deadline.toPlainDate())) {
-    const start = later(earliestStart, window.start);
-    const end = start.add({ minutes: input.task.estimatedMinutes });
+    let start = later(earliestStart, window.start);
+    let end = start.add({ minutes: input.task.estimatedMinutes });
+    let conflict = busy.find((b) => isBefore(b.start, end) && isBefore(start, b.end));
+    while (conflict !== undefined) {
+      start = conflict.end;
+      end = start.add({ minutes: input.task.estimatedMinutes });
+      conflict = busy.find((b) => isBefore(b.start, end) && isBefore(start, b.end));
+    }
     if (isAtOrBefore(end, window.end) && isAtOrBefore(end, deadline)) {
       return { kind: "scheduled", block: toTimeInterval(start, end), preference: "none" };
     }
@@ -84,6 +95,10 @@ function roundUpToSlot(time: Temporal.ZonedDateTime): Temporal.ZonedDateTime {
 
 function later(a: Temporal.ZonedDateTime, b: Temporal.ZonedDateTime): Temporal.ZonedDateTime {
   return Temporal.ZonedDateTime.compare(a, b) >= 0 ? a : b;
+}
+
+function isBefore(a: Temporal.ZonedDateTime, b: Temporal.ZonedDateTime): boolean {
+  return Temporal.ZonedDateTime.compare(a, b) < 0;
 }
 
 function isAtOrBefore(a: Temporal.ZonedDateTime, b: Temporal.ZonedDateTime): boolean {
