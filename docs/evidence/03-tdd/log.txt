@@ -87,3 +87,39 @@ $ npx vitest run
       Tests  6 passed (6)
 exit code: 0
 
+=== Cycle 3 AC2 red ===
+Time: 2026-11-20 17:07 PST
+Base commit: e6352c3
+$ npx vitest run
+    101|         withDeadline({ fixedCommitments: [interval("2026-11-23T09:30",…
+    102|       );
+    103|       expect(result).toMatchObject({ block: { start: local("2026-11-23…
+       |                      ^
+    104|     });
+    105|
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+ FAIL  src/domain/scheduling/recommend-time-block.test.ts > recommendTimeBlock > AC2: no double-booking > moves to the next day when today is fully booked
+AssertionError: expected { kind: 'scheduled', …(2) } to match object { block: { …(2) } }
+(2 matching properties omitted from actual)
+- Expected
++ Received
+  {
+    "block": {
+-     "end": "2026-11-24T18:00:00Z",
+-     "start": "2026-11-24T17:00:00Z",
++     "end": "2026-11-23T18:00:00Z",
++     "start": "2026-11-23T17:00:00Z",
+    },
+  }
+ ❯ src/domain/scheduling/recommend-time-block.test.ts:113:22
+    111|         }),
+    112|       );
+    113|       expect(result).toMatchObject({
+       |                      ^
+    114|         block: { start: local("2026-11-24T09:00"), end: local("2026-11…
+    115|       });
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+ Test Files  1 failed (1)
+      Tests  4 failed | 6 passed (10)
+exit code: 1
+

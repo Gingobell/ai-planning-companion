@@ -74,4 +74,45 @@ describe("recommendTimeBlock", () => {
       });
     });
   });
+
+  describe("AC2: no double-booking", () => {
+    function interval(start: string, end: string) {
+      return { start: local(start), end: local(end) };
+    }
+
+    it("starts right after a fixed commitment that ends when the window opens", () => {
+      const result = recommendTimeBlock(
+        withDeadline({ fixedCommitments: [interval("2026-11-23T09:00", "2026-11-23T10:00")] }),
+      );
+      expect(result).toMatchObject({
+        block: { start: local("2026-11-23T10:00"), end: local("2026-11-23T11:00") },
+      });
+    });
+
+    it("skips an existing time block", () => {
+      const result = recommendTimeBlock(
+        withDeadline({ existingBlocks: [interval("2026-11-23T09:30", "2026-11-23T10:30")] }),
+      );
+      expect(result).toMatchObject({ block: { start: local("2026-11-23T10:30") } });
+    });
+
+    it("does not use a gap shorter than the estimate", () => {
+      const result = recommendTimeBlock(
+        withDeadline({ fixedCommitments: [interval("2026-11-23T09:30", "2026-11-23T10:00")] }),
+      );
+      expect(result).toMatchObject({ block: { start: local("2026-11-23T10:00") } });
+    });
+
+    it("moves to the next day when today is fully booked", () => {
+      const result = recommendTimeBlock(
+        withDeadline({
+          availability: { 1: [{ start: "09:00", end: "17:00" }], 2: [{ start: "09:00", end: "17:00" }] },
+          fixedCommitments: [interval("2026-11-23T09:00", "2026-11-23T17:00")],
+        }),
+      );
+      expect(result).toMatchObject({
+        block: { start: local("2026-11-24T09:00"), end: local("2026-11-24T10:00") },
+      });
+    });
+  });
 });
