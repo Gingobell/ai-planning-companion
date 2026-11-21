@@ -34,31 +34,62 @@ export function recommendTimeBlock(input: RecommendTimeBlockInput): TimeBlockRec
     return { kind: "needs-deadline" };
   }
 
-  const deadline = Temporal.Instant.from(input.task.deadline).toZonedDateTimeISO(input.timeZone);
-  const earliestStart = Temporal.Instant.from(input.now)
-    .toZonedDateTimeISO(input.timeZone)
-    .round({ smallestUnit: "minute", roundingIncrement: 15, roundingMode: "ceil" });
+  const deadline = toZoned(input.task.deadline, input.timeZone);
+  const earliestStart = roundUpToSlot(toZoned(input.now, input.timeZone));
 
-  for (
-    let date = earliestStart.toPlainDate();
-    Temporal.PlainDate.compare(date, deadline.toPlainDate()) <= 0;
-    date = date.add({ days: 1 })
-  ) {
-    const windows = input.availability[date.dayOfWeek as IsoWeekday] ?? [];
-    for (const window of windows) {
-      const windowStart = date.toPlainDateTime(Temporal.PlainTime.from(window.start)).toZonedDateTime(input.timeZone);
-      const windowEnd = date.toPlainDateTime(Temporal.PlainTime.from(window.end)).toZonedDateTime(input.timeZone);
-      const start = Temporal.ZonedDateTime.compare(earliestStart, windowStart) > 0 ? earliestStart : windowStart;
-      const end = start.add({ minutes: input.task.estimatedMinutes });
-      if (Temporal.ZonedDateTime.compare(end, windowEnd) <= 0 && Temporal.ZonedDateTime.compare(end, deadline) <= 0) {
-        return {
-          kind: "scheduled",
-          block: { start: start.toInstant().toString(), end: end.toInstant().toString() },
-          preference: "none",
-        };
-      }
+  for (const window of availableWindows(input, earliestStart.toPlainDate(), deadline.toPlainDate())) {
+    const start = later(earliestStart, window.start);
+    const end = start.add({ minutes: input.task.estimatedMinutes });
+    if (isAtOrBefore(end, window.end) && isAtOrBefore(end, deadline)) {
+      return { kind: "scheduled", block: toTimeInterval(start, end), preference: "none" };
     }
   }
 
   throw new Error("not implemented");
+}
+
+const SLOT_MINUTES = 15;
+
+interface ZonedWindow {
+  start: Temporal.ZonedDateTime;
+  end: Temporal.ZonedDateTime;
+}
+
+function* availableWindows(
+  input: RecommendTimeBlockInput,
+  firstDate: Temporal.PlainDate,
+  lastDate: Temporal.PlainDate,
+): Generator<ZonedWindow> {
+  for (let date = firstDate; Temporal.PlainDate.compare(date, lastDate) <= 0; date = date.add({ days: 1 })) {
+    for (const window of input.availability[date.dayOfWeek as IsoWeekday] ?? []) {
+      yield {
+        start: atLocalTime(date, window.start, input.timeZone),
+        end: atLocalTime(date, window.end, input.timeZone),
+      };
+    }
+  }
+}
+
+function toZoned(instant: string, timeZone: string): Temporal.ZonedDateTime {
+  return Temporal.Instant.from(instant).toZonedDateTimeISO(timeZone);
+}
+
+function atLocalTime(date: Temporal.PlainDate, time: string, timeZone: string): Temporal.ZonedDateTime {
+  return date.toPlainDateTime(Temporal.PlainTime.from(time)).toZonedDateTime(timeZone);
+}
+
+function roundUpToSlot(time: Temporal.ZonedDateTime): Temporal.ZonedDateTime {
+  return time.round({ smallestUnit: "minute", roundingIncrement: SLOT_MINUTES, roundingMode: "ceil" });
+}
+
+function later(a: Temporal.ZonedDateTime, b: Temporal.ZonedDateTime): Temporal.ZonedDateTime {
+  return Temporal.ZonedDateTime.compare(a, b) >= 0 ? a : b;
+}
+
+function isAtOrBefore(a: Temporal.ZonedDateTime, b: Temporal.ZonedDateTime): boolean {
+  return Temporal.ZonedDateTime.compare(a, b) <= 0;
+}
+
+function toTimeInterval(start: Temporal.ZonedDateTime, end: Temporal.ZonedDateTime): TimeInterval {
+  return { start: start.toInstant().toString(), end: end.toInstant().toString() };
 }
