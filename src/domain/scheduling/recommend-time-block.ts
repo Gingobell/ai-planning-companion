@@ -28,6 +28,8 @@ export type TimeBlockRecommendation =
   | { kind: "infeasible"; reason: "deadline-passed" | "no-free-slot" };
 
 export function recommendTimeBlock(input: RecommendTimeBlockInput): TimeBlockRecommendation {
-  void input;
+  if (input.task.deadline === undefined) {
+    return { kind: "needs-deadline" };
+  }
   throw new Error("not implemented");
 }
