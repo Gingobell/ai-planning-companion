@@ -20,7 +20,7 @@ Jingyi Fu:
 - Chat with the Gemini adapter; capture and clarification built with TDD.
 - Project idea approved by the professor in #projects by November 30; decision on user roles.
 - First real hook runs recorded in `docs/evidence/`.
-- Issue template with acceptance criteria.
+- Issue template and the full issue backlog for both partners, before Sprint 1 planning.
 
 Sihui Lyu:
 - Plan files with acceptance criteria for progress rules and for reminder and preference rules; both built with TDD.

@@ -10,7 +10,7 @@ Who owns what in Project 3, so each partner can build, test and ship their areas
 | 2. Claude Code | Hook evidence | MCP, sub-agents | Skills, auto-memory, worktrees, writer/reviewer PRs |
 | 3. Testing | TDD for capture; integration tests | TDD for own rules; Playwright; coverage; acceptance testing | |
 | 4. CI/CD and security | AI PR review and deploy stages | Check stages; security gates | |
-| 5. Pair process | Issue template | PR template; sprint notes | Sprints, issues, standups, reviews |
+| 5. Pair process | Issue template and the full issue backlog | PR template; sprint notes | Sprints, standups, reviews |
 | 6. Documentation and demo | Mermaid diagram | | Blog, video, showcase form, own reflections |
 
 ## 1. Application
@@ -78,6 +78,7 @@ Who owns what in Project 3, so each partner can build, test and ship their areas
 
 **Jingyi Fu**
 - Issue template with acceptance criteria as testable specs.
+- The full issue backlog: one GitHub Issue per piece of work for both partners, each with testable acceptance criteria and an owner, written before Sprint 1 planning.
 
 **Sihui Lyu**
 - Pull request template with C.L.E.A.R. review and AI disclosure (% AI-generated, tool, human review).
@@ -85,7 +86,7 @@ Who owns what in Project 3, so each partner can build, test and ship their areas
 
 **Both**
 - Sprint planning and a retrospective for each sprint.
-- GitHub Issues for their own areas, one branch per issue.
+- Work from the issues for their own areas, one branch per issue. Either partner can propose a new or changed issue.
 - At least three async standups per sprint each.
 - Review each other's pull requests.
 
