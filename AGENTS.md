@@ -7,3 +7,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Project rules
+
+Read [CLAUDE.md](CLAUDE.md) first. Its "Rule files" table lists where each rule lives: product behavior in [docs/product/PRD.md](docs/product/PRD.md), UI design in [DESIGN.md](DESIGN.md), and the TDD protocol in [docs/engineering/tdd-workflow.md](docs/engineering/tdd-workflow.md). Edit the rule in that file rather than copying it here.

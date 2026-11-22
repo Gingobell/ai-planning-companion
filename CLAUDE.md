@@ -8,6 +8,30 @@ AI Planning Companion is a conversational planning assistant built by Jingyi Fu 
 
 @docs/product/PRD.md
 
+## Rule files
+
+Every project rule lives in one file. Before changing an area, read its rule file; when a rule changes, edit that file in the same commit instead of restating the rule elsewhere.
+
+| Area | Rule file | Read before |
+| --- | --- | --- |
+| Product behavior, user stories, edge cases | [docs/product/PRD.md](docs/product/PRD.md) | Any feature work, frontend or backend |
+| UI style, tokens, spacing, controls, adaptive layout | [DESIGN.md](DESIGN.md) | Any frontend or styling change |
+| Test-driven development protocol | [docs/engineering/tdd-workflow.md](docs/engineering/tdd-workflow.md) | Writing or changing any code |
+| Architecture, stack, coding conventions, security | this file (CLAUDE.md) | Any code change |
+| Feature plans | `docs/plans/<feature>.md` | Implementing that feature |
+| Evidence of red, green and session commands | `docs/evidence/` | Recording TDD steps and context commands |
+
+### Keeping rule files current
+
+These files change as the project grows. A rule changes only after a human confirms it, and once confirmed it is written down without being asked.
+
+- **Confirmed means** a human accepted a proposal, asked for a change and approved the result, or merged a PR. Rejected options and unreviewed experiments are not written into rule files.
+- **Update in the same commit.** When a confirmed decision adds or replaces a rule (a new dependency or tool, a changed architecture choice, a new convention, a revised user story or edge case, a changed TDD step, a new design rule), the agent edits the matching rule file from the table above in the same commit as the code. For example, choosing a database provider updates the tech stack table here; changing a user story updates the PRD.
+- **One home per rule.** Edit the rule where it lives and link to it from elsewhere. Do not copy a rule into a second file.
+- **Raise conflicts first.** If a request contradicts an existing rule, point out the conflict and ask which one wins before editing code or rules.
+- **Show the rule diff.** Before every commit, show the rule file changes next to the code changes and say in the commit message which rule changed.
+- **Keep the record.** `DESIGN.md` keeps a changelog section with date, change and reason. Other rule files rely on git history and the commit message.
+
 Current phase: HW4 is complete. The repository contains a Next.js skeleton with Vitest and the first domain feature, time block recommendation (US-02, US-06), built with TDD. Chat, LLM integration, database, authentication, reminders and the Mac companion are not built yet.
 
 ## Commands
@@ -91,6 +115,7 @@ Strict test-driven development, following the protocol imported below. Summary:
 Do:
 
 - Read the PRD section for the story you are working on before planning.
+- Read `DESIGN.md` before any frontend change. Use only its tokens and control sizes. When a human confirms a design change, update `DESIGN.md` and its changelog in the same commit without being asked (see "How this file evolves" in `DESIGN.md`).
 - Run `npm test`, `npm run typecheck` and `npm run lint` before proposing a commit.
 - Show the exact file list and commit message to a human before every commit and push.
 - Keep each commit to one TDD phase or one setup change.

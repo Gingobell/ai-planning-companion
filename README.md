@@ -2,7 +2,7 @@
 
 A planning assistant you talk to instead of filling in forms. Tell it about a goal or task in a sentence, and it asks what it needs to know, turns the task into a concrete time block, checks in on your progress and adapts future plans to what you tell it.
 
-Built by Jingyi Fu and Sihui Lyu for CS6983 Project 3. Full requirements: [docs/product/PRD.md](docs/product/PRD.md).
+Built by Jingyi Fu and Sihui Lyu for CS6983 Project 3. Full requirements: [docs/product/PRD.md](docs/product/PRD.md). UI style and design rules: [DESIGN.md](DESIGN.md).
 
 ## Status
 
