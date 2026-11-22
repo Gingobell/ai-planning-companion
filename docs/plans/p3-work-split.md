@@ -72,8 +72,7 @@ Who owns what in Project 3, so each partner can build, test and ship their areas
 
 **Sihui Lyu**
 - CI stages: ESLint and Prettier, `tsc --noEmit`, unit and integration tests, Playwright, `npm audit`.
-- Security gates: pre-commit secret scan, dependency scan, security review sub-agent, security criteria in a Definition of Done. OWASP Top 10 awareness in CLAUDE.md is already done.
-- Course definitions of C.L.E.A.R. and the 8-gate security pipeline, written into the repo.
+- Security gates from the course's eight (listed in [p3-requirements.md](p3-requirements.md)): pre-commit secret scan, dependency scan, a security review sub-agent as SAST, and security criteria in a Definition of Done.
 
 ## 5. Pair process
 

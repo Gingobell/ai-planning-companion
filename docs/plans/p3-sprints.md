@@ -26,7 +26,7 @@ Sihui Lyu:
 - Plan files with acceptance criteria for progress rules and for reminder and preference rules; both built with TDD.
 - CI stages: ESLint and Prettier, `tsc --noEmit`, unit tests, `npm audit`, with a coverage report.
 - Pre-commit secret scan.
-- Course definitions of C.L.E.A.R. and the 8-gate pipeline in the repo; pull request template.
+- Pull request template with the C.L.E.A.R. review points from CLAUDE.md and the AI disclosure.
 - First draft of acceptance scenarios from PRD Section 8.
 
 Both:

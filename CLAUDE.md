@@ -124,6 +124,16 @@ Strict test-driven development, following the protocol imported below. Summary:
 - **Security misconfiguration and vulnerable components:** keep `npm audit` clean; do not add dependencies without a reason.
 - **Logging:** never log private conversation content or tokens.
 
+## Code review (C.L.E.A.R.)
+
+Every pull request is reviewed by the other partner or a reviewer agent, with one comment point for each letter of the course's C.L.E.A.R. framework (Week 11, "Claude Code Extensibility"):
+
+- **Context:** does the code fit the project's architecture and conventions?
+- **Logic:** is the business logic correct, and are edge cases handled?
+- **Evidence:** are there tests, and do they verify the behavior?
+- **Architecture:** does it follow established patterns, and does it add dependencies?
+- **Risk:** are there security, performance or data exposure concerns?
+
 ## Do's and don'ts
 
 Do:

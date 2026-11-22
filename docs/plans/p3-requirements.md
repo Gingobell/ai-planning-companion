@@ -36,7 +36,7 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 | At least 1 MCP server, shared `.mcp.json`, real workflow evidence | Planned | Playwright MCP server for simulated-user acceptance testing, see [p3-work-split.md](p3-work-split.md) |
 | At least 1 agent option (custom sub-agents in `.claude/agents/`, agent teams, or an Agent SDK feature), with real usage | Planned | Custom sub-agents in `.claude/agents/` |
 | Parallel worktrees: at least 2 features developed in parallel, visible in branch history | Not started | |
-| At least 2 writer/reviewer PRs: one agent writes, another reviews; C.L.E.A.R. in review comments; AI disclosure (% AI-generated, tool, human review) | Not started | The course definition of C.L.E.A.R. is not in our notes yet; get it from the course before using it |
+| At least 2 writer/reviewer PRs: one agent writes, another reviews; C.L.E.A.R. in review comments; AI disclosure (% AI-generated, tool, human review) | Partial | C.L.E.A.R. is defined in "Code review" in [CLAUDE.md](../../CLAUDE.md). First writer/reviewer PR: [#1](https://github.com/Gingobell/ai-planning-companion/pull/1), awaiting review |
 
 ## Testing and TDD
 
@@ -52,7 +52,7 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 | Requirement | Status | Evidence or next step |
 | --- | --- | --- |
 | GitHub Actions with all 8 stages passing: ESLint + Prettier, `tsc --noEmit`, unit/integration tests, Playwright E2E, `npm audit`, AI PR review (claude-code-action or `claude -p`), preview deploy, production deploy on merge to main | Not started | Prettier not installed yet |
-| At least 4 security gates from the course's 8-gate pipeline | Partial (1) | Done: OWASP Top 10 awareness in CLAUDE.md. Candidates named in the assignment: pre-commit secret detection (Gitleaks or similar), dependency scan (`npm audit` in CI), SAST or a security-focused sub-agent, security acceptance criteria in the Definition of Done. The full 8-gate list is not in our notes yet |
+| At least 4 security gates from the course's 8-gate pipeline | Planned | The course's eight gates (Week 13, "AI Security & Code Quality"): 1 secrets detection (Gitleaks), 2 dependency scanning, 3 SAST, 4 DAST, 5 container scanning, 6 license compliance, 7 security acceptance criteria, 8 SBOM. Planned: gates 1, 2, 3 (a security review sub-agent) and 7 (Definition of Done), see [p3-work-split.md](p3-work-split.md). OWASP Top 10 awareness in CLAUDE.md is done but is not one of the eight |
 
 ## Pair process
 
