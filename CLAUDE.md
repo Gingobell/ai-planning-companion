@@ -19,6 +19,7 @@ Every project rule lives in one file. Before changing an area, read its rule fil
 | Test-driven development protocol | [docs/engineering/tdd-workflow.md](docs/engineering/tdd-workflow.md) | Writing or changing any code |
 | Architecture, stack, coding conventions, security | this file (CLAUDE.md) | Any code change |
 | Project 3 course requirements, status and evidence | [docs/plans/p3-requirements.md](docs/plans/p3-requirements.md) | Planning work, choosing what to build next, and finishing any item it lists |
+| Project 3 work split and ownership | [docs/plans/p3-work-split.md](docs/plans/p3-work-split.md) | Starting work in any area, and before changing code in an area another partner owns |
 | Feature plans | `docs/plans/<feature>.md` | Implementing that feature |
 | Evidence of red, green and session commands | `docs/evidence/` | Recording TDD steps and context commands |
 
