@@ -1,8 +1,10 @@
+Local paths in the Vitest output are replaced with <repo>. Test results are unchanged.
+
 === Cycle 1 AC3 red ===
 Time: 2026-11-20 17:06 PST
 Base commit: ebb2bd2
 $ npx vitest run
- RUN  v4.1.12 /Users/gin/Desktop/CS6983/project3/ai-planning-companion
+ RUN  v4.1.12 <repo>
  ❯ src/domain/scheduling/recommend-time-block.test.ts (1 test | 1 failed) 2ms
        × returns needs-deadline when the task has no deadline 2ms
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
@@ -25,7 +27,7 @@ exit code: 1
 Time: 2026-11-20 17:06 PST
 Base commit: 5e23334
 $ npx vitest run
- RUN  v4.1.12 /Users/gin/Desktop/CS6983/project3/ai-planning-companion
+ RUN  v4.1.12 <repo>
  Test Files  1 passed (1)
       Tests  1 passed (1)
 exit code: 0
@@ -73,7 +75,7 @@ exit code: 1
 Time: 2026-11-20 17:07 PST
 Base commit: 22f6fa8
 $ npx vitest run
- RUN  v4.1.12 /Users/gin/Desktop/CS6983/project3/ai-planning-companion
+ RUN  v4.1.12 <repo>
  Test Files  1 passed (1)
       Tests  6 passed (6)
 exit code: 0
@@ -82,7 +84,7 @@ exit code: 0
 Time: 2026-11-20 17:07 PST
 Base commit: dd60431
 $ npx vitest run
- RUN  v4.1.12 /Users/gin/Desktop/CS6983/project3/ai-planning-companion
+ RUN  v4.1.12 <repo>
  Test Files  1 passed (1)
       Tests  6 passed (6)
 exit code: 0
@@ -127,7 +129,7 @@ exit code: 1
 Time: 2026-11-20 17:08 PST
 Base commit: 7d39129
 $ npx vitest run
- RUN  v4.1.12 /Users/gin/Desktop/CS6983/project3/ai-planning-companion
+ RUN  v4.1.12 <repo>
  Test Files  1 passed (1)
       Tests  10 passed (10)
 exit code: 0
@@ -136,7 +138,7 @@ exit code: 0
 Time: 2026-11-20 17:08 PST
 Base commit: 53f1ac8
 $ npx vitest run
- RUN  v4.1.12 /Users/gin/Desktop/CS6983/project3/ai-planning-companion
+ RUN  v4.1.12 <repo>
  Test Files  1 passed (1)
       Tests  10 passed (10)
 exit code: 0
@@ -181,7 +183,7 @@ exit code: 1
 Time: 2026-11-20 20:57 PST
 Base commit: 6ef4be4
 $ npx vitest run
- RUN  v4.1.12 /Users/gin/Desktop/CS6983/project3/ai-planning-companion
+ RUN  v4.1.12 <repo>
  Test Files  1 passed (1)
       Tests  14 passed (14)
 exit code: 0
@@ -229,7 +231,7 @@ exit code: 1
 Time: 2026-11-20 21:12 PST
 Base commit: 986d504
 $ npx vitest run
- RUN  v4.1.12 /Users/gin/Desktop/CS6983/project3/ai-planning-companion
+ RUN  v4.1.12 <repo>
  Test Files  1 passed (1)
       Tests  17 passed (17)
 exit code: 0
@@ -238,7 +240,7 @@ exit code: 0
 Time: 2026-11-20 21:12 PST
 Base commit: d909c48
 $ npx vitest run
- RUN  v4.1.12 /Users/gin/Desktop/CS6983/project3/ai-planning-companion
+ RUN  v4.1.12 <repo>
  Test Files  1 passed (1)
       Tests  17 passed (17)
 exit code: 0
@@ -247,7 +249,7 @@ exit code: 0
 Time: 2026-11-20 21:34 PST
 Base commit: 4b901b1
 $ npx vitest run
- RUN  v4.1.12 /Users/gin/Desktop/CS6983/project3/ai-planning-companion
+ RUN  v4.1.12 <repo>
  Test Files  1 passed (1)
       Tests  20 passed (20)
 exit code: 0

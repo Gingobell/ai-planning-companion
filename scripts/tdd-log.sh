@@ -9,7 +9,7 @@ mkdir -p "$(dirname "$log")"
   echo "Time: $(date '+%Y-%m-%d %H:%M %Z')"
   echo "Base commit: $(git rev-parse --short HEAD)"
   echo "$ npx vitest run"
-  npx vitest run 2>&1 | sed -e 's/\x1b\[[0-9;]*m//g' | grep -v -e '^ *$' -e 'Start at' -e 'Duration' | tail -n 30
+  npx vitest run 2>&1 | sed -e 's/\x1b\[[0-9;]*m//g' -e "s|$(pwd)|<repo>|g" | grep -v -e '^ *$' -e 'Start at' -e 'Duration' | tail -n 30
   echo "exit code: $(npx vitest run >/dev/null 2>&1; echo $?)"
   echo
 } >> "$log"
