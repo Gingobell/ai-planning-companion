@@ -43,6 +43,13 @@ Current phase: HW4 is complete. The repository contains a Next.js skeleton with 
 - `npm test` runs Vitest once; `npm run test:watch` runs it in watch mode.
 - Single test file: `npx vitest run path/to/file.test.ts`. Single test by name: `npx vitest run -t "test name"`.
 
+## Hooks
+
+Configured in `.claude/settings.json`; scripts live in `.claude/hooks/`.
+
+- **PostToolUse, `post-edit.sh`:** after Claude edits or writes a `.ts` or `.tsx` file under `src/`, ESLint runs on that file and any error is sent back to Claude to fix. Editing a `.tsx` or `.css` file under `src/` also reminds Claude to follow `DESIGN.md`.
+- **Stop, `stop-tests.sh`:** before Claude ends a turn with uncommitted changes in `src/`, `npm test` and `npm run typecheck` run. A failure blocks the stop once so Claude fixes it. A TDD red step (only `*.test.ts` files changed) is reported but not blocked, and a second failure in a row is handed to the human instead of looping.
+
 ## Next.js version warning
 
 This project uses Next.js 16.4.6 and React 19.3, which have breaking changes compared with older Next.js versions. Before writing Next.js code, read the relevant guide in `node_modules/next/dist/docs/` (`01-app`, `03-architecture`, etc.) and heed deprecation notices. The block in `AGENTS.md` is generated and re-added by `next dev`; do not remove it.
