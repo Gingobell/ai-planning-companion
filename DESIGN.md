@@ -19,6 +19,8 @@ Calm, light and roomy. The assistant should feel like a quiet desk, not a dashbo
 
 Layout is chat first: a 248 px sidebar (Chat, Today, Week, Goals & tasks, Preferences, history) and a main area that swaps between the conversation and those pages.
 
+**Brand mark.** A route: a start dot and an end dot joined by a curved path, meaning a goal turned into steps. It is the app logo and the avatar in front of every assistant reply, drawn as a 2 px stroke in `currentColor` (accent on `--accent-soft` for the avatar, `--on-accent` on `--accent` for the logo). Never use a checkmark as the assistant's mark, because a check means "done" elsewhere in the product.
+
 ## 2. Color tokens
 
 Every color in the UI comes from a token. No literal hex values in components.
@@ -181,3 +183,4 @@ Motion is 100 to 220 ms, ease-out, and is turned off under `prefers-reduced-moti
 | 2026-11-22 | Questions show numbered answer options plus "Type my own answer" | Picking an answer is less effort than writing one |
 | 2026-11-22 | Week grid stretches time rows so every title fits, and overlapping blocks sit side by side | Short blocks with long titles were clipped and looked overlapped |
 | 2026-11-22 | Controls are centered by fixed height; spacing, type, radius and color come from tokens | Pills such as "Needs a deadline" looked unbalanced next to buttons |
+| 2026-11-22 | Assistant mark changed from a checkmark to a route (two dots joined by a curved path) | A checkmark reads as "done" and was misleading as the assistant avatar |
