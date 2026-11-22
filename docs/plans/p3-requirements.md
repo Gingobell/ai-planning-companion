@@ -33,7 +33,7 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 | Auto-memory usage | Not started | Record real use when it happens |
 | At least 2 custom skills in `.claude/skills/`, with team usage evidence and at least one iterated v1 to v2 from real use (the Excellent rubric asks for 2+ iterated skills) | Not started | |
 | At least 2 hooks in `.claude/settings.json`: one PreToolUse or PostToolUse, one quality gate | Configured | PostToolUse lint and Stop test gate, see "Hooks" in [CLAUDE.md](../../CLAUDE.md); record first real runs in `docs/evidence/` |
-| At least 1 MCP server, shared `.mcp.json`, real workflow evidence | Not started | Server not chosen |
+| At least 1 MCP server, shared `.mcp.json`, real workflow evidence | Planned | Playwright MCP server for simulated-user acceptance testing, see [p3-work-split.md](p3-work-split.md) |
 | At least 1 agent option (custom sub-agents in `.claude/agents/`, agent teams, or an Agent SDK feature), with real usage | Planned | Custom sub-agents in `.claude/agents/` |
 | Parallel worktrees: at least 2 features developed in parallel, visible in branch history | Not started | |
 | At least 2 writer/reviewer PRs: one agent writes, another reviews; C.L.E.A.R. in review comments; AI disclosure (% AI-generated, tool, human review) | Not started | The course definition of C.L.E.A.R. is not in our notes yet; get it from the course before using it |
@@ -58,7 +58,7 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 
 | Requirement | Status | Evidence or next step |
 | --- | --- | --- |
-| At least 2 sprints, each with planning and a retrospective | Not started | |
+| At least 2 sprints, each with planning and a retrospective | Planned | Dates and goals in [p3-sprints.md](p3-sprints.md) |
 | GitHub Issues with acceptance criteria as testable specs; a branch per issue; PR reviews with C.L.E.A.R. | Not started | |
 | At least 3 async standups per sprint per partner (12 entries for 2 sprints) | Not started | Record real activity only |
 

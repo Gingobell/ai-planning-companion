@@ -155,7 +155,7 @@ Daily check-ins and reminders follow the user's timezone and notification settin
 
 - **Security:** Enforce account ownership on the server for every read and change. Keep credentials out of source control and private conversation content out of logs. AI-generated actions follow the same permission checks as direct user actions.
 - **Accessibility:** Provide labeled controls, keyboard navigation, visible focus and readable contrast. Status and errors must not rely on color alone.
-- **Compatibility:** Verify the Mac companion and web planning flow on Mac and Windows. Desktop reminders require the companion to be running and notification permission to be enabled; a hidden window is different from a fully quit application.
+- **Compatibility:** Verify the Mac companion and the web planning flow on Mac. The web application is not separately verified on Windows. Desktop reminders require the companion to be running and notification permission to be enabled; a hidden window is different from a fully quit application.
 - **Responsiveness:** Show when an AI response or save is in progress and keep the user's input during waits. Hiding and reopening the chat window keeps unsent input and the current conversation.
 
 ### Technical approach
@@ -175,7 +175,7 @@ The Mac companion and web application share one backend. The assistant receives 
 
 The core experience is complete when a user can capture a new task in a sentence, describe several goals, clarify missing information, accept a feasible time-blocked plan, receive a scheduled check-in, report progress, and use that feedback to improve a later plan.
 
-Acceptance testing covers this flow alongside missing deadlines, conflicting schedules, partial completion, preference corrections, undoing an edit, failed saves, reminder changes, and isolation between user accounts. The Mac shortcut and the web experience on Mac and Windows are also verified.
+Acceptance testing covers this flow alongside missing deadlines, conflicting schedules, partial completion, preference corrections, undoing an edit, failed saves, reminder changes, and isolation between user accounts. The Mac shortcut and the web experience on Mac are also verified.
 
 The release must demonstrate:
 - All six P0 stories working through the public web application and the Mac companion, as applicable.

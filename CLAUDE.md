@@ -20,6 +20,7 @@ Every project rule lives in one file. Before changing an area, read its rule fil
 | Architecture, stack, coding conventions, security | this file (CLAUDE.md) | Any code change |
 | Project 3 course requirements, status and evidence | [docs/plans/p3-requirements.md](docs/plans/p3-requirements.md) | Planning work, choosing what to build next, and finishing any item it lists |
 | Project 3 work split and ownership | [docs/plans/p3-work-split.md](docs/plans/p3-work-split.md) | Starting work in any area, and before changing code in an area another partner owns |
+| Project 3 sprint dates, goals and records | [docs/plans/p3-sprints.md](docs/plans/p3-sprints.md) | Planning a sprint, choosing what to work on, and writing standups or retrospectives |
 | Feature plans | `docs/plans/<feature>.md` | Implementing that feature |
 | Evidence of red, green and session commands | `docs/evidence/` | Recording TDD steps and context commands |
 
@@ -70,6 +71,7 @@ This project uses Next.js 16.4.6 and React 19.3, which have breaking changes com
 | LLM (in the app) | Google Gemini API behind a provider-neutral adapter | Chosen, not in repo |
 | Mac companion | Electron thin shell: global shortcut, small window loading the web chat, notifications | Chosen, not in repo |
 | Hosting and CI | Vercel, GitHub Actions | Planned for P3 |
+| MCP for Claude Code | Playwright MCP server in a shared `.mcp.json`, used for simulated-user acceptance testing | Chosen, not in repo |
 
 Do not add a dependency for an undecided layer without an explicit team decision recorded in this file.
 
