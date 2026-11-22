@@ -2,11 +2,33 @@
 
 A planning assistant you talk to instead of filling in forms. Tell it about a goal or task in a sentence, and it asks what it needs to know, turns the task into a concrete time block, checks in on your progress and adapts future plans to what you tell it.
 
-Built by Jingyi Fu and Sihui Lyu for CS6983 Project 3. Full requirements: [docs/product/PRD.md](docs/product/PRD.md). UI style and design rules: [DESIGN.md](DESIGN.md). Course requirements and progress: [docs/plans/p3-requirements.md](docs/plans/p3-requirements.md). Who owns what: [docs/plans/p3-work-split.md](docs/plans/p3-work-split.md). Sprint dates and goals: [docs/plans/p3-sprints.md](docs/plans/p3-sprints.md).
+Built by Jingyi Fu and Sihui Lyu for CS6983 Project 3.
 
 ## Status
 
-Project 3 is being built in stages. Homework 4 is the first stage and is complete. The chat interface, AI integration, accounts and Mac companion come next.
+Project 3 is being built in stages. Homework 4 is the first stage and is complete: the time block recommendation rules. Sprint 1 starts on November 24.
+
+## Project 3 plan
+
+**Features.** Six user stories, all in the first release: capture and organize goals and tasks in a sentence (US-01), build a realistic time-blocked plan (US-02), break large goals into steps and track progress (US-03), reminders and daily check-ins (US-04), remember confirmed preferences (US-05), and open the assistant with a Mac keyboard shortcut (US-06).
+
+**Who does what.**
+- Jingyi Fu: data model, database, accounts and hosting; chat with Gemini; capture, clarification and scheduling; today and week views; deploy stages in CI.
+- Sihui Lyu: progress, reminder and preference rules with their pages; the Mac companion; Playwright and acceptance testing; CI check stages and security gates; the Playwright MCP server.
+- Both: skills, sprints, standups, reviews of each other's pull requests, blog post and demo video.
+
+**When.** Sprint 1 runs November 24 to 30, Sprint 2 December 1 to 10, and release week December 10 to 13. We submit by December 13; the course deadline is December 15.
+
+**Read next.**
+
+| To learn | Read |
+| --- | --- |
+| What the product does and its acceptance criteria | [docs/product/PRD.md](docs/product/PRD.md) |
+| Who owns each area and deliverable, and the boundaries between them | [docs/plans/p3-work-split.md](docs/plans/p3-work-split.md) |
+| Sprint dates and goals for each partner | [docs/plans/p3-sprints.md](docs/plans/p3-sprints.md) |
+| Course requirements and their status | [docs/plans/p3-requirements.md](docs/plans/p3-requirements.md) |
+| UI style and design rules | [DESIGN.md](DESIGN.md) |
+| Stack, architecture, conventions and the rule file index for AI agents | [CLAUDE.md](CLAUDE.md) |
 
 ## Homework 4
 

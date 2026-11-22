@@ -65,7 +65,10 @@ This project uses Next.js 16.4.6 and React 19.3, which have breaking changes com
 | Styling | Tailwind CSS v4 via Turbopack loader | In repo |
 | Dates and timezones | `temporal-polyfill` (Temporal API) | In repo |
 | Unit and integration tests | Vitest 4 | In repo |
+| Test coverage | Vitest coverage with `@vitest/coverage-v8`, 70% target | Chosen, not in repo |
 | E2E tests | Playwright | Planned for P3 |
+| Formatting | Prettier, checked in CI with ESLint | Chosen, not in repo |
+| Secret scanning | Gitleaks as a pre-commit hook | Chosen, not in repo |
 | Database | PostgreSQL | Planned, provider not chosen |
 | Authentication | Managed provider (Auth.js or Clerk) | Not chosen |
 | LLM (in the app) | Google Gemini API behind a provider-neutral adapter | Chosen, not in repo |

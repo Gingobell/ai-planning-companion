@@ -15,10 +15,10 @@ The course deadline is December 15, 2026, 11:59 pm. We aim to submit by December
 ## Sprint 1: foundations, November 24 to November 30
 
 Jingyi Fu:
-- Shared contract by November 25: record types, data access interfaces, design tokens and app shell.
+- Shared contract by November 25: record types with all fields (including progress, reminders and preferences), data access interfaces, design tokens and app shell.
 - Database, authentication and a first Vercel deploy.
 - Chat with the Gemini adapter; capture and clarification built with TDD.
-- Project idea approved by the professor in #projects; decision on user roles.
+- Project idea approved by the professor in #projects by November 30; decision on user roles.
 - First real hook runs recorded in `docs/evidence/`.
 - Issue template with acceptance criteria.
 

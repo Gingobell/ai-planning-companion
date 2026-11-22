@@ -18,14 +18,14 @@ Who owns what in Project 3, so each partner can build, test and ship their areas
 **Jingyi Fu**
 - Database, authentication and account isolation.
 - Vercel hosting and the public production app.
-- Shared contract: record types, data access interfaces, design tokens, app shell.
+- Shared contract: record types and their fields for every record, including progress, reminders and preferences; data access interfaces; design tokens; app shell.
 - Chat and the Gemini adapter.
 - Capture, clarification and scheduling (US-01, US-02, US-06).
 - Task breakdown and help when the user feels stuck, in chat (US-01, US-03).
 - Today and week views with direct editing (US-02).
 - Learning and confirming preferences in chat (US-05).
 - Running reminders and check-ins, and web notifications (US-04).
-- Professor approval of the idea in #projects; the decision on "2+ user roles or distinct feature areas".
+- Professor approval of the idea in #projects by November 30; the decision on "2+ user roles or distinct feature areas".
 
 **Sihui Lyu**
 - Progress and task state rules in `src/domain/progress/`, and the `/goals` page (US-03).
@@ -33,7 +33,7 @@ Who owns what in Project 3, so each partner can build, test and ship their areas
 - Mac companion in `desktop/`: global shortcut, small window, Mac notifications (US-04, US-06).
 
 **Boundaries.** Sihui owns the rules as pure functions; Jingyi owns running them.
-- Reminders: Sihui's rules decide which reminders should exist and when (quiet hours, pausing, removal when a task is completed or canceled, updates when a block moves, no duplicates on retry). Jingyi's server jobs call them, store the result and send web notifications.
+- Reminders and check-ins: Sihui's rules decide which reminders and check-ins should exist and when (agreed check-in times, quiet hours, pausing, removal when a task is completed or canceled, updates when a block moves, no duplicates on retry). An unanswered check-in leaves progress unknown and triggers no follow-up messages. Jingyi's server jobs call them, store the result and send web notifications.
 - Preferences: Sihui's rules own preference state (tentative, confirmed, corrected, removed, temporary conditions that expire). A corrected or removed preference is never restored. Jingyi's chat proposes a preference and calls these rules when the user confirms or corrects it.
 - Progress: Sihui's rules own task states and corrections, partial progress, a finished time block not completing its task, and goal completion only after the user confirms it. Progress reported in chat or on `/today` goes through the same rules.
 
@@ -103,7 +103,7 @@ Who owns what in Project 3, so each partner can build, test and ship their areas
 
 ## Working without waiting
 
-1. **Contract first.** By November 25, Jingyi adds the shared record types (defined once and imported everywhere), the data access interfaces, the design tokens from [DESIGN.md](../../DESIGN.md) and the app shell. Sihui builds against in-memory implementations of those interfaces; Jingyi later supplies the PostgreSQL implementations without changes to Sihui's code.
+1. **Contract first.** By November 25, Jingyi adds the shared record types with all their fields (defined once and imported everywhere), the data access interfaces, the design tokens from [DESIGN.md](../../DESIGN.md) and the app shell. Sihui writes in-memory implementations of those interfaces and builds against them; Jingyi later supplies the PostgreSQL implementations without changes to Sihui's code. If Sihui needs a field that is missing, Sihui asks Jingyi through an issue or pull request.
 2. **Plan before code.** Each owner writes `docs/plans/<feature>.md` with testable acceptance criteria before starting a feature, as the [TDD workflow](../engineering/tdd-workflow.md) requires.
 3. **Own folders, own branches.** Each owner works in their own folders and in a separate branch or worktree.
 4. **Call, do not edit.** Code in another owner's area is called, not changed. A change needed in someone else's area goes to its owner as an issue or pull request.
