@@ -50,4 +50,6 @@ npm run lint
 npm run dev         # http://localhost:3000
 ```
 
+Tests need no database. To run the app against one, copy `.env.example` to `.env.local` and set `DATABASE_URL` and `DATABASE_URL_UNPOOLED` to a Neon development branch, then run `npm run db:migrate`.
+
 Built with Next.js, TypeScript and Vitest. Stack decisions are recorded in [CLAUDE.md](CLAUDE.md).
