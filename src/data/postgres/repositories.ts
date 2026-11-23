@@ -1,15 +1,11 @@
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq, gt, lt, lte } from "drizzle-orm";
 import type { PgColumn, PgDatabase, PgQueryResultHKT, PgTable } from "drizzle-orm/pg-core";
-import type { Id, OwnedRecord, User } from "@/domain/records";
+import type { Id, OwnedRecord, TimeInterval, User } from "@/domain/records";
 import type { DueReminderSource, Repositories, Repository, SaveResult } from "@/domain/repositories";
 import * as schema from "@/data/postgres/schema";
 import * as mappers from "@/data/postgres/mappers";
 
 export type Database = PgDatabase<PgQueryResultHKT, typeof schema>;
-
-function notImplemented(): never {
-  throw new Error("not implemented");
-}
 
 // A record saved under another user's id is a programming error, not an expected outcome.
 function assertOwner(userId: Id, record: OwnedRecord) {
@@ -62,6 +58,15 @@ function ownedRepository<R extends OwnedRecord, T extends OwnedTable>(
   };
 }
 
+// Intervals that only touch at an edge do not overlap, as in recommend-time-block.ts.
+function overlaps(table: typeof schema.timeBlocks | typeof schema.fixedCommitments, range: TimeInterval) {
+  return and(lt(table.start, range.end), gt(table.end, range.start));
+}
+
+function isDue(at: string) {
+  return and(eq(schema.reminders.status, "pending"), lte(schema.reminders.scheduledFor, at));
+}
+
 // PostgreSQL implementations of the data access interfaces.
 export function createPostgresRepositories(db: Database): Repositories {
   return {
@@ -88,22 +93,75 @@ export function createPostgresRepositories(db: Database): Repositories {
       },
     },
     goals: ownedRepository(db, schema.goals, mappers.goalMapper),
-    tasks: { ...ownedRepository(db, schema.tasks, mappers.taskMapper), listByGoal: notImplemented },
-    timeBlocks: { ...ownedRepository(db, schema.timeBlocks, mappers.timeBlockMapper), listOverlapping: notImplemented },
+    tasks: {
+      ...ownedRepository(db, schema.tasks, mappers.taskMapper),
+      async listByGoal(userId, goalId) {
+        const { tasks } = schema;
+        const rows = await db.select().from(tasks).where(and(eq(tasks.userId, userId), eq(tasks.goalId, goalId)));
+        return rows.map(mappers.taskMapper.fromRow);
+      },
+    },
+    timeBlocks: {
+      ...ownedRepository(db, schema.timeBlocks, mappers.timeBlockMapper),
+      async listOverlapping(userId, range) {
+        const { timeBlocks } = schema;
+        const rows = await db
+          .select()
+          .from(timeBlocks)
+          .where(and(eq(timeBlocks.userId, userId), overlaps(timeBlocks, range)))
+          .orderBy(asc(timeBlocks.start));
+        return rows.map(mappers.timeBlockMapper.fromRow);
+      },
+    },
     fixedCommitments: {
       ...ownedRepository(db, schema.fixedCommitments, mappers.fixedCommitmentMapper),
-      listOverlapping: notImplemented,
+      async listOverlapping(userId, range) {
+        const { fixedCommitments } = schema;
+        const rows = await db
+          .select()
+          .from(fixedCommitments)
+          .where(and(eq(fixedCommitments.userId, userId), overlaps(fixedCommitments, range)))
+          .orderBy(asc(fixedCommitments.start));
+        return rows.map(mappers.fixedCommitmentMapper.fromRow);
+      },
     },
     preferences: ownedRepository(db, schema.preferences, mappers.preferenceMapper),
     temporaryContexts: ownedRepository(db, schema.temporaryContexts, mappers.temporaryContextMapper),
-    reminders: { ...ownedRepository(db, schema.reminders, mappers.reminderMapper), listDue: notImplemented },
-    messages: { ...ownedRepository(db, schema.messages, mappers.messageMapper), listByChatDate: notImplemented },
+    reminders: {
+      ...ownedRepository(db, schema.reminders, mappers.reminderMapper),
+      async listDue(userId, at) {
+        const { reminders } = schema;
+        const rows = await db
+          .select()
+          .from(reminders)
+          .where(and(eq(reminders.userId, userId), isDue(at)))
+          .orderBy(asc(reminders.scheduledFor));
+        return rows.map(mappers.reminderMapper.fromRow);
+      },
+    },
+    messages: {
+      ...ownedRepository(db, schema.messages, mappers.messageMapper),
+      async listByChatDate(userId, chatDate) {
+        const { messages } = schema;
+        const rows = await db
+          .select()
+          .from(messages)
+          .where(and(eq(messages.userId, userId), eq(messages.chatDate, chatDate)))
+          .orderBy(asc(messages.createdAt));
+        return rows.map(mappers.messageMapper.fromRow);
+      },
+    },
     openQuestions: ownedRepository(db, schema.openQuestions, mappers.openQuestionMapper),
     progressReports: ownedRepository(db, schema.progressReports, mappers.progressReportMapper),
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- stub until the query is built
+// Server-only: due reminders across all users, for the reminder job.
 export function createPostgresDueReminderSource(db: Database): DueReminderSource {
-  return { listDueForAllUsers: notImplemented };
+  return {
+    async listDueForAllUsers(at) {
+      const rows = await db.select().from(schema.reminders).where(isDue(at)).orderBy(asc(schema.reminders.scheduledFor));
+      return rows.map(mappers.reminderMapper.fromRow);
+    },
+  };
 }
