@@ -141,6 +141,8 @@ The product has four feature areas, all working on the same saved information. A
 
 **Preferences and context.** Temporary conditions expire at the end of their stated period. Possible patterns stay tentative until the user confirms them, and the assistant's own suggestions are never treated as user facts. Corrections apply to later plans, and a corrected or removed preference is never restored from older conversations. Preferences never override fixed commitments or deadlines; conflicts are explained to the user.
 
+**Conversations.** Each local day in the user's timezone has one chat. Earlier days stay readable as history but are not continued; open questions and saved records carry over into the new day.
+
 ## 7. Non-functional Requirements and Technical Approach
 
 Users sign in to access their own conversations, tasks, plans, and preferences. Personal records remain private even though the web application is available through a public URL.

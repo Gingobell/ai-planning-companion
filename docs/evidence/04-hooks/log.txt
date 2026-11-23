@@ -1,0 +1,46 @@
+Real Claude Code hook runs (issue #12)
+
+Source: the Claude Code session transcript for this repository. Each line below is copied from a
+hook entry the session recorded while normal work was being done. Nothing was staged or rerun to
+produce it. Hooks are configured in .claude/settings.json; scripts are in .claude/hooks/.
+Times are UTC, with US Pacific time in brackets.
+
+== PostToolUse: post-edit.sh ("Linting the edited file") ==
+Work: issue #4, design tokens and app shell, branch feat/app-shell, commit cddfca6.
+Each Write of a .ts, .tsx or .css file under src/ ran the hook. ESLint passed every time
+(exit code 0, empty stderr), and because these are UI files the hook returned the DESIGN.md reminder.
+
+2026-11-23T19:12:44Z [11:12 PT]  PostToolUse:Write  src/app/globals.css                         exit 0   25 ms
+2026-11-23T19:13:04Z [11:13 PT]  PostToolUse:Write  src/components/app-shell/nav-list.tsx       exit 0  813 ms
+2026-11-23T19:13:04Z [11:13 PT]  PostToolUse:Write  src/components/app-shell/nav-links.tsx      exit 0  728 ms
+2026-11-23T19:13:05Z [11:13 PT]  PostToolUse:Write  src/components/app-shell/route-mark.tsx     exit 0  736 ms
+2026-11-23T19:13:06Z [11:13 PT]  PostToolUse:Write  src/components/app-shell/sidebar.tsx        exit 0  722 ms
+2026-11-23T19:13:07Z [11:13 PT]  PostToolUse:Write  src/components/app-shell/page-placeholder.tsx exit 0 721 ms
+2026-11-23T19:13:20Z [11:13 PT]  PostToolUse:Write  src/app/layout.tsx                          exit 0 1011 ms
+2026-11-23T19:13:21Z [11:13 PT]  PostToolUse:Write  src/app/page.tsx                            exit 0  765 ms
+2026-11-23T19:13:21Z [11:13 PT]  PostToolUse:Write  src/app/today/page.tsx                      exit 0  736 ms
+2026-11-23T19:13:22Z [11:13 PT]  PostToolUse:Write  src/app/week/page.tsx                       exit 0  768 ms
+2026-11-23T19:13:23Z [11:13 PT]  PostToolUse:Write  src/app/goals/page.tsx                      exit 0  735 ms
+2026-11-23T19:13:24Z [11:13 PT]  PostToolUse:Write  src/app/preferences/page.tsx                exit 0  746 ms
+
+Hook output returned to Claude (identical for each run above):
+{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"UI file changed. Use only
+DESIGN.md tokens and control sizes. If the human has confirmed this design, update DESIGN.md and its
+changelog in the same commit."}}
+
+Effect: the reminder led to the DESIGN.md token-name note and changelog line in commit cddfca6.
+No ESLint error occurred in these runs, so the blocking path (exit 2) was not exercised.
+
+== Stop: stop-tests.sh ("Running tests and type check") ==
+The hook runs npm test and npm run typecheck when src/ has uncommitted changes, and stays silent
+when both pass.
+
+2026-11-22T23:11:56Z [15:11 PT]  Stop  hooks: 3  "Running tests and type check" 1445 ms  hookErrors: []  preventedContinuation: false
+  Uncommitted src/domain/records.ts and src/domain/repositories.ts (issue #3). Both checks passed.
+  The work was committed next as 3d5d8ca (PR #1).
+2026-11-23T18:52:37Z [10:52 PT]  Stop  hooks: 3  "Running tests and type check" 1449 ms  hookErrors: []  preventedContinuation: false
+  Uncommitted contract changes requested in the PR #1 review. Both checks passed.
+  The work was committed next as 59e6994 (PR #1).
+
+On turns with no uncommitted changes in src/, the same hook ran and exited at once (about 35 ms).
+No failing run has occurred yet, so the block-once and TDD red-step paths were not exercised.
