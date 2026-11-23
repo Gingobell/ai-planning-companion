@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Task, TaskStatus } from "@/domain/records";
-import { applyProgressReport, correctTaskStatus } from "@/domain/progress/task-progress";
+import type { Task, TaskStatus, TimeBlock } from "@/domain/records";
+import { applyProgressReport, correctTaskStatus, finishTimeBlock } from "@/domain/progress/task-progress";
 
 function task(status: TaskStatus): Task {
   return {
@@ -90,6 +90,24 @@ describe("correctTaskStatus", () => {
         kind: "unchanged",
         task: task("blocked"),
       });
+    });
+  });
+});
+
+describe("finishTimeBlock", () => {
+  const block: TimeBlock = {
+    id: "block-1",
+    userId: "user-1",
+    version: 1,
+    taskId: "task-1",
+    start: "2026-11-24T17:00:00Z",
+    end: "2026-11-24T18:30:00Z",
+    status: "accepted",
+  };
+
+  describe("AC3: finishing a time block does not complete its task", () => {
+    it.each<TaskStatus>(["not-started", "in-progress", "blocked"])("keeps a %s task in its state", (status) => {
+      expect(finishTimeBlock(task(status), block)).toEqual({ kind: "progress-unknown", task: task(status) });
     });
   });
 });

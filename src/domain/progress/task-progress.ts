@@ -1,4 +1,4 @@
-import type { ProgressReport, ProgressReportKind, Task, TaskStatus } from "@/domain/records";
+import type { ProgressReport, ProgressReportKind, Task, TaskStatus, TimeBlock } from "@/domain/records";
 
 export type ProgressResult =
   | { kind: "updated"; task: Task }
@@ -28,4 +28,10 @@ export function applyProgressReport(task: Task, report: Pick<ProgressReport, "ki
 export function correctTaskStatus(task: Task, status: TaskStatus): ProgressResult {
   if (status === task.status) return { kind: "unchanged", task };
   return { kind: "updated", task: { ...task, status } };
+}
+
+export function finishTimeBlock(task: Task, block: TimeBlock): { kind: "progress-unknown"; task: Task } {
+  void task;
+  void block;
+  throw new Error("not implemented");
 }
