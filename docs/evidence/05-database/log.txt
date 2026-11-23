@@ -277,3 +277,12 @@ $ npx vitest run
       Tests  68 passed (68)
 exit code: 0
 
+=== Refactor: one version-checked save for users and owned records ===
+Time: 2026-11-23 13:05 PST
+Base commit: bf8a2cd
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  4 passed (4)
+      Tests  68 passed (68)
+exit code: 0
+

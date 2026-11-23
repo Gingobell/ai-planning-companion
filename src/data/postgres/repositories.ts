@@ -1,6 +1,6 @@
-import { and, asc, eq, gt, lt, lte } from "drizzle-orm";
+import { and, asc, eq, gt, lt, lte, type SQL } from "drizzle-orm";
 import type { PgColumn, PgDatabase, PgQueryResultHKT, PgTable } from "drizzle-orm/pg-core";
-import type { Id, OwnedRecord, TimeInterval, User } from "@/domain/records";
+import type { Id, OwnedRecord, TimeInterval, Versioned } from "@/domain/records";
 import type { DueReminderSource, Repositories, Repository, SaveResult } from "@/domain/repositories";
 import * as schema from "@/data/postgres/schema";
 import * as mappers from "@/data/postgres/mappers";
@@ -14,11 +14,37 @@ function assertOwner(userId: Id, record: OwnedRecord) {
   }
 }
 
-type OwnedTable = PgTable & { id: PgColumn; userId: PgColumn; version: PgColumn };
+type VersionedTable = PgTable & { id: PgColumn; version: PgColumn };
+type OwnedTable = VersionedTable & { userId: PgColumn };
 
 interface Mapper<R, TRow> {
   toRow(record: R): object;
   fromRow(row: TRow): R;
+}
+
+// Inserts a new record (version 0) or updates one whose stored version matches, then bumps the version.
+// Otherwise returns the newer stored record as a conflict, or not-found when the caller has none.
+async function saveVersioned<R extends Versioned, T extends VersionedTable>(
+  db: Database,
+  table: T,
+  record: R,
+  toRow: (record: R) => object,
+  match: SQL | undefined,
+  loadCurrent: () => Promise<R | undefined>,
+): Promise<SaveResult<R>> {
+  const saved = { ...record, version: record.version + 1 };
+  const row = toRow(saved) as T["$inferInsert"];
+  const written =
+    record.version === 0
+      ? await db.insert(table).values(row).onConflictDoNothing().returning({ id: table.id })
+      : await db
+          .update(table)
+          .set(row)
+          .where(and(match, eq(table.version, record.version)))
+          .returning({ id: table.id });
+  if (written.length > 0) return { kind: "saved", record: saved };
+  const current = await loadCurrent();
+  return current === undefined ? { kind: "not-found" } : { kind: "conflict", current };
 }
 
 function ownedRepository<R extends OwnedRecord, T extends OwnedTable>(
@@ -27,30 +53,15 @@ function ownedRepository<R extends OwnedRecord, T extends OwnedTable>(
   mapper: Mapper<R, T["$inferSelect"]>,
 ): Repository<R> {
   const owns = (userId: Id, id: Id) => and(eq(table.userId, userId), eq(table.id, id));
+  const select = async (where: SQL | undefined) =>
+    ((await db.select().from(table as PgTable).where(where)) as T["$inferSelect"][]).map((row) => mapper.fromRow(row));
+  const get = async (userId: Id, id: Id) => (await select(owns(userId, id)))[0];
   return {
-    async list(userId) {
-      const rows = (await db.select().from(table as PgTable).where(eq(table.userId, userId))) as T["$inferSelect"][];
-      return rows.map((row) => mapper.fromRow(row));
-    },
-    async get(userId, id) {
-      const rows = (await db.select().from(table as PgTable).where(owns(userId, id))) as T["$inferSelect"][];
-      return rows[0] === undefined ? undefined : mapper.fromRow(rows[0]);
-    },
-    async save(userId, record): Promise<SaveResult<R>> {
+    list: (userId) => select(eq(table.userId, userId)),
+    get,
+    async save(userId, record) {
       assertOwner(userId, record);
-      const saved = { ...record, version: record.version + 1 };
-      const row = mapper.toRow(saved) as T["$inferInsert"];
-      const written =
-        record.version === 0
-          ? await db.insert(table).values(row).onConflictDoNothing().returning({ id: table.id })
-          : await db
-              .update(table)
-              .set(row)
-              .where(and(owns(userId, record.id), eq(table.version, record.version)))
-              .returning({ id: table.id });
-      if (written.length > 0) return { kind: "saved", record: saved };
-      const current = await this.get(userId, record.id);
-      return current === undefined ? { kind: "not-found" } : { kind: "conflict", current };
+      return saveVersioned(db, table, record, mapper.toRow, owns(userId, record.id), () => get(userId, record.id));
     },
     async remove(userId, id) {
       await db.delete(table).where(owns(userId, id));
@@ -69,28 +80,17 @@ function isDue(at: string) {
 
 // PostgreSQL implementations of the data access interfaces.
 export function createPostgresRepositories(db: Database): Repositories {
+  const getUser = async (userId: Id) => {
+    const rows = await db.select().from(schema.users).where(eq(schema.users.id, userId));
+    return rows[0] === undefined ? undefined : mappers.userMapper.fromRow(rows[0]);
+  };
   return {
     users: {
-      async get(userId) {
-        const rows = await db.select().from(schema.users).where(eq(schema.users.id, userId));
-        return rows[0] === undefined ? undefined : mappers.userMapper.fromRow(rows[0]);
-      },
-      async save(user): Promise<SaveResult<User>> {
-        const saved = { ...user, version: user.version + 1 };
-        const row = mappers.userMapper.toRow(saved);
-        const { users } = schema;
-        const written =
-          user.version === 0
-            ? await db.insert(users).values(row).onConflictDoNothing().returning({ id: users.id })
-            : await db
-                .update(users)
-                .set(row)
-                .where(and(eq(users.id, user.id), eq(users.version, user.version)))
-                .returning({ id: users.id });
-        if (written.length > 0) return { kind: "saved", record: saved };
-        const current = await this.get(user.id);
-        return current === undefined ? { kind: "not-found" } : { kind: "conflict", current };
-      },
+      get: getUser,
+      save: (user) =>
+        saveVersioned(db, schema.users, user, mappers.userMapper.toRow, eq(schema.users.id, user.id), () =>
+          getUser(user.id),
+        ),
     },
     goals: ownedRepository(db, schema.goals, mappers.goalMapper),
     tasks: {
