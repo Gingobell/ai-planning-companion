@@ -21,7 +21,12 @@ import type { TimeInterval } from "@/domain/scheduling/recommend-time-block";
 
 // save stores the record only if its version matches the stored one (0 for a new record),
 // then increments it. A mismatch returns the newer stored record instead of overwriting it.
-export type SaveResult<T> = { kind: "saved"; record: T } | { kind: "conflict"; current: T };
+// not-found: an update whose record no longer exists for this user, such as one deleted
+// meanwhile or an id owned by another user, whose record must not be returned.
+export type SaveResult<T> =
+  | { kind: "saved"; record: T }
+  | { kind: "conflict"; current: T }
+  | { kind: "not-found" };
 
 export interface Repository<T extends OwnedRecord> {
   list(userId: Id): Promise<T[]>;
