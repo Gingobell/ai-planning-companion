@@ -8,8 +8,14 @@ export interface GoalProgress {
   allStepsDone: boolean;
 }
 
+// Every step done is reported, not acted on: only the user confirms that a goal is complete.
 export function goalProgress(goal: Goal, tasks: Task[]): GoalProgress {
-  void goal;
-  void tasks;
-  throw new Error("not implemented");
+  const steps = tasks.filter((task) => task.goalId === goal.id && task.status !== "canceled");
+  const completedTaskIds = steps.filter((task) => task.status === "completed").map((task) => task.id);
+  return {
+    completed: completedTaskIds.length,
+    total: steps.length,
+    completedTaskIds,
+    allStepsDone: steps.length > 0 && completedTaskIds.length === steps.length,
+  };
 }
