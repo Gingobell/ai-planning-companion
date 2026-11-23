@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Task, TaskStatus } from "@/domain/records";
-import { applyProgressReport } from "@/domain/progress/task-progress";
+import { applyProgressReport, correctTaskStatus } from "@/domain/progress/task-progress";
 
 function task(status: TaskStatus): Task {
   return {
@@ -57,6 +57,38 @@ describe("applyProgressReport", () => {
       expect(applyProgressReport(task(status), { kind: "partial" })).toEqual({
         kind: "rejected",
         reason: "task-closed",
+      });
+    });
+  });
+});
+
+describe("correctTaskStatus", () => {
+  describe("AC2: the user can correct a task's state", () => {
+    it("reopens a completed task as in-progress", () => {
+      expect(correctTaskStatus(task("completed"), "in-progress")).toEqual({
+        kind: "updated",
+        task: task("in-progress"),
+      });
+    });
+
+    it("restores a canceled task to not-started", () => {
+      expect(correctTaskStatus(task("canceled"), "not-started")).toEqual({
+        kind: "updated",
+        task: task("not-started"),
+      });
+    });
+
+    it("moves a not-started task straight to completed", () => {
+      expect(correctTaskStatus(task("not-started"), "completed")).toEqual({
+        kind: "updated",
+        task: task("completed"),
+      });
+    });
+
+    it("returns unchanged when the task already has that state", () => {
+      expect(correctTaskStatus(task("blocked"), "blocked")).toEqual({
+        kind: "unchanged",
+        task: task("blocked"),
       });
     });
   });

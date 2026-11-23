@@ -23,3 +23,9 @@ export function applyProgressReport(task: Task, report: Pick<ProgressReport, "ki
   if (next === undefined || next === task.status) return { kind: "unchanged", task };
   return { kind: "updated", task: { ...task, status: next } };
 }
+
+export function correctTaskStatus(task: Task, status: TaskStatus): ProgressResult {
+  void task;
+  void status;
+  throw new Error("not implemented");
+}
