@@ -178,3 +178,39 @@ $ npx vitest run
       Tests  58 passed (58)
 exit code: 0
 
+=== Cycle 5 AC2 queries red ===
+Time: 2026-11-23 12:53 PST
+Base commit: 65dfe87
+$ npx vitest run
+       |         ^
+     12| }
+     13|
+ ❯ due src/data/repository-contract.ts:233:68
+ ❯ src/data/repository-contract.ts:234:22
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > queries > lists due reminders across all users for the reminder job
+Error: not implemented
+ ❯ Object.notImplemented [as listDueForAllUsers] src/data/postgres/repositories.ts:11:9
+      9|
+     10| function notImplemented(): never {
+     11|   throw new Error("not implemented");
+       |         ^
+     12| }
+     13|
+ ❯ src/data/repository-contract.ts:239:42
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > queries > lists one day's messages in the order they were written
+Error: not implemented
+ ❯ Object.notImplemented src/data/postgres/repositories.ts:11:9
+      9|
+     10| function notImplemented(): never {
+     11|   throw new Error("not implemented");
+       |         ^
+     12| }
+     13|
+ ❯ src/data/repository-contract.ts:253:49
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+ Test Files  1 failed | 2 passed (3)
+      Tests  6 failed | 58 passed (64)
+exit code: 1
+

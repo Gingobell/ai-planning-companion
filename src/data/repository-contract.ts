@@ -193,6 +193,69 @@ export function describeRepositoryContract(name: string, createHarness: () => Pr
       });
     });
 
+    describe("queries", () => {
+      async function saveAll(userId: Id) {
+        const data = samples(userId);
+        for (const repoName of ownedRepoNames) {
+          for (const record of data[repoName]) {
+            await repo(h.repos, repoName).save(userId, { ...record, id: `${record.id}-${userId}` });
+          }
+        }
+      }
+
+      beforeEach(async () => {
+        await saveAll(ALICE);
+        await saveAll(BOB);
+      });
+
+      it("lists a user's tasks under one goal", async () => {
+        const tasks = await h.repos.tasks.listByGoal(ALICE, "goal-full");
+        expect(tasks.map((t) => t.id)).toEqual([`task-full-${ALICE}`]);
+      });
+
+      it("lists time blocks that overlap a range, where touching edges do not overlap", async () => {
+        const ids = async (start: string, end: string) =>
+          (await h.repos.timeBlocks.listOverlapping(ALICE, { start, end })).map((b) => b.id);
+        expect(await ids("2026-11-24T18:00:00Z", "2026-11-24T19:00:00Z")).toEqual([`block-1-${ALICE}`]);
+        expect(await ids("2026-11-24T18:30:00Z", "2026-11-24T19:00:00Z")).toEqual([]);
+        expect(await ids("2026-11-24T16:00:00Z", "2026-11-24T17:00:00Z")).toEqual([]);
+      });
+
+      it("lists fixed commitments that overlap a range, ordered by start", async () => {
+        const commitments = await h.repos.fixedCommitments.listOverlapping(ALICE, {
+          start: "2026-11-24T00:00:00Z",
+          end: "2026-11-26T00:00:00Z",
+        });
+        expect(commitments.map((c) => c.id)).toEqual([`commitment-full-${ALICE}`, `commitment-min-${ALICE}`]);
+      });
+
+      it("lists a user's pending reminders that are due, ordered by time", async () => {
+        const due = async (at: string) => (await h.repos.reminders.listDue(ALICE, at)).map((r) => r.id);
+        expect(await due("2026-11-24T16:59:00Z")).toEqual([]);
+        expect(await due("2026-11-24T17:00:00Z")).toEqual([`reminder-min-${ALICE}`]);
+      });
+
+      it("lists due reminders across all users for the reminder job", async () => {
+        const due = await h.dueReminders.listDueForAllUsers("2026-11-24T17:00:00Z");
+        expect(due.map((r) => r.id).sort()).toEqual([`reminder-min-${ALICE}`, `reminder-min-${BOB}`]);
+      });
+
+      it("lists one day's messages in the order they were written", async () => {
+        await h.repos.messages.save(ALICE, {
+          id: "message-earlier",
+          userId: ALICE,
+          version: 0,
+          chatDate: "2026-11-24",
+          role: "assistant",
+          text: "Morning! What is on your mind?",
+          createdAt: "2026-11-24T16:00:00Z",
+        });
+        const messages = await h.repos.messages.listByChatDate(ALICE, "2026-11-24");
+        expect(messages.map((m) => m.id)).toEqual(["message-earlier", `message-1-${ALICE}`]);
+        expect(await h.repos.messages.listByChatDate(ALICE, "2026-11-25")).toEqual([]);
+      });
+    });
+
     describe("ownership", () => {
       it.each(ownedRepoNames)("keeps each user's %s to that user for list, get and remove", async (repoName) => {
         const [aliceRecord] = samples(ALICE)[repoName];
