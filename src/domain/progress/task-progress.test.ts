@@ -109,5 +109,11 @@ describe("finishTimeBlock", () => {
     it.each<TaskStatus>(["not-started", "in-progress", "blocked"])("keeps a %s task in its state", (status) => {
       expect(finishTimeBlock(task(status), block)).toEqual({ kind: "progress-unknown", task: task(status) });
     });
+
+    it("throws when the block belongs to another task, which is a caller error", () => {
+      expect(() => finishTimeBlock(task("in-progress"), { ...block, taskId: "task-2" })).toThrow(
+        "Time block block-1 belongs to task task-2, not task-1",
+      );
+    });
   });
 });
