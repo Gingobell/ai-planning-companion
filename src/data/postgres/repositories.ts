@@ -43,8 +43,18 @@ function ownedRepository<R extends OwnedRecord, T extends OwnedTable>(
     async save(userId, record): Promise<SaveResult<R>> {
       assertOwner(userId, record);
       const saved = { ...record, version: record.version + 1 };
-      await db.insert(table).values(mapper.toRow(saved) as T["$inferInsert"]);
-      return { kind: "saved", record: saved };
+      const row = mapper.toRow(saved) as T["$inferInsert"];
+      const written =
+        record.version === 0
+          ? await db.insert(table).values(row).onConflictDoNothing().returning({ id: table.id })
+          : await db
+              .update(table)
+              .set(row)
+              .where(and(owns(userId, record.id), eq(table.version, record.version)))
+              .returning({ id: table.id });
+      if (written.length > 0) return { kind: "saved", record: saved };
+      const current = await this.get(userId, record.id);
+      return current === undefined ? { kind: "not-found" } : { kind: "conflict", current };
     },
     async remove(userId, id) {
       await db.delete(table).where(owns(userId, id));
@@ -62,8 +72,19 @@ export function createPostgresRepositories(db: Database): Repositories {
       },
       async save(user): Promise<SaveResult<User>> {
         const saved = { ...user, version: user.version + 1 };
-        await db.insert(schema.users).values(mappers.userMapper.toRow(saved));
-        return { kind: "saved", record: saved };
+        const row = mappers.userMapper.toRow(saved);
+        const { users } = schema;
+        const written =
+          user.version === 0
+            ? await db.insert(users).values(row).onConflictDoNothing().returning({ id: users.id })
+            : await db
+                .update(users)
+                .set(row)
+                .where(and(eq(users.id, user.id), eq(users.version, user.version)))
+                .returning({ id: users.id });
+        if (written.length > 0) return { kind: "saved", record: saved };
+        const current = await this.get(user.id);
+        return current === undefined ? { kind: "not-found" } : { kind: "conflict", current };
       },
     },
     goals: ownedRepository(db, schema.goals, mappers.goalMapper),

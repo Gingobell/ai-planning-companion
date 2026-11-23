@@ -169,3 +169,12 @@ Serialized Error: { length: 188, severity: 'ERROR', code: '23505', detail: 'Key 
       Tests  5 failed | 53 passed (58)
 exit code: 1
 
+=== Cycle 4 AC2 versions green ===
+Time: 2026-11-23 12:49 PST
+Base commit: 26ff11d
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  3 passed (3)
+      Tests  58 passed (58)
+exit code: 0
+
