@@ -148,3 +148,5 @@ $ npx vitest run
       Tests  47 passed (47)
 exit code: 0
 
+=== Cycles 2 to 5 refactor ===
+Skipped: each implementation is a few lines with clear names and no duplication worth extracting.
