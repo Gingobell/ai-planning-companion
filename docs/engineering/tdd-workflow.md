@@ -1,6 +1,6 @@
 # TDD workflow
 
-This protocol applies to every feature built in this repository.
+This protocol applies to the TDD features listed under Testing in [p3-work-split.md](../plans/p3-work-split.md). Other code with logic still gets unit or integration tests, written before or after the code. Pure layout, styling and configuration changes are checked with lint, typecheck, a build and a look in the browser at desktop and 400 px width, and the pull request says how they were checked.
 
 ## Before coding
 

@@ -42,9 +42,12 @@ Current phase: HW4 is complete. The repository contains a Next.js skeleton with 
 - `npm run dev` starts the Next.js dev server at http://localhost:3000 (Turbopack).
 - `npm run build` creates a production build; `npm start` serves it.
 - `npm run lint` runs ESLint 9 (flat config in `eslint.config.mjs`, extending `eslint-config-next` core-web-vitals and typescript).
-- `npm run typecheck` runs `tsc --noEmit`.
-- `npm test` runs Vitest once; `npm run test:watch` runs it in watch mode.
+- `npm run typecheck` runs `next typegen` (generates route types such as `LayoutProps`) and then `tsc --noEmit`.
+- `npm test` runs Vitest once; `npm run test:watch` runs it in watch mode; `npm run test:coverage` adds a V8 coverage report.
+- `npm run format:check` runs Prettier (`.prettierrc.json`, print width 120); `npm run format` rewrites files. Markdown is excluded in `.prettierignore`.
+- CI (`.github/workflows/ci.yml`) runs lint, format check, typecheck and tests with coverage on every pull request and push to `main`.
 - Single test file: `npx vitest run path/to/file.test.ts`. Single test by name: `npx vitest run -t "test name"`.
+- `npm run db:generate` writes a SQL migration into `drizzle/` after a change to `src/data/postgres/schema.ts`; commit it with the schema change. `npm run db:migrate` applies migrations to the database in `DATABASE_URL_UNPOOLED`. Vercel runs `vercel-build`, which migrates before `next build`, so production and every preview branch are migrated on deploy. Tests need no database.
 
 ## Hooks
 
@@ -65,16 +68,19 @@ This project uses Next.js 16.4.6 and React 19.3, which have breaking changes com
 | Styling | Tailwind CSS v4 via Turbopack loader | In repo |
 | Dates and timezones | `temporal-polyfill` (Temporal API) | In repo |
 | Unit and integration tests | Vitest 4 | In repo |
-| Test coverage | Vitest coverage with `@vitest/coverage-v8`, 70% target | Chosen, not in repo |
+| Test coverage | Vitest coverage with `@vitest/coverage-v8`, 70% target | In repo, reported in CI |
 | E2E tests | Playwright | Planned for P3 |
-| Formatting | Prettier, checked in CI with ESLint | Chosen, not in repo |
+| Formatting | Prettier, checked in CI with ESLint | In repo |
 | Secret scanning | Gitleaks as a pre-commit hook | Chosen, not in repo |
-| Database | PostgreSQL | Planned, provider not chosen |
-| Authentication | Managed provider (Auth.js or Clerk) | Not chosen |
+| Database | PostgreSQL on Neon (Free plan), added through the Vercel Marketplace integration, in the Washington, D.C. region (Vercel `iad1`, Neon `aws-us-east-1`). Each preview deploy gets its own database branch. The connection string is `DATABASE_URL` | Provisioned, not used in code yet |
+| ORM and migrations | Drizzle ORM with drizzle-kit migrations; PGlite for database tests without a server | Chosen, not in repo |
+| Authentication | Neon Auth (managed Better Auth; users stored in the `neon_auth` schema of the same database) | Chosen, not enabled yet |
 | LLM (in the app) | Google Gemini API behind a provider-neutral adapter | Chosen, not in repo |
 | Mac companion | Electron thin shell: global shortcut, small window loading the web chat, notifications | Chosen, not in repo |
-| Hosting and CI | Vercel, GitHub Actions | Planned for P3 |
+| Hosting and CI | Vercel Hobby, production at https://ai-planning-companion.vercel.app, a preview deploy for every pull request; GitHub Actions | Vercel in use; GitHub Actions planned |
 | MCP for Claude Code | Playwright MCP server in a shared `.mcp.json`, used for simulated-user acceptance testing | Chosen, not in repo |
+
+Why these providers: all are free, and the public app must stay reachable for grading and the showcase. Neon free compute scales to zero after 5 minutes idle and wakes on the next query in a few hundred milliseconds, but the project itself is never paused for inactivity (Supabase free projects pause after a week), and keeping authentication in the same database means one service and one set of secrets. Environment variable values live in Vercel and `.env.local`, never in the repository.
 
 Do not add a dependency for an undecided layer without an explicit team decision recorded in this file.
 
@@ -94,6 +100,7 @@ Current layout:
 - The app shell (sidebar, nav items, brand mark, page placeholder) lives in `src/components/app-shell/`. Nav destinations are defined once in `nav-items.ts`.
 - Domain code goes under `src/domain/<area>/`, with tests next to the code as `*.test.ts`. The first area is `src/domain/scheduling/` (`recommend-time-block.ts`).
 - Shared record types are defined once in `src/domain/records.ts`, and data access interfaces in `src/domain/repositories.ts`. Every repository call takes the owner's `userId`. Implementations (in-memory, PostgreSQL) live outside `src/domain/`. Changes to either file go through their owner (see [docs/plans/p3-work-split.md](docs/plans/p3-work-split.md)).
+- Data access implementations live in `src/data/`. `src/data/postgres/` holds the Drizzle schema, row mappers, repositories and the client (`createDatabase`, which reads `DATABASE_URL`). `src/data/repository-contract.ts` is the shared test suite every implementation runs; database tests use PGlite through `src/data/postgres/test-db.ts`. SQL migrations live in `drizzle/`.
 - Import alias `@/*` maps to `./src/*` in `tsconfig.json` and in `vitest.config.mts` (`.mts` so Vite loads it as ESM).
 - `next.config.ts` enables `cacheComponents` and `partialPrefetching`, and wires Tailwind CSS v4 through a Turbopack loader rule (`@tailwindcss/turbopack`) for `*.css` instead of PostCSS. `globals.css` uses `@import "tailwindcss"` and `@theme inline` tokens.
 
@@ -110,7 +117,7 @@ Current layout:
 
 Strict test-driven development, following the protocol imported below. Summary:
 
-- Every acceptance criterion gets a failing test before any implementation code exists.
+- For the TDD features listed in [docs/plans/p3-work-split.md](docs/plans/p3-work-split.md), every acceptance criterion gets a failing test before any implementation code exists. Other code with logic still gets tests; pure layout, styling and configuration are checked without them (see the protocol).
 - Unit tests cover domain rules and edge cases (boundaries, empty inputs, DST transitions). Integration tests will cover route handlers and database writes once they exist. Playwright E2E tests will cover the core user flow in P3.
 - Tests assert behavior through public functions, not implementation details.
 - Target at least 70% coverage for the project, measured in CI once it exists.
@@ -142,7 +149,7 @@ Do:
 
 - Read the PRD section for the story you are working on before planning.
 - Read `DESIGN.md` before any frontend change. Use only its tokens and control sizes. When a human confirms a design change, update `DESIGN.md` and its changelog in the same commit without being asked (see "How this file evolves" in `DESIGN.md`).
-- Run `npm test`, `npm run typecheck` and `npm run lint` before proposing a commit.
+- Run `npm test`, `npm run typecheck`, `npm run lint` and `npm run format:check` before proposing a commit.
 - Show the exact file list and commit message to a human before every commit and push.
 - Keep each commit to one TDD phase or one setup change.
 
