@@ -161,3 +161,12 @@ $ npx vitest run
       Tests  1 failed | 108 passed (109)
 exit code: 1
 
+=== Review follow-up green ===
+Time: 2026-11-23 15:42 PST
+Base commit: 2b4295b
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  10 passed (10)
+      Tests  109 passed (109)
+exit code: 0
+
