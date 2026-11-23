@@ -1,9 +1,7 @@
 import type { ProgressReport, ProgressReportKind, Task, TaskStatus, TimeBlock } from "@/domain/records";
 
 export type ProgressResult =
-  | { kind: "updated"; task: Task }
-  | { kind: "unchanged"; task: Task }
-  | { kind: "rejected"; reason: "task-closed" };
+  { kind: "updated"; task: Task } | { kind: "unchanged"; task: Task } | { kind: "rejected"; reason: "task-closed" };
 
 // A correction report carries no target state; the state change goes through correctTaskStatus.
 const statusAfterReport: Record<ProgressReportKind, TaskStatus | undefined> = {
