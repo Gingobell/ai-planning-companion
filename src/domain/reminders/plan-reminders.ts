@@ -27,15 +27,23 @@ function toInstant(date: Temporal.PlainDate, time: string, timeZone: string): Te
     .toInstant();
 }
 
-function checkIns({ now, horizonDays, user }: PlanRemindersInput): ReminderDraft[] {
-  const nowInstant = Temporal.Instant.from(now);
-  const today = nowInstant.toZonedDateTimeISO(user.timeZone).toPlainDate();
+function today({ now, user }: PlanRemindersInput): Temporal.PlainDate {
+  return Temporal.Instant.from(now).toZonedDateTimeISO(user.timeZone).toPlainDate();
+}
+
+// The first instant after the planning horizon: local midnight after its last day.
+function horizonEnd(input: PlanRemindersInput): Temporal.Instant {
+  return today(input).add({ days: input.horizonDays }).toZonedDateTime(input.user.timeZone).toInstant();
+}
+
+// Every agreed check-in on each day of the horizon, including times earlier today.
+function checkIns(input: PlanRemindersInput): ReminderDraft[] {
+  const { horizonDays, user } = input;
   const drafts: ReminderDraft[] = [];
   for (let day = 0; day < horizonDays; day++) {
-    const date = today.add({ days: day });
+    const date = today(input).add({ days: day });
     for (const time of user.checkInTimes) {
       const at = toInstant(date, time, user.timeZone);
-      if (Temporal.Instant.compare(at, nowInstant) < 0) continue;
       drafts.push({ kind: "check-in", scheduledFor: at.toString(), deliveryKey: `check-in:${date}T${time}` });
     }
   }
@@ -46,14 +54,12 @@ function isOpen(task: Task): boolean {
   return task.status !== "completed" && task.status !== "canceled";
 }
 
-// Reminders only for tasks the user chose, at the start of each accepted block still ahead.
-function taskReminders({ now, tasks, timeBlocks }: PlanRemindersInput): ReminderDraft[] {
-  const nowInstant = Temporal.Instant.from(now);
+// Reminders only for tasks the user chose, at the start of each accepted block.
+function taskReminders({ tasks, timeBlocks }: PlanRemindersInput): ReminderDraft[] {
   const chosen = new Set(tasks.filter((task) => task.remindersEnabled && isOpen(task)).map((task) => task.id));
   return timeBlocks
     .filter((block) => block.status === "accepted" && chosen.has(block.taskId))
     .map((block) => ({ block, start: Temporal.Instant.from(block.start) }))
-    .filter(({ start }) => Temporal.Instant.compare(start, nowInstant) >= 0)
     .map(({ block, start }) => ({
       kind: "task",
       taskId: block.taskId,
@@ -88,9 +94,27 @@ function isAllowed(draft: ReminderDraft, user: User): boolean {
   return !isInQuietHours(at, user) && !isPaused(at, user);
 }
 
+function isBetween(at: string, start: Temporal.Instant, end: Temporal.Instant): boolean {
+  const instant = Temporal.Instant.from(at);
+  return Temporal.Instant.compare(instant, start) >= 0 && Temporal.Instant.compare(instant, end) < 0;
+}
+
+// A pending reminder that is no longer wanted is canceled. A task reminder is checked at any time,
+// so closed, moved or removed work loses it even when it is overdue; a check-in only inside
+// the horizon from now, so a check-in already due still gets delivered.
+function shouldCancel(reminder: Reminder, wantedKeys: Set<string>, input: PlanRemindersInput): boolean {
+  if (reminder.status !== "pending" || wantedKeys.has(reminder.deliveryKey)) return false;
+  if (reminder.kind === "task") return true;
+  return isBetween(reminder.scheduledFor, Temporal.Instant.from(input.now), horizonEnd(input));
+}
+
 export function planReminders(input: PlanRemindersInput): ReminderPlan {
-  const create = [...checkIns(input), ...taskReminders(input)]
-    .filter((draft) => isAllowed(draft, input.user))
+  const now = Temporal.Instant.from(input.now);
+  const wanted = [...checkIns(input), ...taskReminders(input)].filter((draft) => isAllowed(draft, input.user));
+  const wantedKeys = new Set(wanted.map((draft) => draft.deliveryKey));
+  const create = wanted
+    .filter((draft) => Temporal.Instant.compare(Temporal.Instant.from(draft.scheduledFor), now) >= 0)
     .sort((a, b) => a.scheduledFor.localeCompare(b.scheduledFor));
-  return { create, cancel: [] };
+  const cancel = input.existing.filter((reminder) => shouldCancel(reminder, wantedKeys, input)).map((r) => r.id);
+  return { create, cancel };
 }
