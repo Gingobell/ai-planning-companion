@@ -24,8 +24,8 @@ export function applyProgressReport(task: Task, report: Pick<ProgressReport, "ki
   return { kind: "updated", task: { ...task, status: next } };
 }
 
+// A user correction may set any state, including reopening a closed task.
 export function correctTaskStatus(task: Task, status: TaskStatus): ProgressResult {
-  void task;
-  void status;
-  throw new Error("not implemented");
+  if (status === task.status) return { kind: "unchanged", task };
+  return { kind: "updated", task: { ...task, status } };
 }
