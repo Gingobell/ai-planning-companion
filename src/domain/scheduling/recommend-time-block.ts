@@ -1,18 +1,5 @@
 import { Temporal } from "temporal-polyfill";
-
-export interface TimeInterval {
-  start: string;
-  end: string;
-}
-
-export interface LocalWindow {
-  start: string;
-  end: string;
-}
-
-export type IsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
-
-export type WeeklyAvailability = Partial<Record<IsoWeekday, LocalWindow[]>>;
+import type { IsoWeekday, LocalWindow, TimeInterval, WeeklyAvailability } from "@/domain/records";
 
 export interface RecommendTimeBlockInput {
   now: string;
