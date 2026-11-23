@@ -1,9 +1,23 @@
-import type { LocalWindow, TimeInterval, WeeklyAvailability } from "@/domain/scheduling/recommend-time-block";
-
 // Shared record types for every area. Each record type is defined only here.
 // Instants are ISO 8601 strings in UTC; local wall-clock values are "HH:MM" in the user's time zone.
 
 export type Id = string;
+
+// Time values shared by records and the scheduling rules.
+// TimeInterval holds UTC instants; LocalWindow holds "HH:MM" wall-clock times; IsoWeekday 1 is Monday.
+export interface TimeInterval {
+  start: string;
+  end: string;
+}
+
+export interface LocalWindow {
+  start: string;
+  end: string;
+}
+
+export type IsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
+export type WeeklyAvailability = Partial<Record<IsoWeekday, LocalWindow[]>>;
 
 // Every saved record carries a version so a stale edit never overwrites a newer change.
 export interface Versioned {
