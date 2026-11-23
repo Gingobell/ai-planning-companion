@@ -6,7 +6,7 @@ This file is the source of truth for how the product looks and feels. Read it be
 
 This is a living rule file. It follows "Keeping rule files current" in [CLAUDE.md](CLAUDE.md): once a human confirms a design decision, the agent updates this file in the same commit without being asked. In addition, every change here gets a line in the changelog at the end of this file (date, what changed, why).
 
-When the UI is built, the tokens below live in one place, `src/app/globals.css` (CSS variables exposed to Tailwind through `@theme inline`). Components use those tokens and never define their own colors, sizes, spacing or radii.
+The tokens below live in one place, `src/app/globals.css` (CSS variables exposed to Tailwind through `@theme inline`, with Tailwind's default colors, sizes, radii, shadows and breakpoints cleared). Components use those tokens and never define their own colors, sizes, spacing or radii. Values this file gives without a name are named there: control padding `--px-xs` to `--px-lg`, `--sidebar-width`, `--page-max`, `--chat-max`, the `--raised` and `--inset` shadows, and the `wide` breakpoint at 760 px.
 
 ## 1. Direction
 
@@ -184,3 +184,4 @@ Motion is 100 to 220 ms, ease-out, and is turned off under `prefers-reduced-moti
 | 2026-11-22 | Week grid stretches time rows so every title fits, and overlapping blocks sit side by side | Short blocks with long titles were clipped and looked overlapped |
 | 2026-11-22 | Controls are centered by fixed height; spacing, type, radius and color come from tokens | Pills such as "Needs a deadline" looked unbalanced next to buttons |
 | 2026-11-22 | Assistant mark changed from a checkmark to a route (two dots joined by a curved path) | A checkmark reads as "done" and was misleading as the assistant avatar |
+| 2026-11-23 | Tokens moved into `globals.css`; unnamed values (control padding, layout widths, shadows, the 760 px breakpoint) got token names | The app shell needed them, and one name per value keeps components from using literals |

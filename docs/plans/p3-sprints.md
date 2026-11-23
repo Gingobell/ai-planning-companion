@@ -20,13 +20,13 @@ Jingyi Fu:
 - Chat with the Gemini adapter; capture and clarification built with TDD.
 - Project idea approved by the professor in #projects by November 30; decision on user roles.
 - First real hook runs recorded in `docs/evidence/`.
-- Issue template with acceptance criteria.
+- Issue template and the full issue backlog for both partners, before Sprint 1 planning.
 
 Sihui Lyu:
 - Plan files with acceptance criteria for progress rules and for reminder and preference rules; both built with TDD.
 - CI stages: ESLint and Prettier, `tsc --noEmit`, unit tests, `npm audit`, with a coverage report.
 - Pre-commit secret scan.
-- Course definitions of C.L.E.A.R. and the 8-gate pipeline in the repo; pull request template.
+- Pull request template with the C.L.E.A.R. review points from CLAUDE.md and the AI disclosure.
 - First draft of acceptance scenarios from PRD Section 8.
 
 Both:
@@ -38,12 +38,13 @@ Both:
 
 Jingyi Fu:
 - Capture, clarification and scheduling working end to end on a preview deploy by December 7.
-- Today and week views with direct editing; task breakdown and help when stuck.
-- Learning and confirming preferences in chat; running reminders and check-ins.
+- Direct editing with undo; task breakdown and help when stuck.
+- Learning and confirming preferences in chat.
 - Integration tests; CI stages for AI PR review, preview deploy and production deploy.
 
 Sihui Lyu:
-- `/goals` and `/preferences` pages; Mac companion in `desktop/`.
+- `/goals` and `/preferences` pages; today and week views; Mac companion in `desktop/`.
+- Running reminders and check-ins with web notifications.
 - Playwright MCP server in `.mcp.json`; simulated-user tester and security reviewer sub-agents.
 - Definition of Done with security criteria.
 - Playwright end-to-end tests and their CI stage.

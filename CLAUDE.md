@@ -35,7 +35,7 @@ These files change as the project grows. A rule changes only after a human confi
 - **Show the rule diff.** Before every commit, show the rule file changes next to the code changes and say in the commit message which rule changed.
 - **Keep the record.** `DESIGN.md` keeps a changelog section with date, change and reason. Other rule files rely on git history and the commit message.
 
-Current phase: HW4 is complete. The repository contains a Next.js skeleton with Vitest and the first domain feature, time block recommendation (US-02, US-06), built with TDD. Chat, LLM integration, database, authentication, reminders and the Mac companion are not built yet.
+Current phase: HW4 is complete. The repository contains a Next.js skeleton with Vitest and the first domain feature, time block recommendation (US-02, US-06), built with TDD. Sprint 1 has added the app shell with the DESIGN.md tokens. Chat, LLM integration, database, authentication, reminders and the Mac companion are not built yet.
 
 ## Commands
 
@@ -91,7 +91,8 @@ Do not add a dependency for an undecided layer without an explicit team decision
 
 Current layout:
 
-- App Router under `src/app/` (`layout.tsx`, `page.tsx`, `globals.css`). Layout props use the generated global `LayoutProps<"/">` type.
+- App Router under `src/app/` (`layout.tsx`, `page.tsx`, `globals.css`). Layout props use the generated global `LayoutProps<"/">` type. Routes `/`, `/today`, `/week`, `/goals` and `/preferences` start as placeholders that their owners replace.
+- The app shell (sidebar, nav items, brand mark, page placeholder) lives in `src/components/app-shell/`. Nav destinations are defined once in `nav-items.ts`.
 - Domain code goes under `src/domain/<area>/`, with tests next to the code as `*.test.ts`. The first area is `src/domain/scheduling/` (`recommend-time-block.ts`).
 - Shared record types are defined once in `src/domain/records.ts`, and data access interfaces in `src/domain/repositories.ts`. Every repository call takes the owner's `userId`. Implementations (in-memory, PostgreSQL) live outside `src/domain/`. Changes to either file go through their owner (see [docs/plans/p3-work-split.md](docs/plans/p3-work-split.md)).
 - Data access implementations live in `src/data/`. `src/data/postgres/` holds the Drizzle schema, row mappers, repositories and the client (`createDatabase`, which reads `DATABASE_URL`). `src/data/repository-contract.ts` is the shared test suite every implementation runs; database tests use PGlite through `src/data/postgres/test-db.ts`. SQL migrations live in `drizzle/`.
@@ -126,6 +127,16 @@ Strict test-driven development, following the protocol imported below. Summary:
 - **Cryptographic failures and secrets:** never commit secrets or `.env` files; use `.env.example` with placeholder names only.
 - **Security misconfiguration and vulnerable components:** keep `npm audit` clean; do not add dependencies without a reason.
 - **Logging:** never log private conversation content or tokens.
+
+## Code review (C.L.E.A.R.)
+
+Every pull request is reviewed by the other partner or a reviewer agent, with one comment point for each letter of the course's C.L.E.A.R. framework (Week 11, "Claude Code Extensibility"):
+
+- **Context:** does the code fit the project's architecture and conventions?
+- **Logic:** is the business logic correct, and are edge cases handled?
+- **Evidence:** are there tests, and do they verify the behavior?
+- **Architecture:** does it follow established patterns, and does it add dependencies?
+- **Risk:** are there security, performance or data exposure concerns?
 
 ## Do's and don'ts
 

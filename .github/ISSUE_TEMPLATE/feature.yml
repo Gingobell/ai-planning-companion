@@ -1,0 +1,45 @@
+name: Feature or task
+description: One piece of work with testable acceptance criteria. Work on it in its own branch.
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What this issue delivers, in one or two sentences.
+    validations:
+      required: true
+  - type: input
+    id: stories
+    attributes:
+      label: User stories
+      description: PRD stories this serves, for example US-02, US-06. Write "none" for setup work.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: One testable statement per line. Each one should become at least one test.
+      placeholder: |
+        - Given a task without a deadline, scheduling returns "needs deadline".
+        - Every repository call requires the owner's userId.
+    validations:
+      required: true
+  - type: dropdown
+    id: owner
+    attributes:
+      label: Owner
+      description: Who owns this area (see docs/plans/p3-work-split.md).
+      options:
+        - Jingyi Fu
+        - Sihui Lyu
+        - Both
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Dependencies, open questions or links.
+    validations:
+      required: false

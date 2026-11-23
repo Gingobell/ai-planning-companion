@@ -6,11 +6,11 @@ Who owns what in Project 3, so each partner can build, test and ship their areas
 
 | Category | Jingyi Fu | Sihui Lyu | Both |
 | --- | --- | --- | --- |
-| 1. Application | Data, accounts, hosting, chat, planning core | Progress, reminders and preferences rules and pages; Mac companion | |
+| 1. Application | Data, accounts, hosting, chat, planning core | Progress, reminders and preferences rules and pages; today and week views; running reminders; Mac companion | |
 | 2. Claude Code | Hook evidence | MCP, sub-agents | Skills, auto-memory, worktrees, writer/reviewer PRs |
 | 3. Testing | TDD for capture; integration tests | TDD for own rules; Playwright; coverage; acceptance testing | |
 | 4. CI/CD and security | AI PR review and deploy stages | Check stages; security gates | |
-| 5. Pair process | Issue template | PR template; sprint notes | Sprints, issues, standups, reviews |
+| 5. Pair process | Issue template and the full issue backlog | PR template; sprint notes | Sprints, standups, reviews |
 | 6. Documentation and demo | Mermaid diagram | | Blog, video, showcase form, own reflections |
 
 ## 1. Application
@@ -22,19 +22,21 @@ Who owns what in Project 3, so each partner can build, test and ship their areas
 - Chat and the Gemini adapter.
 - Capture, clarification and scheduling (US-01, US-02, US-06).
 - Task breakdown and help when the user feels stuck, in chat (US-01, US-03).
-- Today and week views with direct editing (US-02).
+- Direct editing of tasks and time blocks, with undo (US-02).
 - Learning and confirming preferences in chat (US-05).
-- Running reminders and check-ins, and web notifications (US-04).
 - Professor approval of the idea in #projects by November 30; the decision on "2+ user roles or distinct feature areas".
 
 **Sihui Lyu**
 - Progress and task state rules in `src/domain/progress/`, and the `/goals` page (US-03).
 - Reminder and preference rules in `src/domain/reminders/` and `src/domain/preferences/`, and the `/preferences` page (US-04, US-05).
+- Today and week views (US-02).
+- Running reminders and check-ins, and web notifications (US-04).
 - Mac companion in `desktop/`: global shortcut, small window, Mac notifications (US-04, US-06).
 
-**Boundaries.** Sihui owns the rules as pure functions; Jingyi owns running them.
-- Reminders and check-ins: Sihui's rules decide which reminders and check-ins should exist and when (agreed check-in times, quiet hours, pausing, removal when a task is completed or canceled, updates when a block moves, no duplicates on retry). An unanswered check-in leaves progress unknown and triggers no follow-up messages. Jingyi's server jobs call them, store the result and send web notifications.
+**Boundaries.** Sihui owns the rules as pure functions. Jingyi runs them from chat and the server, except reminders and check-ins, which Sihui also runs.
+- Reminders and check-ins: Sihui's rules decide which reminders and check-ins should exist and when (agreed check-in times, quiet hours, pausing, removal when a task is completed or canceled, updates when a block moves, no duplicates on retry). An unanswered check-in leaves progress unknown and triggers no follow-up messages. Sihui's server jobs call them, store the result through the data access interfaces and send web notifications. Jingyi supplies the database, the Vercel setup for scheduled jobs and a chat function that posts a check-in message.
 - Preferences: Sihui's rules own preference state (tentative, confirmed, corrected, removed, temporary conditions that expire). A corrected or removed preference is never restored. Jingyi's chat proposes a preference and calls these rules when the user confirms or corrects it.
+- Today and week: Sihui builds the views; they call Jingyi's edit and undo actions for direct editing.
 - Progress: Sihui's rules own task states and corrections, partial progress, a finished time block not completing its task, and goal completion only after the user confirms it. Progress reported in chat or on `/today` goes through the same rules.
 
 ## 2. Claude Code
@@ -74,13 +76,13 @@ The course asks for strict red-green-refactor on at least 3 features. These six 
 
 **Sihui Lyu**
 - CI stages: ESLint and Prettier, `tsc --noEmit`, unit and integration tests, Playwright, `npm audit`.
-- Security gates: pre-commit secret scan, dependency scan, security review sub-agent, security criteria in a Definition of Done. OWASP Top 10 awareness in CLAUDE.md is already done.
-- Course definitions of C.L.E.A.R. and the 8-gate security pipeline, written into the repo.
+- Security gates from the course's eight (listed in [p3-requirements.md](p3-requirements.md)): pre-commit secret scan, dependency scan, a security review sub-agent as SAST, and security criteria in a Definition of Done.
 
 ## 5. Pair process
 
 **Jingyi Fu**
 - Issue template with acceptance criteria as testable specs.
+- The full issue backlog: one GitHub Issue per piece of work for both partners, each with testable acceptance criteria and an owner, written before Sprint 1 planning.
 
 **Sihui Lyu**
 - Pull request template with C.L.E.A.R. review and AI disclosure (% AI-generated, tool, human review).
@@ -88,7 +90,7 @@ The course asks for strict red-green-refactor on at least 3 features. These six 
 
 **Both**
 - Sprint planning and a retrospective for each sprint.
-- GitHub Issues for their own areas, one branch per issue.
+- Work from the issues for their own areas, one branch per issue. Either partner can propose a new or changed issue.
 - At least three async standups per sprint each.
 - Review each other's pull requests.
 

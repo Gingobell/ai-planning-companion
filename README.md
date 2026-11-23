@@ -6,15 +6,15 @@ Built by Jingyi Fu and Sihui Lyu for CS6983 Project 3.
 
 ## Status
 
-Project 3 is being built in stages. Homework 4 is the first stage and is complete: the time block recommendation rules. Sprint 1 starts on November 24.
+Project 3 is being built in stages. Homework 4 is the first stage and is complete: the time block recommendation rules. Sprint 1 starts on November 24. The app shell is in place: run `npm run dev` and open http://localhost:3000 to see the sidebar with Chat, Today, Week, Goals & tasks and Preferences; each page is a placeholder until its feature is built.
 
 ## Project 3 plan
 
 **Features.** Six user stories, all in the first release: capture and organize goals and tasks in a sentence (US-01), build a realistic time-blocked plan (US-02), break large goals into steps and track progress (US-03), reminders and daily check-ins (US-04), remember confirmed preferences (US-05), and open the assistant with a Mac keyboard shortcut (US-06).
 
 **Who does what.**
-- Jingyi Fu: data model, database, accounts and hosting; chat with Gemini; capture, clarification and scheduling; today and week views; deploy stages in CI.
-- Sihui Lyu: progress, reminder and preference rules with their pages; the Mac companion; Playwright and acceptance testing; CI check stages and security gates; the Playwright MCP server.
+- Jingyi Fu: data model, database, accounts and hosting; chat with Gemini; capture, clarification and scheduling; direct editing; deploy stages in CI.
+- Sihui Lyu: progress, reminder and preference rules with their pages; today and week views; running reminders and check-ins; the Mac companion; Playwright and acceptance testing; CI check stages and security gates; the Playwright MCP server.
 - Both: skills, sprints, standups, reviews of each other's pull requests, blog post and demo video.
 
 **When.** Sprint 1 runs November 24 to 30, Sprint 2 December 1 to 10, and release week December 10 to 13. We submit by December 13; the course deadline is December 15.
