@@ -10,7 +10,10 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:coverage": "vitest run --coverage",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },
@@ -28,9 +31,11 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.12",
     "drizzle-kit": "0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "prettier": "^3.10.1",
     "tailwindcss": "4.3.3",
     "typescript": "^5",
     "vitest": "^4.1.12"

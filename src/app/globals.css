@@ -27,8 +27,9 @@
   --shadow-hi: #ffffff;
 
   /* Type (section 3) */
-  --font-stack: var(--font-instrument-sans), "Instrument Sans", -apple-system, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", sans-serif;
+  --font-stack:
+    var(--font-instrument-sans), "Instrument Sans", -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    sans-serif;
   --fs-xs: 11px;
   --fs-sm: 12px;
   --fs-control: 13px;

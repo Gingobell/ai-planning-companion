@@ -45,13 +45,13 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 | Strict red-green-refactor for at least 3 features, failing tests committed before implementation | Partial (1 of 3) | Time block recommendation: [plan](time-block-recommendation.md), [TDD log](../evidence/03-tdd/log.txt). Six TDD features are planned, listed under Testing in [p3-work-split.md](p3-work-split.md) |
 | Unit and integration tests (Vitest) | Partial | Unit tests in `src/domain/`; no integration tests yet |
 | At least 1 Playwright end-to-end test | Not started | Playwright planned (CLAUDE.md tech stack) |
-| 70%+ coverage | Not started | Coverage not measured yet |
+| 70%+ coverage | Partial | Measured with `npm run test:coverage` and shown in the CI run summary; 96% lines at setup, not enforced as a threshold |
 
 ## CI/CD and security
 
 | Requirement | Status | Evidence or next step |
 | --- | --- | --- |
-| GitHub Actions with all 8 stages passing: ESLint + Prettier, `tsc --noEmit`, unit/integration tests, Playwright E2E, `npm audit`, AI PR review (claude-code-action or `claude -p`), preview deploy, production deploy on merge to main | Not started | Prettier not installed yet |
+| GitHub Actions with all 8 stages passing: ESLint + Prettier, `tsc --noEmit`, unit/integration tests, Playwright E2E, `npm audit`, AI PR review (claude-code-action or `claude -p`), preview deploy, production deploy on merge to main | Partial | `.github/workflows/ci.yml` runs ESLint, Prettier, `tsc --noEmit` and unit tests with coverage (#32); other stages not added yet |
 | At least 4 security gates from the course's 8-gate pipeline | Planned | The course's eight gates (Week 13, "AI Security & Code Quality"): 1 secrets detection (Gitleaks), 2 dependency scanning, 3 SAST, 4 DAST, 5 container scanning, 6 license compliance, 7 security acceptance criteria, 8 SBOM. Planned: gates 1, 2, 3 (a security review sub-agent) and 7 (Definition of Done), see [p3-work-split.md](p3-work-split.md). OWASP Top 10 awareness in CLAUDE.md is done but is not one of the eight |
 
 ## Pair process

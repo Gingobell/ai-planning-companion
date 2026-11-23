@@ -84,7 +84,11 @@ export const taskMapper = {
 
 export const timeBlockMapper = {
   toRow: (block: TimeBlock) => block,
-  fromRow: (row: Row<typeof schema.timeBlocks>): TimeBlock => ({ ...row, start: instant(row.start), end: instant(row.end) }),
+  fromRow: (row: Row<typeof schema.timeBlocks>): TimeBlock => ({
+    ...row,
+    start: instant(row.start),
+    end: instant(row.end),
+  }),
 };
 
 export const fixedCommitmentMapper = {
@@ -141,5 +145,8 @@ export const openQuestionMapper = {
 
 export const progressReportMapper = {
   toRow: (report: ProgressReport) => report,
-  fromRow: (row: Row<typeof schema.progressReports>): ProgressReport => ({ ...row, reportedAt: instant(row.reportedAt) }),
+  fromRow: (row: Row<typeof schema.progressReports>): ProgressReport => ({
+    ...row,
+    reportedAt: instant(row.reportedAt),
+  }),
 };

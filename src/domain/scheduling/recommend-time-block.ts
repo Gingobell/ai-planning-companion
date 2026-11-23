@@ -35,9 +35,7 @@ export function recommendTimeBlock(input: RecommendTimeBlockInput): TimeBlockRec
       end: toZoned(interval.end, input.timeZone),
     })),
   };
-  const windows = [
-    ...availableWindows(input, search.earliestStart.toPlainDate(), deadline.toPlainDate()),
-  ];
+  const windows = [...availableWindows(input, search.earliestStart.toPlainDate(), deadline.toPlainDate())];
 
   if (input.preferredWindow !== undefined) {
     const preferred = firstFit(insidePreferredWindow(windows, input.preferredWindow, input.timeZone), search);

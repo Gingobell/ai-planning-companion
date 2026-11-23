@@ -54,7 +54,12 @@ function ownedRepository<R extends OwnedRecord, T extends OwnedTable>(
 ): Repository<R> {
   const owns = (userId: Id, id: Id) => and(eq(table.userId, userId), eq(table.id, id));
   const select = async (where: SQL | undefined) =>
-    ((await db.select().from(table as PgTable).where(where)) as T["$inferSelect"][]).map((row) => mapper.fromRow(row));
+    (
+      (await db
+        .select()
+        .from(table as PgTable)
+        .where(where)) as T["$inferSelect"][]
+    ).map((row) => mapper.fromRow(row));
   const get = async (userId: Id, id: Id) => (await select(owns(userId, id)))[0];
   return {
     list: (userId) => select(eq(table.userId, userId)),
@@ -97,7 +102,10 @@ export function createPostgresRepositories(db: Database): Repositories {
       ...ownedRepository(db, schema.tasks, mappers.taskMapper),
       async listByGoal(userId, goalId) {
         const { tasks } = schema;
-        const rows = await db.select().from(tasks).where(and(eq(tasks.userId, userId), eq(tasks.goalId, goalId)));
+        const rows = await db
+          .select()
+          .from(tasks)
+          .where(and(eq(tasks.userId, userId), eq(tasks.goalId, goalId)));
         return rows.map(mappers.taskMapper.fromRow);
       },
     },
@@ -160,7 +168,11 @@ export function createPostgresRepositories(db: Database): Repositories {
 export function createPostgresDueReminderSource(db: Database): DueReminderSource {
   return {
     async listDueForAllUsers(at) {
-      const rows = await db.select().from(schema.reminders).where(isDue(at)).orderBy(asc(schema.reminders.scheduledFor));
+      const rows = await db
+        .select()
+        .from(schema.reminders)
+        .where(isDue(at))
+        .orderBy(asc(schema.reminders.scheduledFor));
       return rows.map(mappers.reminderMapper.fromRow);
     },
   };

@@ -66,9 +66,7 @@ describe("recommendTimeBlock", () => {
     });
 
     it("uses the next available weekday when today has no availability", () => {
-      const result = recommendTimeBlock(
-        withDeadline({ availability: { 3: [{ start: "13:00", end: "15:00" }] } }),
-      );
+      const result = recommendTimeBlock(withDeadline({ availability: { 3: [{ start: "13:00", end: "15:00" }] } }));
       expect(result).toMatchObject({
         block: { start: local("2026-11-25T13:00"), end: local("2026-11-25T14:00") },
       });
@@ -128,9 +126,7 @@ describe("recommendTimeBlock", () => {
       const result = recommendTimeBlock(
         withDeadline({
           task: { estimatedMinutes: 60, deadline: local("2026-11-23T17:00") },
-          fixedCommitments: [
-            { start: local("2026-11-23T09:00"), end: local("2026-11-23T17:00") },
-          ],
+          fixedCommitments: [{ start: local("2026-11-23T09:00"), end: local("2026-11-23T17:00") }],
         }),
       );
       expect(result).toEqual({ kind: "infeasible", reason: "no-free-slot" });
@@ -158,9 +154,7 @@ describe("recommendTimeBlock", () => {
     const evening = { start: "18:00", end: "21:00" };
 
     it("uses the preferred window over an earlier free slot", () => {
-      const result = recommendTimeBlock(
-        withDeadline({ availability: longMonday, preferredWindow: evening }),
-      );
+      const result = recommendTimeBlock(withDeadline({ availability: longMonday, preferredWindow: evening }));
       expect(result).toEqual({
         kind: "scheduled",
         block: { start: local("2026-11-23T18:00"), end: local("2026-11-23T19:00") },
@@ -174,9 +168,7 @@ describe("recommendTimeBlock", () => {
           task: { estimatedMinutes: 60, deadline: local("2026-11-23T21:00") },
           availability: longMonday,
           preferredWindow: evening,
-          fixedCommitments: [
-            { start: local("2026-11-23T18:00"), end: local("2026-11-23T21:00") },
-          ],
+          fixedCommitments: [{ start: local("2026-11-23T18:00"), end: local("2026-11-23T21:00") }],
         }),
       );
       expect(result).toEqual({
@@ -191,9 +183,7 @@ describe("recommendTimeBlock", () => {
         withDeadline({
           availability: longMonday,
           preferredWindow: evening,
-          fixedCommitments: [
-            { start: local("2026-11-23T18:00"), end: local("2026-11-23T19:00") },
-          ],
+          fixedCommitments: [{ start: local("2026-11-23T18:00"), end: local("2026-11-23T19:00") }],
         }),
       );
       expect(result).toMatchObject({
