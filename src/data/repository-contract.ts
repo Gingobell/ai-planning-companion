@@ -156,6 +156,43 @@ export function describeRepositoryContract(name: string, createHarness: () => Pr
       });
     });
 
+    describe("versions", () => {
+      it("updates a record when its version matches and increments the version", async () => {
+        const [goal] = samples(ALICE).goals;
+        await h.repos.goals.save(ALICE, goal);
+        const edited = { ...goal, version: 1, title: "Land a fall internship" };
+        expect(await h.repos.goals.save(ALICE, edited)).toEqual({ kind: "saved", record: { ...edited, version: 2 } });
+        expect(await h.repos.goals.get(ALICE, goal.id)).toEqual({ ...edited, version: 2 });
+      });
+
+      it("returns the newer stored record instead of overwriting it with a stale edit", async () => {
+        const [goal] = samples(ALICE).goals;
+        await h.repos.goals.save(ALICE, goal);
+        await h.repos.goals.save(ALICE, { ...goal, version: 1, title: "Newer edit" });
+        const stale = { ...goal, version: 1, title: "Stale edit" };
+        const current = { ...goal, version: 2, title: "Newer edit" };
+        expect(await h.repos.goals.save(ALICE, stale)).toEqual({ kind: "conflict", current });
+        expect(await h.repos.goals.save(ALICE, { ...goal, version: 0 })).toEqual({ kind: "conflict", current });
+        expect(await h.repos.goals.get(ALICE, goal.id)).toEqual(current);
+      });
+
+      it("returns not-found when the record was deleted before the edit", async () => {
+        const [goal] = samples(ALICE).goals;
+        await h.repos.goals.save(ALICE, goal);
+        await h.repos.goals.remove(ALICE, goal.id);
+        expect(await h.repos.goals.save(ALICE, { ...goal, version: 1 })).toEqual({ kind: "not-found" });
+        expect(await h.repos.goals.get(ALICE, goal.id)).toBeUndefined();
+      });
+
+      it("applies the same version rules to users", async () => {
+        const alice = { ...makeUser(ALICE), version: 1, timeZone: "America/New_York" };
+        expect(await h.repos.users.save(alice)).toEqual({ kind: "saved", record: { ...alice, version: 2 } });
+        const stale = { ...makeUser(ALICE), version: 1 };
+        expect(await h.repos.users.save(stale)).toEqual({ kind: "conflict", current: { ...alice, version: 2 } });
+        expect(await h.repos.users.save({ ...makeUser("user-gone"), version: 3 })).toEqual({ kind: "not-found" });
+      });
+    });
+
     describe("ownership", () => {
       it.each(ownedRepoNames)("keeps each user's %s to that user for list, get and remove", async (repoName) => {
         const [aliceRecord] = samples(ALICE)[repoName];
@@ -172,6 +209,15 @@ export function describeRepositoryContract(name: string, createHarness: () => Pr
         await repo(h.repos, repoName).remove(ALICE, aliceRecord.id);
         expect(await repo(h.repos, repoName).get(ALICE, aliceRecord.id)).toBeUndefined();
         expect(await repo(h.repos, repoName).get(BOB, bobRecord.id)).toBeDefined();
+      });
+
+      it("returns not-found when another user saves over an existing id, and leaves the record alone", async () => {
+        const [aliceGoal] = samples(ALICE).goals;
+        await h.repos.goals.save(ALICE, aliceGoal);
+        const intruder = { ...aliceGoal, userId: BOB, title: "Taken over" };
+        expect(await h.repos.goals.save(BOB, intruder)).toEqual({ kind: "not-found" });
+        expect(await h.repos.goals.save(BOB, { ...intruder, version: 1 })).toEqual({ kind: "not-found" });
+        expect(await h.repos.goals.get(ALICE, aliceGoal.id)).toEqual({ ...aliceGoal, version: 1 });
       });
 
       it("rejects saving a record whose userId is not the caller's", async () => {

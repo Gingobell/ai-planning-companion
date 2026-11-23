@@ -133,3 +133,39 @@ $ npx vitest run
       Tests  53 passed (53)
 exit code: 0
 
+=== Cycle 4 AC2 versions red ===
+Time: 2026-11-23 12:48 PST
+Base commit: 6e6fc49
+$ npx vitest run
+ ❯ pe.tt node_modules/@electric-sql/pglite/dist/chunk-Y6PULSM7.js:1:15658
+ ❯ pe.parse node_modules/@electric-sql/pglite/dist/chunk-Y6PULSM7.js:1:14332
+ ❯ q.Ce node_modules/@electric-sql/pglite/dist/chunk-XZUEO4BZ.js:5:1759
+ ❯ node_modules/@electric-sql/pglite/dist/chunk-XZUEO4BZ.js:5:1151
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { length: 189, severity: 'ERROR', code: '23505', detail: 'Key (id)=(user-alice) already exists.', hint: undefined, position: undefined, internalPosition: undefined, internalQuery: undefined, where: undefined, schema: 'public', table: 'users', dataType: undefined, constraint: 'users_pkey', file: 'nbtinsert.c', routine: '_bt_check_unique', query: 'insert into "users" ("id", "version", "time_zone", "availability", "check_in_times", "quiet_hours", "reminders_pause") values ($1, $2, $3, $4, $5, $6, $7)', params: [ 'user-alice', 2, 'America/New_York', '{"1":[{"start":"09:00","end":"17:00"}],"6":[]}', '["09:00","21:00"]', '{"start":"22:00","end":"07:00"}', '{"until":"2026-12-01T08:00:00Z"}' ], queryOptions: { rowMode: 'object', parsers: { '1082': 'Function<1082>', '1114': 'Function<1114>', '1115': 'Function<1115>', '1182': 'Function<1182>', '1184': 'Function<1184>', '1185': 'Function<1185>', '1186': 'Function<1186>', '1187': 'Function<1187>', '1231': 'Function<1231>' } } }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > ownership > returns not-found when another user saves over an existing id, and leaves the record alone
+Error: Failed query: insert into "goals" ("id", "user_id", "version", "title", "category", "horizon", "deadline_at", "deadline_source", "status") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+params: goal-full,user-bob,1,Taken over,Career,long,2027-03-01T08:00:00Z,external,active
+ ❯ PglitePreparedQuery.queryWithCache node_modules/src/pg-core/session.ts:73:10
+ ❯ Object.save src/data/postgres/repositories.ts:46:7
+     44|       assertOwner(userId, record);
+     45|       const saved = { ...record, version: record.version + 1 };
+     46|       await db.insert(table).values(mapper.toRow(saved) as T["$inferIn…
+       |       ^
+     47|       return { kind: "saved", record: saved };
+     48|     },
+ ❯ src/data/repository-contract.ts:218:16
+Caused by: error: duplicate key value violates unique constraint "goals_pkey"
+ ❯ pe.Oe node_modules/@electric-sql/pglite/dist/chunk-Y6PULSM7.js:1:18272
+ ❯ pe.tt node_modules/@electric-sql/pglite/dist/chunk-Y6PULSM7.js:1:15658
+ ❯ pe.parse node_modules/@electric-sql/pglite/dist/chunk-Y6PULSM7.js:1:14332
+ ❯ q.Ce node_modules/@electric-sql/pglite/dist/chunk-XZUEO4BZ.js:5:1759
+ ❯ node_modules/@electric-sql/pglite/dist/chunk-XZUEO4BZ.js:5:1151
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { length: 188, severity: 'ERROR', code: '23505', detail: 'Key (id)=(goal-full) already exists.', hint: undefined, position: undefined, internalPosition: undefined, internalQuery: undefined, where: undefined, schema: 'public', table: 'goals', dataType: undefined, constraint: 'goals_pkey', file: 'nbtinsert.c', routine: '_bt_check_unique', query: 'insert into "goals" ("id", "user_id", "version", "title", "category", "horizon", "deadline_at", "deadline_source", "status") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)', params: [ 'goal-full', 'user-bob', 1, 'Taken over', 'Career', 'long', '2027-03-01T08:00:00Z', 'external', 'active' ], queryOptions: { rowMode: 'object', parsers: { '1082': 'Function<1082>', '1114': 'Function<1114>', '1115': 'Function<1115>', '1182': 'Function<1182>', '1184': 'Function<1184>', '1185': 'Function<1185>', '1186': 'Function<1186>', '1187': 'Function<1187>', '1231': 'Function<1231>' } } }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+ Test Files  1 failed | 2 passed (3)
+      Tests  5 failed | 53 passed (58)
+exit code: 1
+
