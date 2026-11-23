@@ -52,6 +52,6 @@ npm run lint
 npm run dev         # http://localhost:3000
 ```
 
-Tests need no database. To run the app against one, copy `.env.example` to `.env.local` and set `DATABASE_URL` and `DATABASE_URL_UNPOOLED` to a Neon development branch, then run `npm run db:migrate`.
+Tests need no database or auth service. To run the app against real ones, copy `.env.example` to `.env.local`, set `DATABASE_URL` and `DATABASE_URL_UNPOOLED` to a Neon development branch, set `NEON_AUTH_BASE_URL` to the project's Auth URL and `NEON_AUTH_COOKIE_SECRET` to the output of `openssl rand -base64 32`, then run `npm run db:migrate`. Every page except `/sign-in` and `/sign-up` asks you to sign in.
 
 Built with Next.js, TypeScript and Vitest. Stack decisions are recorded in [CLAUDE.md](CLAUDE.md).

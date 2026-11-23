@@ -58,7 +58,7 @@ Both:
 
 ## Release week, December 10 to December 13
 
-- Jingyi Fu: fix acceptance issues in owned areas; production deploy with all CI stages green on `main`; README Mermaid diagram.
+- Jingyi Fu: fix acceptance issues in owned areas; production deploy with all CI stages green on `main`; README Mermaid diagram; delete the test accounts created on preview deploys from Neon Auth before the demo.
 - Sihui Lyu: fix acceptance issues in owned areas; final acceptance run, December 11 to 12.
 - Both: blog post, demo video, showcase form, individual reflections, submission by December 13.
 

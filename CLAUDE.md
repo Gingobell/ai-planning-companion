@@ -72,9 +72,9 @@ This project uses Next.js 16.4.6 and React 19.3, which have breaking changes com
 | E2E tests | Playwright | Planned for P3 |
 | Formatting | Prettier, checked in CI with ESLint | In repo |
 | Secret scanning | Gitleaks as a pre-commit hook | Chosen, not in repo |
-| Database | PostgreSQL on Neon (Free plan), added through the Vercel Marketplace integration, in the Washington, D.C. region (Vercel `iad1`, Neon `aws-us-east-1`). Each preview deploy gets its own database branch. The connection string is `DATABASE_URL` | Provisioned, not used in code yet |
-| ORM and migrations | Drizzle ORM with drizzle-kit migrations; PGlite for database tests without a server | Chosen, not in repo |
-| Authentication | Neon Auth (managed Better Auth; users stored in the `neon_auth` schema of the same database) | Chosen, not enabled yet |
+| Database | PostgreSQL on Neon (Free plan), added through the Vercel Marketplace integration, in the Washington, D.C. region (Vercel `iad1`, Neon `aws-us-east-1`). Each preview deploy gets its own database branch. The connection string is `DATABASE_URL` | In repo |
+| ORM and migrations | Drizzle ORM with drizzle-kit migrations; PGlite for database tests without a server | In repo |
+| Authentication | Neon Auth (managed Better Auth; users stored in the `neon_auth` schema of the same database) | In repo; enabled on the main branch, with the production URL and the `feat/auth` preview as trusted domains |
 | LLM (in the app) | Google Gemini API behind a provider-neutral adapter | Chosen, not in repo |
 | Mac companion | Electron thin shell: global shortcut, small window loading the web chat, notifications | Chosen, not in repo |
 | Hosting and CI | Vercel Hobby, production at https://ai-planning-companion.vercel.app, a preview deploy for every pull request; GitHub Actions | Vercel in use; GitHub Actions planned |
@@ -96,7 +96,8 @@ Do not add a dependency for an undecided layer without an explicit team decision
 
 Current layout:
 
-- App Router under `src/app/` (`layout.tsx`, `page.tsx`, `globals.css`). Layout props use the generated global `LayoutProps<"/">` type. Routes `/`, `/today`, `/week`, `/goals` and `/preferences` start as placeholders that their owners replace.
+- App Router under `src/app/`. The root `layout.tsx` holds the font and `globals.css`. Signed-in pages live in the `(app)` route group, whose layout adds the app frame and sidebar; `/sign-in` and `/sign-up` live in `(auth)` outside the frame. Layout props use the generated global `LayoutProps<"/">` type. Routes `/`, `/today`, `/week`, `/goals` and `/preferences` start as placeholders that their owners replace.
+- Authentication is Neon Auth through `src/server/auth/` (lazy `getAuth()`, server actions) and the API route `src/app/api/auth/[...path]`. `src/proxy.ts` redirects signed-out visitors to `/sign-in` on every page except `/sign-in` and `/sign-up`.
 - The app shell (sidebar, nav items, brand mark, page placeholder) lives in `src/components/app-shell/`. Nav destinations are defined once in `nav-items.ts`.
 - Domain code goes under `src/domain/<area>/`, with tests next to the code as `*.test.ts`. The first area is `src/domain/scheduling/` (`recommend-time-block.ts`).
 - Shared record types are defined once in `src/domain/records.ts`, and data access interfaces in `src/domain/repositories.ts`. Every repository call takes the owner's `userId`. Implementations (in-memory, PostgreSQL) live outside `src/domain/`. Changes to either file go through their owner (see [docs/plans/p3-work-split.md](docs/plans/p3-work-split.md)).
@@ -127,7 +128,7 @@ Strict test-driven development, following the protocol imported below. Summary:
 
 ## Security (OWASP Top 10 awareness)
 
-- **Broken access control:** every read and write checks account ownership on the server; assistant actions go through the same checks.
+- **Broken access control:** every read and write checks account ownership on the server; assistant actions go through the same checks. Pages, route handlers, server actions and assistant actions get personal data only through `getCurrentUser()` in `src/server/session.ts`, whose repositories are bound to the session's user (`scopeToUser`) and take no `userId`. Never read a user id from the request body or URL.
 - **Injection:** use parameterized queries; validate and schema-check all LLM output and user input before it reaches the domain or the database.
 - **Cryptographic failures and secrets:** never commit secrets or `.env` files; use `.env.example` with placeholder names only.
 - **Security misconfiguration and vulnerable components:** keep `npm audit` clean; do not add dependencies without a reason.
