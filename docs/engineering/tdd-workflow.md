@@ -1,6 +1,6 @@
 # TDD workflow
 
-This protocol applies to every feature built in this repository.
+This protocol applies to every feature with logic to verify: domain rules, data access, route handlers and server actions, and the logic behind chat. Pure layout, styling and configuration changes do not need a failing test first; they are checked with lint, typecheck, a build and a look in the browser at desktop and 400 px width, and the pull request says how they were checked.
 
 ## Before coding
 

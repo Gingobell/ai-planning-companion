@@ -109,7 +109,7 @@ Current layout:
 
 Strict test-driven development, following the protocol imported below. Summary:
 
-- Every acceptance criterion gets a failing test before any implementation code exists.
+- Every acceptance criterion of a feature with logic gets a failing test before any implementation code exists. Pure layout, styling and configuration are checked without a red step (see the protocol for how).
 - Unit tests cover domain rules and edge cases (boundaries, empty inputs, DST transitions). Integration tests will cover route handlers and database writes once they exist. Playwright E2E tests will cover the core user flow in P3.
 - Tests assert behavior through public functions, not implementation details.
 - Target at least 70% coverage for the project, measured in CI once it exists.
