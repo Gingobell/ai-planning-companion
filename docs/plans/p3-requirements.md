@@ -42,7 +42,7 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 
 | Requirement | Status | Evidence or next step |
 | --- | --- | --- |
-| Strict red-green-refactor for at least 3 features, failing tests committed before implementation | Partial (1 of 3) | Time block recommendation: [plan](time-block-recommendation.md), [TDD log](../evidence/03-tdd/log.txt) |
+| Strict red-green-refactor for at least 3 features, failing tests committed before implementation | Partial (1 of 3) | Time block recommendation: [plan](time-block-recommendation.md), [TDD log](../evidence/03-tdd/log.txt). Six TDD features are planned, listed under Testing in [p3-work-split.md](p3-work-split.md) |
 | Unit and integration tests (Vitest) | Partial | Unit tests in `src/domain/`; no integration tests yet |
 | At least 1 Playwright end-to-end test | Not started | Playwright planned (CLAUDE.md tech stack) |
 | 70%+ coverage | Not started | Coverage not measured yet |
