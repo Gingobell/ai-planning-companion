@@ -18,12 +18,12 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 
 | Requirement | Status | Evidence or next step |
 | --- | --- | --- |
-| Polished, production-ready app solving a real problem; publicly deployed | Not started | Product defined in [PRD](../product/PRD.md) |
-| 2+ user roles or distinct feature areas (the Excellent rubric says 2+ user roles) | Not started | Scope decision still open |
+| Polished, production-ready app solving a real problem; publicly deployed | Partial | Deployed at https://ai-planning-companion.vercel.app; product defined in [PRD](../product/PRD.md) |
+| 2+ user roles or distinct feature areas | Planned | Four distinct feature areas (PRD Section 5); multiple user roles are not planned |
 | Next.js full stack | Partial | Next.js skeleton in `src/app/` |
-| Database (PostgreSQL recommended) | Not started | Provider not chosen (CLAUDE.md tech stack) |
-| Authentication | Not started | Auth.js or Clerk, not chosen |
-| Hosting with preview deploys (Vercel) | Not started | |
+| Database (PostgreSQL recommended) | Partial | Neon PostgreSQL provisioned through Vercel; schema and repositories in #6 |
+| Authentication | Not started | Neon Auth chosen; built in #7 |
+| Hosting with preview deploys (Vercel) | Partial | Production deploys from `main`; preview deploys checked on the next pull request (#8) |
 
 ## Claude Code mastery
 
