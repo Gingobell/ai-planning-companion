@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { User } from "@/domain/records";
+import type { Task, TimeBlock, User } from "@/domain/records";
 import { planReminders, type PlanRemindersInput } from "@/domain/reminders/plan-reminders";
 
 const user: User = {
@@ -69,6 +69,74 @@ describe("planReminders", () => {
       );
       // 09:00 PST is UTC-8.
       expect(plan.create).toEqual([checkIn("2026-11-01T09:00", "2026-11-01T17:00:00Z")]);
+    });
+  });
+});
+
+const quietUser: User = { ...user, checkInTimes: [] };
+
+function chosenTask(overrides: Partial<Task> = {}): Task {
+  return {
+    id: "task-1",
+    userId: "user-1",
+    version: 1,
+    title: "Practice interview answers",
+    category: "Career",
+    priority: "high",
+    status: "not-started",
+    remindersEnabled: true,
+    acceptance: "accepted",
+    ...overrides,
+  };
+}
+
+function block(overrides: Partial<TimeBlock> = {}): TimeBlock {
+  return {
+    id: "block-1",
+    userId: "user-1",
+    version: 1,
+    taskId: "task-1",
+    // 19:00 to 20:00 local on November 24.
+    start: "2026-11-25T03:00:00Z",
+    end: "2026-11-25T04:00:00Z",
+    status: "accepted",
+    ...overrides,
+  };
+}
+
+const taskReminder = {
+  kind: "task",
+  taskId: "task-1",
+  timeBlockId: "block-1",
+  scheduledFor: "2026-11-25T03:00:00Z",
+  deliveryKey: "block:block-1:2026-11-25T03:00:00Z",
+};
+
+describe("planReminders for tasks", () => {
+  describe("AC2: only tasks the user chose get reminders", () => {
+    it("reminds at the start of an accepted block of a chosen task", () => {
+      const plan = planReminders(input({ user: quietUser, tasks: [chosenTask()], timeBlocks: [block()] }));
+      expect(plan).toEqual({ create: [taskReminder], cancel: [] });
+    });
+
+    it("creates no reminder for a task without reminders enabled", () => {
+      const tasks = [chosenTask({ remindersEnabled: false })];
+      expect(planReminders(input({ user: quietUser, tasks, timeBlocks: [block()] })).create).toEqual([]);
+    });
+
+    it("creates no reminder for a proposed block", () => {
+      const timeBlocks = [block({ status: "proposed" })];
+      expect(planReminders(input({ user: quietUser, tasks: [chosenTask()], timeBlocks })).create).toEqual([]);
+    });
+
+    it.each(["completed", "canceled"] as const)("creates no reminder for a %s task", (status) => {
+      const tasks = [chosenTask({ status })];
+      expect(planReminders(input({ user: quietUser, tasks, timeBlocks: [block()] })).create).toEqual([]);
+    });
+
+    it("creates no reminder for a block that already started", () => {
+      const timeBlocks = [block({ start: "2026-11-24T15:00:00Z", end: "2026-11-24T17:00:00Z" })];
+      expect(planReminders(input({ user: quietUser, tasks: [chosenTask()], timeBlocks })).create).toEqual([]);
     });
   });
 });
