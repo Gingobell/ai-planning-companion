@@ -42,7 +42,30 @@ function checkIns({ now, horizonDays, user }: PlanRemindersInput): ReminderDraft
   return drafts;
 }
 
+function isOpen(task: Task): boolean {
+  return task.status !== "completed" && task.status !== "canceled";
+}
+
+// Reminders only for tasks the user chose, at the start of each accepted block still ahead.
+function taskReminders({ now, tasks, timeBlocks }: PlanRemindersInput): ReminderDraft[] {
+  const nowInstant = Temporal.Instant.from(now);
+  const chosen = new Set(tasks.filter((task) => task.remindersEnabled && isOpen(task)).map((task) => task.id));
+  return timeBlocks
+    .filter((block) => block.status === "accepted" && chosen.has(block.taskId))
+    .map((block) => ({ block, start: Temporal.Instant.from(block.start) }))
+    .filter(({ start }) => Temporal.Instant.compare(start, nowInstant) >= 0)
+    .map(({ block, start }) => ({
+      kind: "task",
+      taskId: block.taskId,
+      timeBlockId: block.id,
+      scheduledFor: start.toString(),
+      deliveryKey: `block:${block.id}:${start}`,
+    }));
+}
+
 export function planReminders(input: PlanRemindersInput): ReminderPlan {
-  const create = checkIns(input).sort((a, b) => a.scheduledFor.localeCompare(b.scheduledFor));
+  const create = [...checkIns(input), ...taskReminders(input)].sort((a, b) =>
+    a.scheduledFor.localeCompare(b.scheduledFor),
+  );
   return { create, cancel: [] };
 }
