@@ -23,13 +23,16 @@ function scopeRepository(repository: object, userId: Id) {
   );
   return {
     ...bound,
-    save: (record: Omit<OwnedRecord, "userId">) => (repository as Repository<OwnedRecord>).save(userId, { ...record, userId }),
+    save: (record: Omit<OwnedRecord, "userId">) =>
+      (repository as Repository<OwnedRecord>).save(userId, { ...record, userId }),
   };
 }
 
 export function scopeToUser(repos: Repositories, userId: Id): ScopedRepositories {
   const { users, ...owned } = repos;
-  const scoped = Object.fromEntries(Object.entries(owned).map(([name, repository]) => [name, scopeRepository(repository, userId)]));
+  const scoped = Object.fromEntries(
+    Object.entries(owned).map(([name, repository]) => [name, scopeRepository(repository, userId)]),
+  );
   return {
     // Built by mapping over the repositories at runtime, which TypeScript cannot follow;
     // the two-account tests check every repository through this shape.

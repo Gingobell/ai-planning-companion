@@ -16,7 +16,14 @@ interface AuthFormProps {
 const inputClass =
   "h-control-md w-full rounded-md bg-surface-3 px-pad-sm text-base text-ink shadow-inset placeholder:text-muted";
 
-export function AuthForm({ action, submitLabel, passwordAutoComplete, switchText, switchLabel, switchHref }: AuthFormProps) {
+export function AuthForm({
+  action,
+  submitLabel,
+  passwordAutoComplete,
+  switchText,
+  switchLabel,
+  switchHref,
+}: AuthFormProps) {
   const [state, formAction, pending] = useActionState(action, null);
   const timeZone = useRef<HTMLInputElement>(null);
 

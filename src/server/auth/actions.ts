@@ -41,7 +41,10 @@ export async function signUpAction(_state: AuthFormState, form: FormData): Promi
 }
 
 export async function signInAction(_state: AuthFormState, form: FormData): Promise<AuthFormState> {
-  const { data, error } = await getAuth().signIn.email({ email: field(form, "email"), password: field(form, "password") });
+  const { data, error } = await getAuth().signIn.email({
+    email: field(form, "email"),
+    password: field(form, "password"),
+  });
   if (error) return { error: authErrorMessage(error, "signIn") };
   return finishSignIn(data?.user, field(form, "timeZone"));
 }
