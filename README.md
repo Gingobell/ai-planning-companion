@@ -6,6 +6,8 @@ Built by Jingyi Fu and Sihui Lyu for CS6983 Project 3.
 
 ## Status
 
+Live app: https://ai-planning-companion.vercel.app
+
 Project 3 is being built in stages. Homework 4 is the first stage and is complete: the time block recommendation rules. Sprint 1 starts on November 24.
 
 ## Project 3 plan

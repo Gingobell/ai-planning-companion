@@ -24,7 +24,7 @@ Who owns what in Project 3, so each partner can build, test and ship their areas
 - Task breakdown and help when the user feels stuck, in chat (US-01, US-03).
 - Direct editing of tasks and time blocks, with undo (US-02).
 - Learning and confirming preferences in chat (US-05).
-- Professor approval of the idea in #projects by November 30; the decision on "2+ user roles or distinct feature areas".
+- Professor approval of the idea in #projects by November 30.
 
 **Sihui Lyu**
 - Progress and task state rules in `src/domain/progress/`, and the `/goals` page (US-03).
