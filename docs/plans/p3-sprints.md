@@ -38,12 +38,13 @@ Both:
 
 Jingyi Fu:
 - Capture, clarification and scheduling working end to end on a preview deploy by December 7.
-- Today and week views with direct editing; task breakdown and help when stuck.
-- Learning and confirming preferences in chat; running reminders and check-ins.
+- Direct editing with undo; task breakdown and help when stuck.
+- Learning and confirming preferences in chat.
 - Integration tests; CI stages for AI PR review, preview deploy and production deploy.
 
 Sihui Lyu:
-- `/goals` and `/preferences` pages; Mac companion in `desktop/`.
+- `/goals` and `/preferences` pages; today and week views; Mac companion in `desktop/`.
+- Running reminders and check-ins with web notifications.
 - Playwright MCP server in `.mcp.json`; simulated-user tester and security reviewer sub-agents.
 - Definition of Done with security criteria.
 - Playwright end-to-end tests and their CI stage.
