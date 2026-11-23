@@ -1,0 +1,6 @@
+# Markdown docs are edited by hand; tables and prose are not reformatted.
+*.md
+package-lock.json
+.next
+coverage
+next-env.d.ts

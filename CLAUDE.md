@@ -42,8 +42,10 @@ Current phase: HW4 is complete. The repository contains a Next.js skeleton with 
 - `npm run dev` starts the Next.js dev server at http://localhost:3000 (Turbopack).
 - `npm run build` creates a production build; `npm start` serves it.
 - `npm run lint` runs ESLint 9 (flat config in `eslint.config.mjs`, extending `eslint-config-next` core-web-vitals and typescript).
-- `npm run typecheck` runs `tsc --noEmit`.
-- `npm test` runs Vitest once; `npm run test:watch` runs it in watch mode.
+- `npm run typecheck` runs `next typegen` (generates route types such as `LayoutProps`) and then `tsc --noEmit`.
+- `npm test` runs Vitest once; `npm run test:watch` runs it in watch mode; `npm run test:coverage` adds a V8 coverage report.
+- `npm run format:check` runs Prettier (`.prettierrc.json`, print width 120); `npm run format` rewrites files. Markdown is excluded in `.prettierignore`.
+- CI (`.github/workflows/ci.yml`) runs lint, format check, typecheck and tests with coverage on every pull request and push to `main`.
 - Single test file: `npx vitest run path/to/file.test.ts`. Single test by name: `npx vitest run -t "test name"`.
 
 ## Hooks
@@ -65,9 +67,9 @@ This project uses Next.js 16.4.6 and React 19.3, which have breaking changes com
 | Styling | Tailwind CSS v4 via Turbopack loader | In repo |
 | Dates and timezones | `temporal-polyfill` (Temporal API) | In repo |
 | Unit and integration tests | Vitest 4 | In repo |
-| Test coverage | Vitest coverage with `@vitest/coverage-v8`, 70% target | Chosen, not in repo |
+| Test coverage | Vitest coverage with `@vitest/coverage-v8`, 70% target | In repo, reported in CI |
 | E2E tests | Playwright | Planned for P3 |
-| Formatting | Prettier, checked in CI with ESLint | Chosen, not in repo |
+| Formatting | Prettier, checked in CI with ESLint | In repo |
 | Secret scanning | Gitleaks as a pre-commit hook | Chosen, not in repo |
 | Database | PostgreSQL | Planned, provider not chosen |
 | Authentication | Managed provider (Auth.js or Clerk) | Not chosen |
@@ -141,7 +143,7 @@ Do:
 
 - Read the PRD section for the story you are working on before planning.
 - Read `DESIGN.md` before any frontend change. Use only its tokens and control sizes. When a human confirms a design change, update `DESIGN.md` and its changelog in the same commit without being asked (see "How this file evolves" in `DESIGN.md`).
-- Run `npm test`, `npm run typecheck` and `npm run lint` before proposing a commit.
+- Run `npm test`, `npm run typecheck`, `npm run lint` and `npm run format:check` before proposing a commit.
 - Show the exact file list and commit message to a human before every commit and push.
 - Keep each commit to one TDD phase or one setup change.
 
