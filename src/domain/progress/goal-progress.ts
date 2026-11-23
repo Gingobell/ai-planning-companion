@@ -19,3 +19,9 @@ export function goalProgress(goal: Goal, tasks: Task[]): GoalProgress {
     allStepsDone: steps.length > 0 && completedTaskIds.length === steps.length,
   };
 }
+
+// Called only after the user confirms that the goal's outcome has been reached.
+export function confirmGoalCompleted(goal: Goal): { kind: "updated" | "unchanged"; goal: Goal } {
+  void goal;
+  throw new Error("not implemented");
+}

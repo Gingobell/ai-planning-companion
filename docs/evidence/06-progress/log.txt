@@ -115,3 +115,18 @@ $ npx vitest run
       Tests  39 passed (39)
 exit code: 0
 
+=== Cycle 5 AC5 red ===
+Time: 2026-11-23 14:17 PST
+Base commit: 880e451
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × completes an active goal 1ms
+       × leaves a completed goal unchanged 0ms
+       × leaves a canceled goal unchanged 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+Error: not implemented
+Error: not implemented
+ Test Files  1 failed | 2 passed (3)
+      Tests  3 failed | 39 passed (42)
+exit code: 1
+

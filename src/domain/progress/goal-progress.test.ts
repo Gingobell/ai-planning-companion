@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Goal, Task, TaskStatus } from "@/domain/records";
-import { goalProgress } from "@/domain/progress/goal-progress";
+import type { Goal, GoalStatus, Task, TaskStatus } from "@/domain/records";
+import { confirmGoalCompleted, goalProgress } from "@/domain/progress/goal-progress";
 
 const goal: Goal = {
   id: "goal-1",
@@ -57,6 +57,19 @@ describe("goalProgress", () => {
 
     it("does not report all steps done for a goal without steps", () => {
       expect(goalProgress(goal, [])).toEqual({ completed: 0, total: 0, completedTaskIds: [], allStepsDone: false });
+    });
+  });
+});
+
+describe("confirmGoalCompleted", () => {
+  describe("AC5: a goal is completed only when the user confirms it", () => {
+    it("completes an active goal", () => {
+      expect(confirmGoalCompleted(goal)).toEqual({ kind: "updated", goal: { ...goal, status: "completed" } });
+    });
+
+    it.each<GoalStatus>(["completed", "canceled"])("leaves a %s goal unchanged", (status) => {
+      const closed = { ...goal, status };
+      expect(confirmGoalCompleted(closed)).toEqual({ kind: "unchanged", goal: closed });
     });
   });
 });
