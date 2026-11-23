@@ -1,0 +1,36 @@
+=== Cycle 1 AC1 tables red ===
+Time: 2026-11-23 12:38 PST
+Base commit: 3e54551
+$ npx vitest run
+     38|     expect(columns.get("id")).toBe("NO");
+       |                               ^
+     39|     expect(columns.get("version")).toBe("NO");
+     40|   });
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+ FAIL  src/data/postgres/schema.test.ts > database schema > has an owned table goals with a non-null user_id and a version
+ FAIL  src/data/postgres/schema.test.ts > database schema > has an owned table tasks with a non-null user_id and a version
+ FAIL  src/data/postgres/schema.test.ts > database schema > has an owned table time_blocks with a non-null user_id and a version
+ FAIL  src/data/postgres/schema.test.ts > database schema > has an owned table fixed_commitments with a non-null user_id and a version
+ FAIL  src/data/postgres/schema.test.ts > database schema > has an owned table preferences with a non-null user_id and a version
+ FAIL  src/data/postgres/schema.test.ts > database schema > has an owned table temporary_contexts with a non-null user_id and a version
+ FAIL  src/data/postgres/schema.test.ts > database schema > has an owned table reminders with a non-null user_id and a version
+ FAIL  src/data/postgres/schema.test.ts > database schema > has an owned table messages with a non-null user_id and a version
+ FAIL  src/data/postgres/schema.test.ts > database schema > has an owned table open_questions with a non-null user_id and a version
+ FAIL  src/data/postgres/schema.test.ts > database schema > has an owned table progress_reports with a non-null user_id and a version
+AssertionError: expected undefined to be 'NO' // Object.is equality
+- Expected:
+"NO"
++ Received:
+undefined
+ ❯ src/data/postgres/schema.test.ts:44:36
+     42|   it.each(ownedTables)("has an owned table %s with a non-null user_id …
+     43|     const columns = await columnsOf(table);
+     44|     expect(columns.get("user_id")).toBe("NO");
+       |                                    ^
+     45|     expect(columns.get("version")).toBe("NO");
+     46|   });
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+ Test Files  1 failed | 1 passed (2)
+      Tests  11 failed | 20 passed (31)
+exit code: 1
+
