@@ -1,0 +1,152 @@
+TDD evidence for progress and task state rules (#30). Plan: docs/plans/progress-rules.md.
+Local paths in the Vitest output are replaced with <repo>. Test results are unchanged.
+
+=== Cycle 1 AC1 red ===
+Time: 2026-11-23 13:52 PST
+Base commit: 5c20104
+$ npx vitest run src/domain/progress
+ RUN  v4.1.12 <repo>
+       × moves a not-started task to in-progress on partial progress 2ms
+       × moves a blocked task back to in-progress on partial progress 0ms
+       × keeps an in-progress task in progress on partial progress 0ms
+       × moves a task to blocked when the user reports a blocker 0ms
+       × moves a task to completed when the user reports it done 0ms
+       × rejects a report on a completed task 0ms
+       × rejects a report on a canceled task 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+ Test Files  1 failed (1)
+      Tests  7 failed (7)
+exit code: 1
+
+=== Cycle 1 AC1 green ===
+Time: 2026-11-23 13:57 PST
+Base commit: 7e43ba0 (red)
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  2 passed (2)
+      Tests  27 passed (27)
+exit code: 0
+
+=== Cycle 1 AC1 refactor ===
+Skipped: the implementation is a short lookup with clear names; nothing worth changing.
+
+=== Cycle 2 AC2 red ===
+Time: 2026-11-23 14:01 PST
+Base commit: 23edef2
+$ npx vitest run src/domain/progress
+ RUN  v4.1.12 <repo>
+       × reopens a completed task as in-progress 1ms
+       × restores a canceled task to not-started 0ms
+       × moves a not-started task straight to completed 0ms
+       × returns unchanged when the task already has that state 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+ Test Files  1 failed (1)
+      Tests  4 failed | 7 passed (11)
+exit code: 1
+
+=== Cycle 2 AC2 green ===
+Time: 2026-11-23 14:03 PST
+Base commit: b012b99
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  2 passed (2)
+      Tests  31 passed (31)
+exit code: 0
+
+=== Cycle 3 AC3 red ===
+Time: 2026-11-23 14:03 PST
+Base commit: 4763ea9
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × keeps a not-started task in its state 2ms
+       × keeps a in-progress task in its state 0ms
+       × keeps a blocked task in its state 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+Error: not implemented
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 31 passed (34)
+exit code: 1
+
+=== Cycle 3 AC3 green ===
+Time: 2026-11-23 14:10 PST
+Base commit: 410732d
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  2 passed (2)
+      Tests  34 passed (34)
+exit code: 0
+
+=== Cycle 4 AC4 red ===
+Time: 2026-11-23 14:11 PST
+Base commit: f5bf95e
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × counts completed steps out of all steps 2ms
+       × leaves canceled steps out of the total 0ms
+       × ignores tasks that belong to another goal 0ms
+       × reports all steps done without marking the goal completed 0ms
+       × does not report all steps done for a goal without steps 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+ Test Files  1 failed | 2 passed (3)
+      Tests  5 failed | 34 passed (39)
+exit code: 1
+
+=== Cycle 4 AC4 green ===
+Time: 2026-11-23 14:16 PST
+Base commit: b4ebc8d
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  3 passed (3)
+      Tests  39 passed (39)
+exit code: 0
+
+=== Cycle 5 AC5 red ===
+Time: 2026-11-23 14:17 PST
+Base commit: 880e451
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × completes an active goal 1ms
+       × leaves a completed goal unchanged 0ms
+       × leaves a canceled goal unchanged 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+Error: not implemented
+Error: not implemented
+ Test Files  1 failed | 2 passed (3)
+      Tests  3 failed | 39 passed (42)
+exit code: 1
+
+=== Cycle 5 AC5 green ===
+Time: 2026-11-23 14:17 PST
+Base commit: 96b9e1c
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  3 passed (3)
+      Tests  42 passed (42)
+exit code: 0
+
+=== Cycle 6 AC6 (passed on its first run, not a red step: the implementations already return new objects) ===
+Time: 2026-11-23 14:17 PST
+Base commit: b57532a
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  4 passed (4)
+      Tests  47 passed (47)
+exit code: 0
+
+=== Cycles 2 to 5 refactor ===
+Skipped: each implementation is a few lines with clear names and no duplication worth extracting.

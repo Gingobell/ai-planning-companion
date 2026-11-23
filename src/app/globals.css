@@ -27,8 +27,9 @@
   --shadow-hi: #ffffff;
 
   /* Type (section 3) */
-  --font-stack: var(--font-instrument-sans), "Instrument Sans", -apple-system, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", sans-serif;
+  --font-stack:
+    var(--font-instrument-sans), "Instrument Sans", -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    sans-serif;
   --fs-xs: 11px;
   --fs-sm: 12px;
   --fs-control: 13px;
@@ -70,6 +71,7 @@
   --sidebar-width: 248px;
   --page-max: 860px;
   --chat-max: 720px;
+  --auth-max: 400px;
 
   /* Elevation (section 9) */
   --raised: 2px 2px 6px var(--shadow-lo), -2px -2px 6px var(--shadow-hi);
@@ -147,6 +149,7 @@
 
   --container-page: var(--page-max);
   --container-chat: var(--chat-max);
+  --container-auth: var(--auth-max);
 
   --radius-*: initial;
   --radius-sm: var(--r-sm);

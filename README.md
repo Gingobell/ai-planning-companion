@@ -6,6 +6,8 @@ Built by Jingyi Fu and Sihui Lyu for CS6983 Project 3.
 
 ## Status
 
+Live app: https://ai-planning-companion.vercel.app
+
 Project 3 is being built in stages. Homework 4 is the first stage and is complete: the time block recommendation rules. Sprint 1 starts on November 24. The app shell is in place: run `npm run dev` and open http://localhost:3000 to see the sidebar with Chat, Today, Week, Goals & tasks and Preferences; each page is a placeholder until its feature is built.
 
 ## Project 3 plan
@@ -49,5 +51,7 @@ npm run typecheck
 npm run lint
 npm run dev         # http://localhost:3000
 ```
+
+Tests need no database or auth service. To run the app against real ones, copy `.env.example` to `.env.local`, set `DATABASE_URL` and `DATABASE_URL_UNPOOLED` to a Neon development branch, set `NEON_AUTH_BASE_URL` to the project's Auth URL and `NEON_AUTH_COOKIE_SECRET` to the output of `openssl rand -base64 32`, then run `npm run db:migrate`. Every page except `/sign-in` and `/sign-up` asks you to sign in.
 
 Built with Next.js, TypeScript and Vitest. Stack decisions are recorded in [CLAUDE.md](CLAUDE.md).

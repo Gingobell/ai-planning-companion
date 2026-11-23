@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { AccountMenu } from "@/components/app-shell/account-menu";
 import { NavLinks } from "@/components/app-shell/nav-links";
 import { NavList } from "@/components/app-shell/nav-list";
 import { RouteMark } from "@/components/app-shell/route-mark";
@@ -20,6 +21,11 @@ export function Sidebar() {
           <NavLinks />
         </Suspense>
       </nav>
+      <div className="wide:mt-auto">
+        <Suspense fallback={null}>
+          <AccountMenu />
+        </Suspense>
+      </div>
     </aside>
   );
 }

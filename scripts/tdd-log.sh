@@ -1,8 +1,8 @@
 #!/bin/sh
 # Append a TDD phase record (label, command, trimmed Vitest output) to the evidence log.
-# Usage: scripts/tdd-log.sh "Cycle 1 AC3 red"
+# Usage: scripts/tdd-log.sh "Cycle 1 AC3 red"  (set TDD_LOG to write to another evidence log)
 set -u
-log="docs/evidence/03-tdd/log.txt"
+log="${TDD_LOG:-docs/evidence/03-tdd/log.txt}"
 mkdir -p "$(dirname "$log")"
 {
   echo "=== $1 ==="

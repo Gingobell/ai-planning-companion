@@ -6,7 +6,7 @@ This file is the source of truth for how the product looks and feels. Read it be
 
 This is a living rule file. It follows "Keeping rule files current" in [CLAUDE.md](CLAUDE.md): once a human confirms a design decision, the agent updates this file in the same commit without being asked. In addition, every change here gets a line in the changelog at the end of this file (date, what changed, why).
 
-The tokens below live in one place, `src/app/globals.css` (CSS variables exposed to Tailwind through `@theme inline`, with Tailwind's default colors, sizes, radii, shadows and breakpoints cleared). Components use those tokens and never define their own colors, sizes, spacing or radii. Values this file gives without a name are named there: control padding `--px-xs` to `--px-lg`, `--sidebar-width`, `--page-max`, `--chat-max`, the `--raised` and `--inset` shadows, and the `wide` breakpoint at 760 px.
+The tokens below live in one place, `src/app/globals.css` (CSS variables exposed to Tailwind through `@theme inline`, with Tailwind's default colors, sizes, radii, shadows and breakpoints cleared). Components use those tokens and never define their own colors, sizes, spacing or radii. Values this file gives without a name are named there: control padding `--px-xs` to `--px-lg`, `--sidebar-width`, `--page-max`, `--chat-max`, `--auth-max`, the `--raised` and `--inset` shadows, and the `wide` breakpoint at 760 px.
 
 ## 1. Direction
 
@@ -126,6 +126,7 @@ Text inside a control must look vertically centered. Two rules guarantee it:
 | Sidebar | `--s4` `--s3` | `--s4` between sections | `--surface-2`, right hairline |
 | Page view | `--s6` top, `--s8` sides | `--s6` between sections | none, max width 860 px |
 | Chat thread | `--s8` top, `--s6` sides | `--s4` between messages | none, max width 720 px |
+| Sign-in card | `--s8` top and bottom, `--s6` sides | `--s6` | 1 px `--line`, `--r-xl`, `--surface`, max width 400 px, centered on `--desk` outside the app frame |
 | Card (proposal, steps) | `--s4` | `--s3` | 1 px `--line` (proposal `--accent-line`), `--r-lg` |
 | List row (Today, prefs) | `--s3` top and bottom | `--s4` between columns | hairline on top only |
 | Panel item (unscheduled tray, history banner) | `--s3` `--s4` | `--s3` | 1 px dashed `--line-strong` or solid `--line`, `--r-md` |
@@ -185,3 +186,4 @@ Motion is 100 to 220 ms, ease-out, and is turned off under `prefers-reduced-moti
 | 2026-11-22 | Controls are centered by fixed height; spacing, type, radius and color come from tokens | Pills such as "Needs a deadline" looked unbalanced next to buttons |
 | 2026-11-22 | Assistant mark changed from a checkmark to a route (two dots joined by a curved path) | A checkmark reads as "done" and was misleading as the assistant avatar |
 | 2026-11-23 | Tokens moved into `globals.css`; unnamed values (control padding, layout widths, shadows, the 760 px breakpoint) got token names | The app shell needed them, and one name per value keeps components from using literals |
+| 2026-11-23 | Sign-in and sign-up are one centered card outside the app frame; the signed-in email and Sign out sit at the bottom of the sidebar | Added for accounts (#7); keeps the auth pages calm and apart from the planning views |
