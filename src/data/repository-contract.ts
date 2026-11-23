@@ -193,6 +193,17 @@ export function describeRepositoryContract(name: string, createHarness: () => Pr
       });
     });
 
+    describe("parameterized values", () => {
+      it("stores text that looks like SQL exactly as written and leaves the tables intact", async () => {
+        const hostile = `Robert'); DROP TABLE goals; -- 小明的"目标"\\`;
+        const [goal] = samples(ALICE).goals;
+        await h.repos.goals.save(ALICE, { ...goal, title: hostile, category: "' OR '1'='1" });
+        expect(await h.repos.goals.get(ALICE, goal.id)).toEqual({ ...goal, version: 1, title: hostile, category: "' OR '1'='1" });
+        expect(await h.repos.goals.get(ALICE, "' OR '1'='1")).toBeUndefined();
+        expect(await h.repos.goals.list(BOB)).toEqual([]);
+      });
+    });
+
     describe("queries", () => {
       async function saveAll(userId: Id) {
         const data = samples(userId);

@@ -223,3 +223,12 @@ $ npx vitest run
       Tests  64 passed (64)
 exit code: 0
 
+=== Cycle 6 AC3 parameterized values (passes on first run, not a red step: Drizzle sends every value as a parameter) ===
+Time: 2026-11-23 13:01 PST
+Base commit: 91e9163
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  3 passed (3)
+      Tests  65 passed (65)
+exit code: 0
+
