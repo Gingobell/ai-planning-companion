@@ -36,7 +36,7 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 | At least 1 MCP server, shared `.mcp.json`, real workflow evidence | Planned | Playwright MCP server for simulated-user acceptance testing, see [p3-work-split.md](p3-work-split.md) |
 | At least 1 agent option (custom sub-agents in `.claude/agents/`, agent teams, or an Agent SDK feature), with real usage | Planned | Custom sub-agents in `.claude/agents/` |
 | Parallel worktrees: at least 2 features developed in parallel, visible in branch history | Not started | |
-| At least 2 writer/reviewer PRs: one agent writes, another reviews; C.L.E.A.R. in review comments; AI disclosure (% AI-generated, tool, human review) | Partial | C.L.E.A.R. is defined in "Code review" in [CLAUDE.md](../../CLAUDE.md). First writer/reviewer PR: [#1](https://github.com/Gingobell/ai-planning-companion/pull/1), awaiting review. The PR template in `.github/pull_request_template.md` asks for the C.L.E.A.R. points and the AI disclosure |
+| At least 2 writer/reviewer PRs: one agent writes, another reviews; C.L.E.A.R. in review comments; AI disclosure (% AI-generated, tool, human review) | Partial | C.L.E.A.R. is defined in "Code review" in [CLAUDE.md](../../CLAUDE.md). First writer/reviewer PR: [#1](https://github.com/Gingobell/ai-planning-companion/pull/1), reviewed and merged. The PR template in `.github/pull_request_template.md` asks for the C.L.E.A.R. points and the AI disclosure |
 
 ## Testing and TDD
 

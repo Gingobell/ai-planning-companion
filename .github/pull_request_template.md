@@ -12,7 +12,8 @@ Closes #
 - [ ] `npm run lint`
 - [ ] `npm run typecheck`
 - [ ] `npm test`
-- [ ] TDD red and green commits and evidence in `docs/evidence/` (feature work only)
+- [ ] `npm run build`
+- [ ] TDD red and green commits and evidence in `docs/evidence/` (TDD features only, see `docs/plans/p3-work-split.md`)
 
 ## AI disclosure
 - AI-generated: about __% of the code and text
