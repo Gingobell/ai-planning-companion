@@ -1,6 +1,9 @@
-import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
-import type { DueReminderSource, Repositories } from "@/domain/repositories";
-import type * as schema from "@/data/postgres/schema";
+import { and, eq } from "drizzle-orm";
+import type { PgColumn, PgDatabase, PgQueryResultHKT, PgTable } from "drizzle-orm/pg-core";
+import type { Id, OwnedRecord, User } from "@/domain/records";
+import type { DueReminderSource, Repositories, Repository, SaveResult } from "@/domain/repositories";
+import * as schema from "@/data/postgres/schema";
+import * as mappers from "@/data/postgres/mappers";
 
 export type Database = PgDatabase<PgQueryResultHKT, typeof schema>;
 
@@ -8,23 +11,61 @@ function notImplemented(): never {
   throw new Error("not implemented");
 }
 
-const stub = { list: notImplemented, get: notImplemented, save: notImplemented, remove: notImplemented };
+type OwnedTable = PgTable & { id: PgColumn; userId: PgColumn; version: PgColumn };
+
+interface Mapper<R, TRow> {
+  toRow(record: R): object;
+  fromRow(row: TRow): R;
+}
+
+function ownedRepository<R extends OwnedRecord, T extends OwnedTable>(
+  db: Database,
+  table: T,
+  mapper: Mapper<R, T["$inferSelect"]>,
+): Repository<R> {
+  const owns = (userId: Id, id: Id) => and(eq(table.userId, userId), eq(table.id, id));
+  return {
+    list: notImplemented,
+    async get(userId, id) {
+      const rows = (await db.select().from(table as PgTable).where(owns(userId, id))) as T["$inferSelect"][];
+      return rows[0] === undefined ? undefined : mapper.fromRow(rows[0]);
+    },
+    async save(userId, record): Promise<SaveResult<R>> {
+      const saved = { ...record, version: record.version + 1 };
+      await db.insert(table).values(mapper.toRow(saved) as T["$inferInsert"]);
+      return { kind: "saved", record: saved };
+    },
+    remove: notImplemented,
+  };
+}
 
 // PostgreSQL implementations of the data access interfaces.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- stub until the repositories are built
 export function createPostgresRepositories(db: Database): Repositories {
   return {
-    users: { get: notImplemented, save: notImplemented },
-    goals: stub,
-    tasks: { ...stub, listByGoal: notImplemented },
-    timeBlocks: { ...stub, listOverlapping: notImplemented },
-    fixedCommitments: { ...stub, listOverlapping: notImplemented },
-    preferences: stub,
-    temporaryContexts: stub,
-    reminders: { ...stub, listDue: notImplemented },
-    messages: { ...stub, listByChatDate: notImplemented },
-    openQuestions: stub,
-    progressReports: stub,
+    users: {
+      async get(userId) {
+        const rows = await db.select().from(schema.users).where(eq(schema.users.id, userId));
+        return rows[0] === undefined ? undefined : mappers.userMapper.fromRow(rows[0]);
+      },
+      async save(user): Promise<SaveResult<User>> {
+        const saved = { ...user, version: user.version + 1 };
+        await db.insert(schema.users).values(mappers.userMapper.toRow(saved));
+        return { kind: "saved", record: saved };
+      },
+    },
+    goals: ownedRepository(db, schema.goals, mappers.goalMapper),
+    tasks: { ...ownedRepository(db, schema.tasks, mappers.taskMapper), listByGoal: notImplemented },
+    timeBlocks: { ...ownedRepository(db, schema.timeBlocks, mappers.timeBlockMapper), listOverlapping: notImplemented },
+    fixedCommitments: {
+      ...ownedRepository(db, schema.fixedCommitments, mappers.fixedCommitmentMapper),
+      listOverlapping: notImplemented,
+    },
+    preferences: ownedRepository(db, schema.preferences, mappers.preferenceMapper),
+    temporaryContexts: ownedRepository(db, schema.temporaryContexts, mappers.temporaryContextMapper),
+    reminders: { ...ownedRepository(db, schema.reminders, mappers.reminderMapper), listDue: notImplemented },
+    messages: { ...ownedRepository(db, schema.messages, mappers.messageMapper), listByChatDate: notImplemented },
+    openQuestions: ownedRepository(db, schema.openQuestions, mappers.openQuestionMapper),
+    progressReports: ownedRepository(db, schema.progressReports, mappers.progressReportMapper),
   };
 }
 
