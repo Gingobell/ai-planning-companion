@@ -1,0 +1,23 @@
+TDD evidence for reminder and check-in rules (#31). Plan: docs/plans/reminder-rules.md.
+Local paths in the Vitest output are replaced with <repo>. Test results are unchanged.
+
+=== Cycle 1 AC1 red ===
+Time: 2026-11-23 14:27 PST
+Base commit: 865a6f2
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × creates one check-in per agreed time for each day in the horizon 2ms
+       × skips a check-in time that has already passed today 0ms
+       × maps a check-in to the right instant on the spring-forward day 0ms
+       × moves a check-in time that does not exist on the spring-forward day to the next valid time 0ms
+       × maps a check-in to the right instant on the fall-back day 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 20 passed (25)
+exit code: 1
+
