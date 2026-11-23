@@ -11,6 +11,13 @@ function notImplemented(): never {
   throw new Error("not implemented");
 }
 
+// A record saved under another user's id is a programming error, not an expected outcome.
+function assertOwner(userId: Id, record: OwnedRecord) {
+  if (record.userId !== userId) {
+    throw new Error(`Record ${record.id} belongs to another user`);
+  }
+}
+
 type OwnedTable = PgTable & { id: PgColumn; userId: PgColumn; version: PgColumn };
 
 interface Mapper<R, TRow> {
@@ -25,17 +32,23 @@ function ownedRepository<R extends OwnedRecord, T extends OwnedTable>(
 ): Repository<R> {
   const owns = (userId: Id, id: Id) => and(eq(table.userId, userId), eq(table.id, id));
   return {
-    list: notImplemented,
+    async list(userId) {
+      const rows = (await db.select().from(table as PgTable).where(eq(table.userId, userId))) as T["$inferSelect"][];
+      return rows.map((row) => mapper.fromRow(row));
+    },
     async get(userId, id) {
       const rows = (await db.select().from(table as PgTable).where(owns(userId, id))) as T["$inferSelect"][];
       return rows[0] === undefined ? undefined : mapper.fromRow(rows[0]);
     },
     async save(userId, record): Promise<SaveResult<R>> {
+      assertOwner(userId, record);
       const saved = { ...record, version: record.version + 1 };
       await db.insert(table).values(mapper.toRow(saved) as T["$inferInsert"]);
       return { kind: "saved", record: saved };
     },
-    remove: notImplemented,
+    async remove(userId, id) {
+      await db.delete(table).where(owns(userId, id));
+    },
   };
 }
 
