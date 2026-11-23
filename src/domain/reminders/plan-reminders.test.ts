@@ -280,3 +280,15 @@ describe("planReminders without duplicates", () => {
     });
   });
 });
+
+describe("planReminders purity", () => {
+  describe("AC7: inputs are not mutated and the same input gives the same plan", () => {
+    it("leaves its input unchanged and repeats its result", () => {
+      const given = input({ tasks: [chosenTask()], timeBlocks: [block()], existing: [saved("r1", taskReminder)] });
+      const before = structuredClone(given);
+      const first = planReminders(given);
+      expect(given).toEqual(before);
+      expect(planReminders(given)).toEqual(first);
+    });
+  });
+});

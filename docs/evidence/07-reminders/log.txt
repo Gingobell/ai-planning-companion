@@ -146,3 +146,12 @@ $ npx vitest run
       Tests  52 passed (52)
 exit code: 0
 
+=== Cycle 7 AC7 (passed on its first run, not a red step: the rules already build new objects) ===
+Time: 2026-11-23 14:34 PST
+Base commit: b40099c
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  3 passed (3)
+      Tests  53 passed (53)
+exit code: 0
+
