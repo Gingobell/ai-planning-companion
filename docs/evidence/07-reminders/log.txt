@@ -155,3 +155,11 @@ $ npx vitest run
       Tests  53 passed (53)
 exit code: 0
 
+=== Refactor ===
+Time: 2026-11-23 14:35 PST
+Shared isBefore helper for instant comparisons, today computed once per plan, block start normalized in one place, drafts sorted by instant.
+$ npx vitest run
+ Test Files  3 passed (3)
+      Tests  53 passed (53)
+Cycles 1 to 6 had no separate refactor step; this one covers the whole file.
+

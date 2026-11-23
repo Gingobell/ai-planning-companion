@@ -152,14 +152,20 @@ describe("planReminders with quiet hours and pausing", () => {
 
     it("drops a check-in inside quiet hours within one day", () => {
       const plan = planReminders(
-        input({ horizonDays: 1, user: { ...user, checkInTimes: ["13:00", "15:00"], quietHours: { start: "12:00", end: "14:00" } } }),
+        input({
+          horizonDays: 1,
+          user: { ...user, checkInTimes: ["13:00", "15:00"], quietHours: { start: "12:00", end: "14:00" } },
+        }),
       );
       expect(keys(plan)).toEqual(["check-in:2026-11-24T15:00"]);
     });
 
     it("keeps a check-in at the exact end of quiet hours", () => {
       const plan = planReminders(
-        input({ horizonDays: 1, user: { ...user, checkInTimes: ["14:00"], quietHours: { start: "12:00", end: "14:00" } } }),
+        input({
+          horizonDays: 1,
+          user: { ...user, checkInTimes: ["14:00"], quietHours: { start: "12:00", end: "14:00" } },
+        }),
       );
       expect(keys(plan)).toEqual(["check-in:2026-11-24T14:00"]);
     });
@@ -214,7 +220,9 @@ describe("planReminders against saved reminders", () => {
         input({ user: quietUser, tasks: [chosenTask()], timeBlocks: [moved], existing: [saved("r1", taskReminder)] }),
       );
       expect(plan).toEqual({
-        create: [{ ...taskReminder, scheduledFor: "2026-11-25T17:00:00Z", deliveryKey: "block:block-1:2026-11-25T17:00:00Z" }],
+        create: [
+          { ...taskReminder, scheduledFor: "2026-11-25T17:00:00Z", deliveryKey: "block:block-1:2026-11-25T17:00:00Z" },
+        ],
         cancel: ["r1"],
       });
     });
@@ -228,7 +236,9 @@ describe("planReminders against saved reminders", () => {
 
     it("cancels a pending check-in at a time the user no longer wants", () => {
       const old = checkIn("2026-11-24T12:00", "2026-11-24T20:00:00Z");
-      const plan = planReminders(input({ horizonDays: 1, user: { ...user, checkInTimes: [] }, existing: [saved("r1", old)] }));
+      const plan = planReminders(
+        input({ horizonDays: 1, user: { ...user, checkInTimes: [] }, existing: [saved("r1", old)] }),
+      );
       expect(plan.cancel).toEqual(["r1"]);
     });
 

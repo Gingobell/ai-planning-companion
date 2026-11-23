@@ -39,9 +39,10 @@ function horizonEnd(input: PlanRemindersInput): Temporal.Instant {
 // Every agreed check-in on each day of the horizon, including times earlier today.
 function checkIns(input: PlanRemindersInput): ReminderDraft[] {
   const { horizonDays, user } = input;
+  const firstDay = today(input);
   const drafts: ReminderDraft[] = [];
   for (let day = 0; day < horizonDays; day++) {
-    const date = today(input).add({ days: day });
+    const date = firstDay.add({ days: day });
     for (const time of user.checkInTimes) {
       const at = toInstant(date, time, user.timeZone);
       drafts.push({ kind: "check-in", scheduledFor: at.toString(), deliveryKey: `check-in:${date}T${time}` });
@@ -59,14 +60,21 @@ function taskReminders({ tasks, timeBlocks }: PlanRemindersInput): ReminderDraft
   const chosen = new Set(tasks.filter((task) => task.remindersEnabled && isOpen(task)).map((task) => task.id));
   return timeBlocks
     .filter((block) => block.status === "accepted" && chosen.has(block.taskId))
-    .map((block) => ({ block, start: Temporal.Instant.from(block.start) }))
-    .map(({ block, start }) => ({
-      kind: "task",
-      taskId: block.taskId,
-      timeBlockId: block.id,
-      scheduledFor: start.toString(),
-      deliveryKey: `block:${block.id}:${start}`,
-    }));
+    .map((block) => {
+      // Normalized so the key is the same however the stored start was written.
+      const start = Temporal.Instant.from(block.start).toString();
+      return {
+        kind: "task",
+        taskId: block.taskId,
+        timeBlockId: block.id,
+        scheduledFor: start,
+        deliveryKey: `block:${block.id}:${start}`,
+      };
+    });
+}
+
+function isBefore(a: Temporal.Instant, b: Temporal.Instant): boolean {
+  return Temporal.Instant.compare(a, b) < 0;
 }
 
 function minuteOfDay(time: Temporal.PlainTime): number {
@@ -86,7 +94,7 @@ function isInQuietHours(at: Temporal.Instant, user: User): boolean {
 function isPaused(at: Temporal.Instant, user: User): boolean {
   const pause = user.remindersPause;
   if (pause === undefined) return false;
-  return pause.until === undefined || Temporal.Instant.compare(at, Temporal.Instant.from(pause.until)) < 0;
+  return pause.until === undefined || isBefore(at, Temporal.Instant.from(pause.until));
 }
 
 function isAllowed(draft: ReminderDraft, user: User): boolean {
@@ -94,9 +102,8 @@ function isAllowed(draft: ReminderDraft, user: User): boolean {
   return !isInQuietHours(at, user) && !isPaused(at, user);
 }
 
-function isBetween(at: string, start: Temporal.Instant, end: Temporal.Instant): boolean {
-  const instant = Temporal.Instant.from(at);
-  return Temporal.Instant.compare(instant, start) >= 0 && Temporal.Instant.compare(instant, end) < 0;
+function isBetween(at: Temporal.Instant, start: Temporal.Instant, end: Temporal.Instant): boolean {
+  return !isBefore(at, start) && isBefore(at, end);
 }
 
 // A pending reminder that is no longer wanted is canceled. A task reminder is checked at any time,
@@ -105,7 +112,7 @@ function isBetween(at: string, start: Temporal.Instant, end: Temporal.Instant): 
 function shouldCancel(reminder: Reminder, wantedKeys: Set<string>, input: PlanRemindersInput): boolean {
   if (reminder.status !== "pending" || wantedKeys.has(reminder.deliveryKey)) return false;
   if (reminder.kind === "task") return true;
-  return isBetween(reminder.scheduledFor, Temporal.Instant.from(input.now), horizonEnd(input));
+  return isBetween(Temporal.Instant.from(reminder.scheduledFor), Temporal.Instant.from(input.now), horizonEnd(input));
 }
 
 export function planReminders(input: PlanRemindersInput): ReminderPlan {
@@ -118,8 +125,10 @@ export function planReminders(input: PlanRemindersInput): ReminderPlan {
   );
   const create = wanted
     .filter((draft) => !existingKeys.has(draft.deliveryKey))
-    .filter((draft) => Temporal.Instant.compare(Temporal.Instant.from(draft.scheduledFor), now) >= 0)
-    .sort((a, b) => a.scheduledFor.localeCompare(b.scheduledFor));
+    .filter((draft) => !isBefore(Temporal.Instant.from(draft.scheduledFor), now))
+    .sort((a, b) =>
+      Temporal.Instant.compare(Temporal.Instant.from(a.scheduledFor), Temporal.Instant.from(b.scheduledFor)),
+    );
   const cancel = input.existing.filter((reminder) => shouldCancel(reminder, wantedKeys, input)).map((r) => r.id);
   return { create, cancel };
 }
