@@ -12,13 +12,14 @@ export interface CurrentUser extends SessionUser {
 }
 
 // The only way server code gets data: the session decides whose records it can reach.
+// Repositories are created only once someone is signed in, so signed-out requests never touch the database.
 export async function resolveCurrentUser(
   readSession: () => Promise<SessionUser | undefined>,
-  repos: Repositories,
+  repositories: () => Repositories,
 ): Promise<CurrentUser | undefined> {
   const session = await readSession();
   if (session === undefined) return undefined;
-  return { ...session, repos: scopeToUser(repos, session.id) };
+  return { ...session, repos: scopeToUser(repositories(), session.id) };
 }
 
 export function isTimeZone(value: string): boolean {
