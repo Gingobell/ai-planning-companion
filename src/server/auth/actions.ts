@@ -2,8 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { getAuth, SIGN_IN_PATH } from "@/server/auth/neon-auth";
-import { ensureUserSettings } from "@/server/current-user";
-import { getCurrentUser } from "@/server/session";
+import { ensureUserSettings, type SessionUser } from "@/server/current-user";
+import { currentUserFor } from "@/server/session";
 
 export type AuthFormState = { error: string } | null;
 
@@ -12,10 +12,13 @@ function field(form: FormData, name: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+type AuthUser = { id: string; email: string } | null | undefined;
+
 // After a successful sign-in or sign-up, make sure the user's settings record exists.
-async function finishSignIn(timeZone: string) {
-  const current = await getCurrentUser();
-  if (current === undefined) return { error: "Signed in, but the session was not found. Please try again." };
+async function finishSignIn(user: AuthUser, timeZone: string) {
+  if (!user) return { error: "Signed in, but the account was not returned. Please try again." };
+  const current = await currentUserFor({ id: user.id, email: user.email } satisfies SessionUser);
+  if (current === undefined) return { error: "Signed in, but the account was not returned. Please try again." };
   try {
     await ensureUserSettings(current.repos, current.id, timeZone);
   } catch {
@@ -27,19 +30,19 @@ async function finishSignIn(timeZone: string) {
 
 export async function signUpAction(_state: AuthFormState, form: FormData): Promise<AuthFormState> {
   const email = field(form, "email");
-  const { error } = await getAuth().signUp.email({
+  const { data, error } = await getAuth().signUp.email({
     email,
     name: field(form, "name") || email,
     password: field(form, "password"),
   });
   if (error) return { error: error.message || "Could not create the account. Please try again." };
-  return finishSignIn(field(form, "timeZone"));
+  return finishSignIn(data?.user, field(form, "timeZone"));
 }
 
 export async function signInAction(_state: AuthFormState, form: FormData): Promise<AuthFormState> {
-  const { error } = await getAuth().signIn.email({ email: field(form, "email"), password: field(form, "password") });
+  const { data, error } = await getAuth().signIn.email({ email: field(form, "email"), password: field(form, "password") });
   if (error) return { error: error.message || "Email or password is incorrect." };
-  return finishSignIn(field(form, "timeZone"));
+  return finishSignIn(data?.user, field(form, "timeZone"));
 }
 
 export async function signOutAction() {

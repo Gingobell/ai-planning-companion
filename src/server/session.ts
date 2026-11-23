@@ -19,6 +19,12 @@ async function readSession(): Promise<SessionUser | undefined> {
   return data?.user ? { id: data.user.id, email: data.user.email } : undefined;
 }
 
+// Right after sign-in or sign-up the new session cookie is not readable in the same request,
+// so those actions pass the user that Neon Auth just returned.
+export function currentUserFor(user: SessionUser) {
+  return resolveCurrentUser(async () => user, repositories);
+}
+
 // Route handlers, server actions and pages get personal data only through this.
 // Cached per request so several components share one session read.
 export const getCurrentUser = cache(() => resolveCurrentUser(readSession, repositories));
