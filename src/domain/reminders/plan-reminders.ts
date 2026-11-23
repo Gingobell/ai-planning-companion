@@ -63,9 +63,34 @@ function taskReminders({ now, tasks, timeBlocks }: PlanRemindersInput): Reminder
     }));
 }
 
+function minuteOfDay(time: Temporal.PlainTime): number {
+  return time.hour * 60 + time.minute;
+}
+
+// Quiet hours are a local window that may cross midnight; the end itself is outside it.
+function isInQuietHours(at: Temporal.Instant, user: User): boolean {
+  if (user.quietHours === undefined) return false;
+  const minute = minuteOfDay(at.toZonedDateTimeISO(user.timeZone).toPlainTime());
+  const start = minuteOfDay(Temporal.PlainTime.from(user.quietHours.start));
+  const end = minuteOfDay(Temporal.PlainTime.from(user.quietHours.end));
+  return start <= end ? minute >= start && minute < end : minute >= start || minute < end;
+}
+
+// A pause without an end lasts until the user resumes reminders.
+function isPaused(at: Temporal.Instant, user: User): boolean {
+  const pause = user.remindersPause;
+  if (pause === undefined) return false;
+  return pause.until === undefined || Temporal.Instant.compare(at, Temporal.Instant.from(pause.until)) < 0;
+}
+
+function isAllowed(draft: ReminderDraft, user: User): boolean {
+  const at = Temporal.Instant.from(draft.scheduledFor);
+  return !isInQuietHours(at, user) && !isPaused(at, user);
+}
+
 export function planReminders(input: PlanRemindersInput): ReminderPlan {
-  const create = [...checkIns(input), ...taskReminders(input)].sort((a, b) =>
-    a.scheduledFor.localeCompare(b.scheduledFor),
-  );
+  const create = [...checkIns(input), ...taskReminders(input)]
+    .filter((draft) => isAllowed(draft, input.user))
+    .sort((a, b) => a.scheduledFor.localeCompare(b.scheduledFor));
   return { create, cancel: [] };
 }
