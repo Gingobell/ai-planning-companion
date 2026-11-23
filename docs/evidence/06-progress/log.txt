@@ -1,0 +1,26 @@
+TDD evidence for progress and task state rules (#30). Plan: docs/plans/progress-rules.md.
+Local paths in the Vitest output are replaced with <repo>. Test results are unchanged.
+
+=== Cycle 1 AC1 red ===
+Time: 2026-11-23 13:52 PST
+Base commit: 5c20104
+$ npx vitest run src/domain/progress
+ RUN  v4.1.12 <repo>
+       × moves a not-started task to in-progress on partial progress 2ms
+       × moves a blocked task back to in-progress on partial progress 0ms
+       × keeps an in-progress task in progress on partial progress 0ms
+       × moves a task to blocked when the user reports a blocker 0ms
+       × moves a task to completed when the user reports it done 0ms
+       × rejects a report on a completed task 0ms
+       × rejects a report on a canceled task 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+ Test Files  1 failed (1)
+      Tests  7 failed (7)
+exit code: 1
+

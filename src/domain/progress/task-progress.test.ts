@@ -1,0 +1,63 @@
+import { describe, expect, it } from "vitest";
+import type { Task, TaskStatus } from "@/domain/records";
+import { applyProgressReport } from "@/domain/progress/task-progress";
+
+function task(status: TaskStatus): Task {
+  return {
+    id: "task-1",
+    userId: "user-1",
+    version: 3,
+    title: "Write the lab report",
+    category: "Coursework",
+    priority: "medium",
+    status,
+    remindersEnabled: false,
+    acceptance: "accepted",
+  };
+}
+
+describe("applyProgressReport", () => {
+  describe("AC1: a progress report changes the task state", () => {
+    it("moves a not-started task to in-progress on partial progress", () => {
+      expect(applyProgressReport(task("not-started"), { kind: "partial" })).toEqual({
+        kind: "updated",
+        task: task("in-progress"),
+      });
+    });
+
+    it("moves a blocked task back to in-progress on partial progress", () => {
+      expect(applyProgressReport(task("blocked"), { kind: "partial" })).toEqual({
+        kind: "updated",
+        task: task("in-progress"),
+      });
+    });
+
+    it("keeps an in-progress task in progress on partial progress", () => {
+      expect(applyProgressReport(task("in-progress"), { kind: "partial" })).toEqual({
+        kind: "unchanged",
+        task: task("in-progress"),
+      });
+    });
+
+    it("moves a task to blocked when the user reports a blocker", () => {
+      expect(applyProgressReport(task("in-progress"), { kind: "blocker" })).toEqual({
+        kind: "updated",
+        task: task("blocked"),
+      });
+    });
+
+    it("moves a task to completed when the user reports it done", () => {
+      expect(applyProgressReport(task("in-progress"), { kind: "completed" })).toEqual({
+        kind: "updated",
+        task: task("completed"),
+      });
+    });
+
+    it.each<TaskStatus>(["completed", "canceled"])("rejects a report on a %s task", (status) => {
+      expect(applyProgressReport(task(status), { kind: "partial" })).toEqual({
+        kind: "rejected",
+        reason: "task-closed",
+      });
+    });
+  });
+});
