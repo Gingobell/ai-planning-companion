@@ -22,6 +22,6 @@ export function goalProgress(goal: Goal, tasks: Task[]): GoalProgress {
 
 // Called only after the user confirms that the goal's outcome has been reached.
 export function confirmGoalCompleted(goal: Goal): { kind: "updated" | "unchanged"; goal: Goal } {
-  void goal;
-  throw new Error("not implemented");
+  if (goal.status !== "active") return { kind: "unchanged", goal };
+  return { kind: "updated", goal: { ...goal, status: "completed" } };
 }
