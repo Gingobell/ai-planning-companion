@@ -140,3 +140,52 @@ describe("planReminders for tasks", () => {
     });
   });
 });
+
+describe("planReminders with quiet hours and pausing", () => {
+  describe("AC3: nothing is scheduled inside quiet hours or while paused", () => {
+    const keys = (plan: { create: { deliveryKey: string }[] }) => plan.create.map((draft) => draft.deliveryKey);
+
+    it("drops a check-in inside quiet hours that cross midnight", () => {
+      const plan = planReminders(input({ user: { ...user, quietHours: { start: "20:00", end: "08:00" } } }));
+      expect(keys(plan)).toEqual(["check-in:2026-11-24T09:00", "check-in:2026-11-25T09:00"]);
+    });
+
+    it("drops a check-in inside quiet hours within one day", () => {
+      const plan = planReminders(
+        input({ horizonDays: 1, user: { ...user, checkInTimes: ["13:00", "15:00"], quietHours: { start: "12:00", end: "14:00" } } }),
+      );
+      expect(keys(plan)).toEqual(["check-in:2026-11-24T15:00"]);
+    });
+
+    it("keeps a check-in at the exact end of quiet hours", () => {
+      const plan = planReminders(
+        input({ horizonDays: 1, user: { ...user, checkInTimes: ["14:00"], quietHours: { start: "12:00", end: "14:00" } } }),
+      );
+      expect(keys(plan)).toEqual(["check-in:2026-11-24T14:00"]);
+    });
+
+    it("drops a task reminder inside quiet hours", () => {
+      const plan = planReminders(
+        input({
+          user: { ...quietUser, quietHours: { start: "18:00", end: "22:00" } },
+          tasks: [chosenTask()],
+          timeBlocks: [block()],
+        }),
+      );
+      expect(plan.create).toEqual([]);
+    });
+
+    it("drops reminders until a pause ends and keeps those after it", () => {
+      // Paused until 04:00 local on November 25.
+      const plan = planReminders(input({ user: { ...user, remindersPause: { until: "2026-11-25T12:00:00Z" } } }));
+      expect(keys(plan)).toEqual(["check-in:2026-11-25T09:00", "check-in:2026-11-25T21:00"]);
+    });
+
+    it("drops every reminder while paused without an end", () => {
+      const plan = planReminders(
+        input({ user: { ...user, remindersPause: {} }, tasks: [chosenTask()], timeBlocks: [block()] }),
+      );
+      expect(plan.create).toEqual([]);
+    });
+  });
+});
