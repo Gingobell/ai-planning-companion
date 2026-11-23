@@ -11,9 +11,9 @@ import type {
   Task,
   TemporaryContext,
   TimeBlock,
+  TimeInterval,
   User,
 } from "@/domain/records";
-import type { TimeInterval } from "@/domain/scheduling/recommend-time-block";
 
 // Data access contracts. The domain and the UI depend on these interfaces;
 // in-memory and PostgreSQL implementations live outside src/domain/.
@@ -58,6 +58,12 @@ export interface ReminderRepository extends Repository<Reminder> {
 
 export interface MessageRepository extends Repository<Message> {
   listByChatDate(userId: Id, chatDate: string): Promise<Message[]>;
+}
+
+// Server-only access for the reminder job, which needs due reminders across all users.
+// Kept out of Repositories so chat, pages and assistant actions cannot read other users' data.
+export interface DueReminderSource {
+  listDueForAllUsers(at: string): Promise<Reminder[]>;
 }
 
 export interface Repositories {
