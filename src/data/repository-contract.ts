@@ -40,7 +40,13 @@ export function samples(userId: Id) {
         deadline: { at: "2027-03-01T08:00:00Z", source: "external" as const },
         status: "active" as const,
       },
-      { ...base("goal-min"), title: "Read more", category: "Personal", horizon: "long" as const, status: "active" as const },
+      {
+        ...base("goal-min"),
+        title: "Read more",
+        category: "Personal",
+        horizon: "long" as const,
+        status: "active" as const,
+      },
     ],
     tasks: [
       {
@@ -68,10 +74,21 @@ export function samples(userId: Id) {
       },
     ],
     timeBlocks: [
-      { ...base("block-1"), taskId: "task-full", start: "2026-11-24T17:00:00Z", end: "2026-11-24T18:30:00Z", status: "proposed" as const },
+      {
+        ...base("block-1"),
+        taskId: "task-full",
+        start: "2026-11-24T17:00:00Z",
+        end: "2026-11-24T18:30:00Z",
+        status: "proposed" as const,
+      },
     ],
     fixedCommitments: [
-      { ...base("commitment-full"), title: "CS6983 lecture", start: "2026-11-24T21:00:00Z", end: "2026-11-24T23:00:00Z" },
+      {
+        ...base("commitment-full"),
+        title: "CS6983 lecture",
+        start: "2026-11-24T21:00:00Z",
+        end: "2026-11-24T23:00:00Z",
+      },
       { ...base("commitment-min"), start: "2026-11-25T16:00:00Z", end: "2026-11-25T17:00:00Z" },
     ],
     preferences: [
@@ -84,10 +101,21 @@ export function samples(userId: Id) {
         source: "user-stated" as const,
         supersededBy: "pref-min",
       },
-      { ...base("pref-min"), description: "No meetings before 10", scope: "all", status: "tentative" as const, source: "confirmed-inference" as const },
+      {
+        ...base("pref-min"),
+        description: "No meetings before 10",
+        scope: "all",
+        status: "tentative" as const,
+        source: "confirmed-inference" as const,
+      },
     ],
     temporaryContexts: [
-      { ...base("context-1"), description: "Low energy today", startsAt: "2026-11-24T08:00:00Z", endsAt: "2026-11-25T08:00:00Z" },
+      {
+        ...base("context-1"),
+        description: "Low energy today",
+        startsAt: "2026-11-24T08:00:00Z",
+        endsAt: "2026-11-25T08:00:00Z",
+      },
     ],
     reminders: [
       {
@@ -100,17 +128,35 @@ export function samples(userId: Id) {
         deliveryKey: `${userId}:block-1:start`,
         answeredAt: "2026-11-24T16:50:00Z",
       },
-      { ...base("reminder-min"), kind: "check-in" as const, scheduledFor: "2026-11-24T17:00:00Z", status: "pending" as const, deliveryKey: `${userId}:check-in:2026-11-24` },
+      {
+        ...base("reminder-min"),
+        kind: "check-in" as const,
+        scheduledFor: "2026-11-24T17:00:00Z",
+        status: "pending" as const,
+        deliveryKey: `${userId}:check-in:2026-11-24`,
+      },
     ],
     messages: [
-      { ...base("message-1"), chatDate: "2026-11-24", role: "user" as const, text: "Lab 5 is due Thursday", createdAt: "2026-11-24T18:02:11Z" },
+      {
+        ...base("message-1"),
+        chatDate: "2026-11-24",
+        role: "user" as const,
+        text: "Lab 5 is due Thursday",
+        createdAt: "2026-11-24T18:02:11Z",
+      },
     ],
     openQuestions: [
       { ...base("question-full"), taskId: "task-full", question: "When is lab 5 due?", status: "open" as const },
       { ...base("question-min"), question: "Which evenings are free?", status: "answered" as const },
     ],
     progressReports: [
-      { ...base("progress-1"), taskId: "task-full", kind: "partial" as const, note: "Part 1 done", reportedAt: "2026-11-24T19:00:00Z" },
+      {
+        ...base("progress-1"),
+        taskId: "task-full",
+        kind: "partial" as const,
+        note: "Part 1 done",
+        reportedAt: "2026-11-24T19:00:00Z",
+      },
     ],
   };
 }
@@ -140,7 +186,13 @@ export function describeRepositoryContract(name: string, createHarness: () => Pr
 
     describe("round trip", () => {
       it("saves a new user as version 1 and reads it back unchanged", async () => {
-        const user: User = { id: "user-carol", version: 0, timeZone: "Asia/Shanghai", availability: {}, checkInTimes: [] };
+        const user: User = {
+          id: "user-carol",
+          version: 0,
+          timeZone: "Asia/Shanghai",
+          availability: {},
+          checkInTimes: [],
+        };
         const result = await h.repos.users.save(user);
         expect(result).toEqual({ kind: "saved", record: { ...user, version: 1 } });
         expect(await h.repos.users.get("user-carol")).toEqual({ ...user, version: 1 });
@@ -198,7 +250,12 @@ export function describeRepositoryContract(name: string, createHarness: () => Pr
         const hostile = `Robert'); DROP TABLE goals; -- 小明的"目标"\\`;
         const [goal] = samples(ALICE).goals;
         await h.repos.goals.save(ALICE, { ...goal, title: hostile, category: "' OR '1'='1" });
-        expect(await h.repos.goals.get(ALICE, goal.id)).toEqual({ ...goal, version: 1, title: hostile, category: "' OR '1'='1" });
+        expect(await h.repos.goals.get(ALICE, goal.id)).toEqual({
+          ...goal,
+          version: 1,
+          title: hostile,
+          category: "' OR '1'='1",
+        });
         expect(await h.repos.goals.get(ALICE, "' OR '1'='1")).toBeUndefined();
         expect(await h.repos.goals.list(BOB)).toEqual([]);
       });
