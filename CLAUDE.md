@@ -35,7 +35,7 @@ These files change as the project grows. A rule changes only after a human confi
 - **Show the rule diff.** Before every commit, show the rule file changes next to the code changes and say in the commit message which rule changed.
 - **Keep the record.** `DESIGN.md` keeps a changelog section with date, change and reason. Other rule files rely on git history and the commit message.
 
-Current phase: HW4 is complete. The repository contains a Next.js skeleton with Vitest and the first domain feature, time block recommendation (US-02, US-06), built with TDD. Chat, LLM integration, database, authentication, reminders and the Mac companion are not built yet.
+Current phase: HW4 is complete. The repository contains a Next.js skeleton with Vitest and the first domain feature, time block recommendation (US-02, US-06), built with TDD. Sprint 1 has added the app shell with the DESIGN.md tokens. Chat, LLM integration, database, authentication, reminders and the Mac companion are not built yet.
 
 ## Commands
 
@@ -90,7 +90,8 @@ Do not add a dependency for an undecided layer without an explicit team decision
 
 Current layout:
 
-- App Router under `src/app/` (`layout.tsx`, `page.tsx`, `globals.css`). Layout props use the generated global `LayoutProps<"/">` type.
+- App Router under `src/app/` (`layout.tsx`, `page.tsx`, `globals.css`). Layout props use the generated global `LayoutProps<"/">` type. Routes `/`, `/today`, `/week`, `/goals` and `/preferences` start as placeholders that their owners replace.
+- The app shell (sidebar, nav items, brand mark, page placeholder) lives in `src/components/app-shell/`. Nav destinations are defined once in `nav-items.ts`.
 - Domain code goes under `src/domain/<area>/`, with tests next to the code as `*.test.ts`. The first area is `src/domain/scheduling/` (`recommend-time-block.ts`).
 - Import alias `@/*` maps to `./src/*` in `tsconfig.json` and in `vitest.config.mts` (`.mts` so Vite loads it as ESM).
 - `next.config.ts` enables `cacheComponents` and `partialPrefetching`, and wires Tailwind CSS v4 through a Turbopack loader rule (`@tailwindcss/turbopack`) for `*.css` instead of PostCSS. `globals.css` uses `@import "tailwindcss"` and `@theme inline` tokens.
