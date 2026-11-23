@@ -5,18 +5,28 @@ import type { LocalWindow, TimeInterval, WeeklyAvailability } from "@/domain/sch
 
 export type Id = string;
 
-export interface OwnedRecord {
+// Every saved record carries a version so a stale edit never overwrites a newer change.
+export interface Versioned {
+  version: number;
+}
+
+export interface OwnedRecord extends Versioned {
   id: Id;
   userId: Id;
 }
 
-export interface User {
+// Present while reminders are paused; without `until` the pause lasts until the user resumes.
+export interface ReminderPause {
+  until?: string;
+}
+
+export interface User extends Versioned {
   id: Id;
   timeZone: string;
   availability: WeeklyAvailability;
   checkInTimes: string[];
   quietHours?: LocalWindow;
-  remindersPaused: boolean;
+  remindersPause?: ReminderPause;
 }
 
 // A deadline is external or agreed with the user, never invented by the assistant.
@@ -47,6 +57,8 @@ export interface Task extends OwnedRecord {
   estimatedMinutes?: number;
   estimateSource?: "user" | "assistant";
   status: TaskStatus;
+  // Users choose which tasks get reminders; off unless the user turns it on.
+  remindersEnabled: boolean;
   // Steps the assistant suggests stay "proposed" until the user accepts them.
   acceptance: "proposed" | "accepted";
 }
@@ -68,6 +80,8 @@ export interface Preference extends OwnedRecord {
   preferredWindow?: LocalWindow;
   status: PreferenceStatus;
   source: "user-stated" | "confirmed-inference";
+  // Set when this preference is corrected, so the replaced version is never restored.
+  supersededBy?: Id;
 }
 
 export interface TemporaryContext extends OwnedRecord {
@@ -84,6 +98,8 @@ export interface Reminder extends OwnedRecord {
   status: "pending" | "delivered" | "canceled";
   // Stable key so a delivery retry never creates a duplicate reminder.
   deliveryKey: string;
+  // Check-ins only. Delivered without answeredAt means unanswered, which leaves progress unknown.
+  answeredAt?: string;
 }
 
 export interface Message extends OwnedRecord {
@@ -100,8 +116,11 @@ export interface OpenQuestion extends OwnedRecord {
   status: "open" | "answered";
 }
 
+export type ProgressReportKind = "partial" | "blocker" | "completed" | "correction";
+
 export interface ProgressReport extends OwnedRecord {
   taskId: Id;
+  kind: ProgressReportKind;
   note: string;
   reportedAt: string;
 }

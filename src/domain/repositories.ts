@@ -19,16 +19,20 @@ import type { TimeInterval } from "@/domain/scheduling/recommend-time-block";
 // in-memory and PostgreSQL implementations live outside src/domain/.
 // Every call takes the owner's userId so account ownership is checked on every read and write.
 
+// save stores the record only if its version matches the stored one (0 for a new record),
+// then increments it. A mismatch returns the newer stored record instead of overwriting it.
+export type SaveResult<T> = { kind: "saved"; record: T } | { kind: "conflict"; current: T };
+
 export interface Repository<T extends OwnedRecord> {
   list(userId: Id): Promise<T[]>;
   get(userId: Id, id: Id): Promise<T | undefined>;
-  save(userId: Id, record: T): Promise<T>;
+  save(userId: Id, record: T): Promise<SaveResult<T>>;
   remove(userId: Id, id: Id): Promise<void>;
 }
 
 export interface UserRepository {
   get(userId: Id): Promise<User | undefined>;
-  save(user: User): Promise<User>;
+  save(user: User): Promise<SaveResult<User>>;
 }
 
 export interface TaskRepository extends Repository<Task> {
