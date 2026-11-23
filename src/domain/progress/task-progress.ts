@@ -30,8 +30,8 @@ export function correctTaskStatus(task: Task, status: TaskStatus): ProgressResul
   return { kind: "updated", task: { ...task, status } };
 }
 
+// Scheduled time and completion are separate: the caller asks the user instead of assuming progress.
 export function finishTimeBlock(task: Task, block: TimeBlock): { kind: "progress-unknown"; task: Task } {
-  void task;
   void block;
-  throw new Error("not implemented");
+  return { kind: "progress-unknown", task };
 }
