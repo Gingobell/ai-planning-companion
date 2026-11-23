@@ -18,7 +18,7 @@ Jingyi Fu:
 - Shared contract by November 25: record types with all fields (including progress, reminders and preferences), data access interfaces, design tokens and app shell.
 - Database, authentication and a first Vercel deploy.
 - Chat with the Gemini adapter; capture and clarification built with TDD.
-- Project idea approved by the professor in #projects by November 30; decision on user roles.
+- Project idea approved by the professor in #projects by November 30.
 - First real hook runs recorded in `docs/evidence/`.
 - Issue template and the full issue backlog for both partners, before Sprint 1 planning.
 

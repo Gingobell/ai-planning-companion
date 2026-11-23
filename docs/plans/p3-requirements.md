@@ -18,12 +18,12 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 
 | Requirement | Status | Evidence or next step |
 | --- | --- | --- |
-| Polished, production-ready app solving a real problem; publicly deployed | Not started | Product defined in [PRD](../product/PRD.md) |
-| 2+ user roles or distinct feature areas (the Excellent rubric says 2+ user roles) | Not started | Scope decision still open |
+| Polished, production-ready app solving a real problem; publicly deployed | Partial | Deployed at https://ai-planning-companion.vercel.app; product defined in [PRD](../product/PRD.md) |
+| 2+ user roles or distinct feature areas | Planned | Four distinct feature areas (PRD Section 5); multiple user roles are not planned |
 | Next.js full stack | Partial | Next.js skeleton in `src/app/` |
-| Database (PostgreSQL recommended) | Not started | Provider not chosen (CLAUDE.md tech stack) |
-| Authentication | Not started | Auth.js or Clerk, not chosen |
-| Hosting with preview deploys (Vercel) | Not started | |
+| Database (PostgreSQL recommended) | Partial | Neon PostgreSQL provisioned through Vercel; schema and repositories in #6 |
+| Authentication | Not started | Neon Auth chosen; built in #7 |
+| Hosting with preview deploys (Vercel) | Partial | Production deploys from `main`; preview deploys checked on the next pull request (#8) |
 
 ## Claude Code mastery
 
@@ -36,13 +36,13 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 | At least 1 MCP server, shared `.mcp.json`, real workflow evidence | Planned | Playwright MCP server for simulated-user acceptance testing, see [p3-work-split.md](p3-work-split.md) |
 | At least 1 agent option (custom sub-agents in `.claude/agents/`, agent teams, or an Agent SDK feature), with real usage | Planned | Custom sub-agents in `.claude/agents/` |
 | Parallel worktrees: at least 2 features developed in parallel, visible in branch history | Not started | |
-| At least 2 writer/reviewer PRs: one agent writes, another reviews; C.L.E.A.R. in review comments; AI disclosure (% AI-generated, tool, human review) | Partial | C.L.E.A.R. is defined in "Code review" in [CLAUDE.md](../../CLAUDE.md). First writer/reviewer PR: [#1](https://github.com/Gingobell/ai-planning-companion/pull/1), awaiting review |
+| At least 2 writer/reviewer PRs: one agent writes, another reviews; C.L.E.A.R. in review comments; AI disclosure (% AI-generated, tool, human review) | Partial | C.L.E.A.R. is defined in "Code review" in [CLAUDE.md](../../CLAUDE.md). First writer/reviewer PR: [#1](https://github.com/Gingobell/ai-planning-companion/pull/1), reviewed and merged. The PR template in `.github/pull_request_template.md` asks for the C.L.E.A.R. points and the AI disclosure |
 
 ## Testing and TDD
 
 | Requirement | Status | Evidence or next step |
 | --- | --- | --- |
-| Strict red-green-refactor for at least 3 features, failing tests committed before implementation | Partial (1 of 3) | Time block recommendation: [plan](time-block-recommendation.md), [TDD log](../evidence/03-tdd/log.txt) |
+| Strict red-green-refactor for at least 3 features, failing tests committed before implementation | Partial (1 of 3) | Time block recommendation: [plan](time-block-recommendation.md), [TDD log](../evidence/03-tdd/log.txt). Six TDD features are planned, listed under Testing in [p3-work-split.md](p3-work-split.md) |
 | Unit and integration tests (Vitest) | Partial | Unit tests in `src/domain/`; no integration tests yet |
 | At least 1 Playwright end-to-end test | Not started | Playwright planned (CLAUDE.md tech stack) |
 | 70%+ coverage | Partial | Measured with `npm run test:coverage` and shown in the CI run summary; 96% lines at setup, not enforced as a threshold |
