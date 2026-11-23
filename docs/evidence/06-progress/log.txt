@@ -86,3 +86,23 @@ $ npx vitest run
       Tests  34 passed (34)
 exit code: 0
 
+=== Cycle 4 AC4 red ===
+Time: 2026-11-23 14:11 PST
+Base commit: f5bf95e
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × counts completed steps out of all steps 2ms
+       × leaves canceled steps out of the total 0ms
+       × ignores tasks that belong to another goal 0ms
+       × reports all steps done without marking the goal completed 0ms
+       × does not report all steps done for a goal without steps 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+ Test Files  1 failed | 2 passed (3)
+      Tests  5 failed | 34 passed (39)
+exit code: 1
+
