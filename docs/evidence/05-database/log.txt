@@ -43,3 +43,39 @@ $ npx vitest run
       Tests  31 passed (31)
 exit code: 0
 
+=== Cycle 2 AC2 round trip red ===
+Time: 2026-11-23 12:43 PST
+Base commit: 0ed196e
+$ npx vitest run
+       × saves each preferences sample as version 1 and reads it back unchanged 6ms
+       × saves each temporaryContexts sample as version 1 and reads it back unchanged 5ms
+       × saves each reminders sample as version 1 and reads it back unchanged 4ms
+       × saves each messages sample as version 1 and reads it back unchanged 4ms
+       × saves each openQuestions sample as version 1 and reads it back unchanged 4ms
+       × saves each progressReports sample as version 1 and reads it back unchanged 4ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > round trip > saves a new user as version 1 and reads it back unchanged
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > round trip > saves each goals sample as version 1 and reads it back unchanged
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > round trip > saves each tasks sample as version 1 and reads it back unchanged
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > round trip > saves each timeBlocks sample as version 1 and reads it back unchanged
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > round trip > saves each fixedCommitments sample as version 1 and reads it back unchanged
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > round trip > saves each preferences sample as version 1 and reads it back unchanged
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > round trip > saves each temporaryContexts sample as version 1 and reads it back unchanged
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > round trip > saves each reminders sample as version 1 and reads it back unchanged
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > round trip > saves each messages sample as version 1 and reads it back unchanged
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > round trip > saves each openQuestions sample as version 1 and reads it back unchanged
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > round trip > saves each progressReports sample as version 1 and reads it back unchanged
+Error: not implemented
+ ❯ Object.notImplemented src/data/postgres/repositories.ts:8:9
+      6|
+      7| function notImplemented(): never {
+      8|   throw new Error("not implemented");
+       |         ^
+      9| }
+     10|
+ ❯ src/data/repository-contract.ts:134:27
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+ Test Files  1 failed | 2 passed (3)
+      Tests  11 failed | 31 passed (42)
+exit code: 1
+

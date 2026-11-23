@@ -1,0 +1,159 @@
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import type { Id, OwnedRecord, User } from "@/domain/records";
+import type { DueReminderSource, Repositories, Repository } from "@/domain/repositories";
+
+// One test suite for every implementation of the data access interfaces
+// (PostgreSQL here; the in-memory version runs the same suite).
+
+export interface RepositoryHarness {
+  repos: Repositories;
+  dueReminders: DueReminderSource;
+  reset(): Promise<void>;
+  close(): Promise<void>;
+}
+
+export const ALICE = "user-alice";
+export const BOB = "user-bob";
+
+export function makeUser(id: Id): User {
+  return {
+    id,
+    version: 0,
+    timeZone: "America/Los_Angeles",
+    availability: { 1: [{ start: "09:00", end: "17:00" }], 6: [] },
+    checkInTimes: ["09:00", "21:00"],
+    quietHours: { start: "22:00", end: "07:00" },
+    remindersPause: { until: "2026-12-01T08:00:00Z" },
+  };
+}
+
+// For each repository: a record with every optional field set and one with none.
+export function samples(userId: Id) {
+  const base = (id: Id) => ({ id, userId, version: 0 });
+  return {
+    goals: [
+      {
+        ...base("goal-full"),
+        title: "Land a summer internship",
+        category: "Career",
+        horizon: "long" as const,
+        deadline: { at: "2027-03-01T08:00:00Z", source: "external" as const },
+        status: "active" as const,
+      },
+      { ...base("goal-min"), title: "Read more", category: "Personal", horizon: "long" as const, status: "active" as const },
+    ],
+    tasks: [
+      {
+        ...base("task-full"),
+        title: "Finish lab 5",
+        category: "School",
+        goalId: "goal-full",
+        parentTaskId: "task-parent",
+        deadline: { at: "2026-11-27T07:59:00Z", source: "agreed" as const },
+        priority: "high" as const,
+        estimatedMinutes: 90,
+        estimateSource: "assistant" as const,
+        status: "in-progress" as const,
+        remindersEnabled: true,
+        acceptance: "accepted" as const,
+      },
+      {
+        ...base("task-min"),
+        title: "Call the dentist",
+        category: "Personal",
+        priority: "low" as const,
+        status: "not-started" as const,
+        remindersEnabled: false,
+        acceptance: "proposed" as const,
+      },
+    ],
+    timeBlocks: [
+      { ...base("block-1"), taskId: "task-full", start: "2026-11-24T17:00:00Z", end: "2026-11-24T18:30:00Z", status: "proposed" as const },
+    ],
+    fixedCommitments: [
+      { ...base("commitment-full"), title: "CS6983 lecture", start: "2026-11-24T21:00:00Z", end: "2026-11-24T23:00:00Z" },
+      { ...base("commitment-min"), start: "2026-11-25T16:00:00Z", end: "2026-11-25T17:00:00Z" },
+    ],
+    preferences: [
+      {
+        ...base("pref-full"),
+        description: "Interview practice in the evening",
+        scope: "interview practice",
+        preferredWindow: { start: "19:00", end: "21:00" },
+        status: "corrected" as const,
+        source: "user-stated" as const,
+        supersededBy: "pref-min",
+      },
+      { ...base("pref-min"), description: "No meetings before 10", scope: "all", status: "tentative" as const, source: "confirmed-inference" as const },
+    ],
+    temporaryContexts: [
+      { ...base("context-1"), description: "Low energy today", startsAt: "2026-11-24T08:00:00Z", endsAt: "2026-11-25T08:00:00Z" },
+    ],
+    reminders: [
+      {
+        ...base("reminder-full"),
+        kind: "task" as const,
+        taskId: "task-full",
+        timeBlockId: "block-1",
+        scheduledFor: "2026-11-24T16:45:00Z",
+        status: "delivered" as const,
+        deliveryKey: `${userId}:block-1:start`,
+        answeredAt: "2026-11-24T16:50:00Z",
+      },
+      { ...base("reminder-min"), kind: "check-in" as const, scheduledFor: "2026-11-24T17:00:00Z", status: "pending" as const, deliveryKey: `${userId}:check-in:2026-11-24` },
+    ],
+    messages: [
+      { ...base("message-1"), chatDate: "2026-11-24", role: "user" as const, text: "Lab 5 is due Thursday", createdAt: "2026-11-24T18:02:11Z" },
+    ],
+    openQuestions: [
+      { ...base("question-full"), taskId: "task-full", question: "When is lab 5 due?", status: "open" as const },
+      { ...base("question-min"), question: "Which evenings are free?", status: "answered" as const },
+    ],
+    progressReports: [
+      { ...base("progress-1"), taskId: "task-full", kind: "partial" as const, note: "Part 1 done", reportedAt: "2026-11-24T19:00:00Z" },
+    ],
+  };
+}
+
+type OwnedRepoName = keyof ReturnType<typeof samples>;
+const ownedRepoNames = Object.keys(samples(ALICE)) as OwnedRepoName[];
+
+function repo(repos: Repositories, name: OwnedRepoName) {
+  return repos[name] as unknown as Repository<OwnedRecord>;
+}
+
+export function describeRepositoryContract(name: string, createHarness: () => Promise<RepositoryHarness>) {
+  describe(`${name} repositories`, () => {
+    let h: RepositoryHarness;
+
+    beforeAll(async () => {
+      h = await createHarness();
+    });
+    beforeEach(async () => {
+      await h.reset();
+      await h.repos.users.save(makeUser(ALICE));
+      await h.repos.users.save(makeUser(BOB));
+    });
+    afterAll(async () => {
+      await h.close();
+    });
+
+    describe("round trip", () => {
+      it("saves a new user as version 1 and reads it back unchanged", async () => {
+        const user: User = { id: "user-carol", version: 0, timeZone: "Asia/Shanghai", availability: {}, checkInTimes: [] };
+        const result = await h.repos.users.save(user);
+        expect(result).toEqual({ kind: "saved", record: { ...user, version: 1 } });
+        expect(await h.repos.users.get("user-carol")).toEqual({ ...user, version: 1 });
+        expect(await h.repos.users.get(ALICE)).toEqual({ ...makeUser(ALICE), version: 1 });
+      });
+
+      it.each(ownedRepoNames)("saves each %s sample as version 1 and reads it back unchanged", async (repoName) => {
+        for (const record of samples(ALICE)[repoName]) {
+          const result = await repo(h.repos, repoName).save(ALICE, record);
+          expect(result).toEqual({ kind: "saved", record: { ...record, version: 1 } });
+          expect(await repo(h.repos, repoName).get(ALICE, record.id)).toEqual({ ...record, version: 1 });
+        }
+      });
+    });
+  });
+}
