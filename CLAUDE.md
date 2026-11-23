@@ -72,9 +72,9 @@ This project uses Next.js 16.4.6 and React 19.3, which have breaking changes com
 | E2E tests | Playwright | Planned for P3 |
 | Formatting | Prettier, checked in CI with ESLint | In repo |
 | Secret scanning | Gitleaks as a pre-commit hook | Chosen, not in repo |
-| Database | PostgreSQL on Neon (Free plan), added through the Vercel Marketplace integration, in the Washington, D.C. region (Vercel `iad1`, Neon `aws-us-east-1`). Each preview deploy gets its own database branch. The connection string is `DATABASE_URL` | Provisioned, not used in code yet |
-| ORM and migrations | Drizzle ORM with drizzle-kit migrations; PGlite for database tests without a server | Chosen, not in repo |
-| Authentication | Neon Auth (managed Better Auth; users stored in the `neon_auth` schema of the same database) | Chosen, not enabled yet |
+| Database | PostgreSQL on Neon (Free plan), added through the Vercel Marketplace integration, in the Washington, D.C. region (Vercel `iad1`, Neon `aws-us-east-1`). Each preview deploy gets its own database branch. The connection string is `DATABASE_URL` | In repo |
+| ORM and migrations | Drizzle ORM with drizzle-kit migrations; PGlite for database tests without a server | In repo |
+| Authentication | Neon Auth (managed Better Auth; users stored in the `neon_auth` schema of the same database) | In repo; enabled on the main branch, with the production URL and the `feat/auth` preview as trusted domains |
 | LLM (in the app) | Google Gemini API behind a provider-neutral adapter | Chosen, not in repo |
 | Mac companion | Electron thin shell: global shortcut, small window loading the web chat, notifications | Chosen, not in repo |
 | Hosting and CI | Vercel Hobby, production at https://ai-planning-companion.vercel.app, a preview deploy for every pull request; GitHub Actions | Vercel in use; GitHub Actions planned |
