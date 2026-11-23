@@ -112,7 +112,12 @@ export function planReminders(input: PlanRemindersInput): ReminderPlan {
   const now = Temporal.Instant.from(input.now);
   const wanted = [...checkIns(input), ...taskReminders(input)].filter((draft) => isAllowed(draft, input.user));
   const wantedKeys = new Set(wanted.map((draft) => draft.deliveryKey));
+  // A canceled reminder does not count, so a block moved back to its old time is reminded again.
+  const existingKeys = new Set(
+    input.existing.filter((reminder) => reminder.status !== "canceled").map((reminder) => reminder.deliveryKey),
+  );
   const create = wanted
+    .filter((draft) => !existingKeys.has(draft.deliveryKey))
     .filter((draft) => Temporal.Instant.compare(Temporal.Instant.from(draft.scheduledFor), now) >= 0)
     .sort((a, b) => a.scheduledFor.localeCompare(b.scheduledFor));
   const cancel = input.existing.filter((reminder) => shouldCancel(reminder, wantedKeys, input)).map((r) => r.id);
