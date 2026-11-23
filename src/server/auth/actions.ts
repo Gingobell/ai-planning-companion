@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { authErrorMessage } from "@/server/auth/error-messages";
 import { getAuth, SIGN_IN_PATH } from "@/server/auth/neon-auth";
 import { ensureUserSettings, type SessionUser } from "@/server/current-user";
 import { currentUserFor } from "@/server/session";
@@ -35,13 +36,13 @@ export async function signUpAction(_state: AuthFormState, form: FormData): Promi
     name: field(form, "name") || email,
     password: field(form, "password"),
   });
-  if (error) return { error: error.message || "Could not create the account. Please try again." };
+  if (error) return { error: authErrorMessage(error, "signUp") };
   return finishSignIn(data?.user, field(form, "timeZone"));
 }
 
 export async function signInAction(_state: AuthFormState, form: FormData): Promise<AuthFormState> {
   const { data, error } = await getAuth().signIn.email({ email: field(form, "email"), password: field(form, "password") });
-  if (error) return { error: error.message || "Email or password is incorrect." };
+  if (error) return { error: authErrorMessage(error, "signIn") };
   return finishSignIn(data?.user, field(form, "timeZone"));
 }
 
