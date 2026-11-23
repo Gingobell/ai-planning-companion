@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Task, TimeBlock, User } from "@/domain/records";
-import { planReminders, type PlanRemindersInput } from "@/domain/reminders/plan-reminders";
+import type { Reminder, Task, TimeBlock, User } from "@/domain/records";
+import { planReminders, type PlanRemindersInput, type ReminderDraft } from "@/domain/reminders/plan-reminders";
 
 const user: User = {
   id: "user-1",
@@ -23,7 +23,7 @@ function input(overrides: Partial<PlanRemindersInput> = {}): PlanRemindersInput 
   };
 }
 
-function checkIn(localDateTime: string, scheduledFor: string) {
+function checkIn(localDateTime: string, scheduledFor: string): ReminderDraft {
   return { kind: "check-in", scheduledFor, deliveryKey: `check-in:${localDateTime}` };
 }
 
@@ -104,7 +104,7 @@ function block(overrides: Partial<TimeBlock> = {}): TimeBlock {
   };
 }
 
-const taskReminder = {
+const taskReminder: ReminderDraft = {
   kind: "task",
   taskId: "task-1",
   timeBlockId: "block-1",
@@ -186,6 +186,72 @@ describe("planReminders with quiet hours and pausing", () => {
         input({ user: { ...user, remindersPause: {} }, tasks: [chosenTask()], timeBlocks: [block()] }),
       );
       expect(plan.create).toEqual([]);
+    });
+  });
+});
+
+function saved(id: string, draft: ReminderDraft, status: Reminder["status"] = "pending"): Reminder {
+  return { id, version: 1, userId: "user-1", status, ...draft };
+}
+
+describe("planReminders against saved reminders", () => {
+  describe("AC4: completed, canceled and moved work updates its reminders", () => {
+    it.each(["completed", "canceled"] as const)("cancels the pending reminder of a %s task", (status) => {
+      const plan = planReminders(
+        input({
+          user: quietUser,
+          tasks: [chosenTask({ status })],
+          timeBlocks: [block()],
+          existing: [saved("r1", taskReminder)],
+        }),
+      );
+      expect(plan).toEqual({ create: [], cancel: ["r1"] });
+    });
+
+    it("cancels the old reminder and creates a new one when a block moves", () => {
+      const moved = block({ start: "2026-11-25T17:00:00Z", end: "2026-11-25T18:00:00Z" });
+      const plan = planReminders(
+        input({ user: quietUser, tasks: [chosenTask()], timeBlocks: [moved], existing: [saved("r1", taskReminder)] }),
+      );
+      expect(plan).toEqual({
+        create: [{ ...taskReminder, scheduledFor: "2026-11-25T17:00:00Z", deliveryKey: "block:block-1:2026-11-25T17:00:00Z" }],
+        cancel: ["r1"],
+      });
+    });
+
+    it("cancels the pending reminder of a block that was removed", () => {
+      const plan = planReminders(
+        input({ user: quietUser, tasks: [chosenTask()], timeBlocks: [], existing: [saved("r1", taskReminder)] }),
+      );
+      expect(plan.cancel).toEqual(["r1"]);
+    });
+
+    it("cancels a pending check-in at a time the user no longer wants", () => {
+      const old = checkIn("2026-11-24T12:00", "2026-11-24T20:00:00Z");
+      const plan = planReminders(input({ horizonDays: 1, user: { ...user, checkInTimes: [] }, existing: [saved("r1", old)] }));
+      expect(plan.cancel).toEqual(["r1"]);
+    });
+
+    it("never cancels a delivered reminder", () => {
+      const plan = planReminders(
+        input({
+          user: quietUser,
+          tasks: [chosenTask({ status: "completed" })],
+          timeBlocks: [block()],
+          existing: [saved("r1", taskReminder, "delivered")],
+        }),
+      );
+      expect(plan.cancel).toEqual([]);
+    });
+
+    it("keeps a pending reminder that is due but not yet delivered", () => {
+      // The block started at 07:00 local; its reminder waits for delivery.
+      const started = block({ start: "2026-11-24T15:00:00Z", end: "2026-11-24T17:00:00Z" });
+      const due = { ...taskReminder, scheduledFor: started.start, deliveryKey: "block:block-1:2026-11-24T15:00:00Z" };
+      const plan = planReminders(
+        input({ user: quietUser, tasks: [chosenTask()], timeBlocks: [started], existing: [saved("r1", due)] }),
+      );
+      expect(plan.cancel).toEqual([]);
     });
   });
 });
