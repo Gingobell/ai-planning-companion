@@ -88,3 +88,39 @@ $ npx vitest run
       Tests  42 passed (42)
 exit code: 0
 
+=== Cycle 3 AC2 ownership red ===
+Time: 2026-11-23 12:47 PST
+Base commit: 0914bfb
+$ npx vitest run
+- Expected
++ Received
+- Error {
+-   "message": "rejected promise",
++ {
++   "kind": "saved",
++   "record": {
++     "category": "Career",
++     "deadline": {
++       "at": "2027-03-01T08:00:00Z",
++       "source": "external",
++     },
++     "horizon": "long",
++     "id": "goal-full",
++     "status": "active",
++     "title": "Land a summer internship",
++     "userId": "user-bob",
++     "version": 1,
++   },
+  }
+ ❯ src/data/repository-contract.ts:179:54
+    177|       it("rejects saving a record whose userId is not the caller's", a…
+    178|         const [goal] = samples(BOB).goals;
+    179|         await expect(h.repos.goals.save(ALICE, goal)).rejects.toThrow(…
+       |                                                      ^
+    180|         expect(await h.repos.goals.get(BOB, goal.id)).toBeUndefined();
+    181|       });
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+ Test Files  1 failed | 2 passed (3)
+      Tests  11 failed | 42 passed (53)
+exit code: 1
+

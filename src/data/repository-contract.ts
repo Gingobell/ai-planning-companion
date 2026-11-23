@@ -155,5 +155,30 @@ export function describeRepositoryContract(name: string, createHarness: () => Pr
         }
       });
     });
+
+    describe("ownership", () => {
+      it.each(ownedRepoNames)("keeps each user's %s to that user for list, get and remove", async (repoName) => {
+        const [aliceRecord] = samples(ALICE)[repoName];
+        const bobRecord = { ...samples(BOB)[repoName][0], id: `${aliceRecord.id}-bob` };
+        await repo(h.repos, repoName).save(ALICE, aliceRecord);
+        await repo(h.repos, repoName).save(BOB, bobRecord);
+
+        expect((await repo(h.repos, repoName).list(ALICE)).map((r) => r.id)).toEqual([aliceRecord.id]);
+        expect(await repo(h.repos, repoName).get(BOB, aliceRecord.id)).toBeUndefined();
+
+        await repo(h.repos, repoName).remove(BOB, aliceRecord.id);
+        expect(await repo(h.repos, repoName).get(ALICE, aliceRecord.id)).toBeDefined();
+
+        await repo(h.repos, repoName).remove(ALICE, aliceRecord.id);
+        expect(await repo(h.repos, repoName).get(ALICE, aliceRecord.id)).toBeUndefined();
+        expect(await repo(h.repos, repoName).get(BOB, bobRecord.id)).toBeDefined();
+      });
+
+      it("rejects saving a record whose userId is not the caller's", async () => {
+        const [goal] = samples(BOB).goals;
+        await expect(h.repos.goals.save(ALICE, goal)).rejects.toThrow(/belongs to another user/);
+        expect(await h.repos.goals.get(BOB, goal.id)).toBeUndefined();
+      });
+    });
   });
 }
