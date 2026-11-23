@@ -45,6 +45,7 @@ Current phase: HW4 is complete. The repository contains a Next.js skeleton with 
 - `npm run typecheck` runs `tsc --noEmit`.
 - `npm test` runs Vitest once; `npm run test:watch` runs it in watch mode.
 - Single test file: `npx vitest run path/to/file.test.ts`. Single test by name: `npx vitest run -t "test name"`.
+- `npm run db:generate` writes a SQL migration into `drizzle/` after a change to `src/data/postgres/schema.ts`; commit it with the schema change. `npm run db:migrate` applies migrations to the database in `DATABASE_URL_UNPOOLED`. Vercel runs `vercel-build`, which migrates before `next build`, so production and every preview branch are migrated on deploy. Tests need no database.
 
 ## Hooks
 
@@ -97,6 +98,7 @@ Current layout:
 - The app shell (sidebar, nav items, brand mark, page placeholder) lives in `src/components/app-shell/`. Nav destinations are defined once in `nav-items.ts`.
 - Domain code goes under `src/domain/<area>/`, with tests next to the code as `*.test.ts`. The first area is `src/domain/scheduling/` (`recommend-time-block.ts`).
 - Shared record types are defined once in `src/domain/records.ts`, and data access interfaces in `src/domain/repositories.ts`. Every repository call takes the owner's `userId`. Implementations (in-memory, PostgreSQL) live outside `src/domain/`. Changes to either file go through their owner (see [docs/plans/p3-work-split.md](docs/plans/p3-work-split.md)).
+- Data access implementations live in `src/data/`. `src/data/postgres/` holds the Drizzle schema, row mappers, repositories and the client (`createDatabase`, which reads `DATABASE_URL`). `src/data/repository-contract.ts` is the shared test suite every implementation runs; database tests use PGlite through `src/data/postgres/test-db.ts`. SQL migrations live in `drizzle/`.
 - Import alias `@/*` maps to `./src/*` in `tsconfig.json` and in `vitest.config.mts` (`.mts` so Vite loads it as ESM).
 - `next.config.ts` enables `cacheComponents` and `partialPrefetching`, and wires Tailwind CSS v4 through a Turbopack loader rule (`@tailwindcss/turbopack`) for `*.css` instead of PostCSS. `globals.css` uses `@import "tailwindcss"` and `@theme inline` tokens.
 
@@ -113,7 +115,7 @@ Current layout:
 
 Strict test-driven development, following the protocol imported below. Summary:
 
-- Every acceptance criterion gets a failing test before any implementation code exists.
+- For the TDD features listed in [docs/plans/p3-work-split.md](docs/plans/p3-work-split.md), every acceptance criterion gets a failing test before any implementation code exists. Other code with logic still gets tests; pure layout, styling and configuration are checked without them (see the protocol).
 - Unit tests cover domain rules and edge cases (boundaries, empty inputs, DST transitions). Integration tests will cover route handlers and database writes once they exist. Playwright E2E tests will cover the core user flow in P3.
 - Tests assert behavior through public functions, not implementation details.
 - Target at least 70% coverage for the project, measured in CI once it exists.

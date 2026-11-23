@@ -57,12 +57,14 @@ Who owns what in Project 3, so each partner can build, test and ship their areas
 
 ## 3. Testing
 
+The course asks for strict red-green-refactor on at least 3 features. These six TDD features, three per partner, are the ones that follow the full protocol in the [TDD workflow](../engineering/tdd-workflow.md); all other code with logic still gets tests, written before or after the code.
+
 **Jingyi Fu**
-- TDD features: time block recommendation (done), capture and clarification.
+- TDD features: time block recommendation (done in HW4), database and repositories (#6), capture and clarification (#10, #11).
 - Integration tests for route handlers and database writes.
 
 **Sihui Lyu**
-- TDD features: progress rules, reminder and preference rules.
+- TDD features: progress rules (#30), reminder and check-in rules (#31), preference and temporary context rules (#36).
 - Playwright end-to-end tests of the core flow.
 - Coverage tool and the 70% target.
 - Acceptance testing with simulated users: scenarios with expected results from PRD Section 8 and each story's acceptance criteria, run against the deployed app by the simulated-user sub-agent through Playwright MCP. The Mac shortcut and Mac notifications are tested by hand. Each failure becomes a GitHub Issue labeled `acceptance`, assigned to the owner of that area.
