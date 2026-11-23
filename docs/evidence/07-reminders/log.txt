@@ -98,3 +98,17 @@ $ npx vitest run
       Tests  44 passed (44)
 exit code: 0
 
+=== Cycle 5 AC5 red ===
+Time: 2026-11-23 14:33 PST
+Base commit: ae9b167
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × does not recreate a pending reminder with the same key 3ms
+       × does not recreate a delivered reminder with the same key 1ms
+       × plans nothing new when run again on its own saved result 3ms
+       × gives the same key however the block start is written 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 44 passed (48)
+exit code: 1
+

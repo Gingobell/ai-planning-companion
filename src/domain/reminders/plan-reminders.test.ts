@@ -255,3 +255,28 @@ describe("planReminders against saved reminders", () => {
     });
   });
 });
+
+describe("planReminders without duplicates", () => {
+  describe("AC5: a reminder that already exists is never created again", () => {
+    const withTask = { user, tasks: [chosenTask()], timeBlocks: [block()] };
+
+    it.each(["pending", "delivered"] as const)("does not recreate a %s reminder with the same key", (status) => {
+      const plan = planReminders(input({ ...withTask, existing: [saved("r1", taskReminder, status)] }));
+      expect(plan.create.map((draft) => draft.deliveryKey)).not.toContain(taskReminder.deliveryKey);
+    });
+
+    it("plans nothing new when run again on its own saved result", () => {
+      const first = planReminders(input(withTask));
+      const existing = first.create.map((draft, index) => saved(`r${index}`, draft));
+      expect(planReminders(input({ ...withTask, existing }))).toEqual({ create: [], cancel: [] });
+    });
+
+    it("gives the same key however the block start is written", () => {
+      const written = block({ start: "2026-11-25T03:00:00.000Z" });
+      const plan = planReminders(
+        input({ user: quietUser, tasks: [chosenTask()], timeBlocks: [written], existing: [saved("r1", taskReminder)] }),
+      );
+      expect(plan).toEqual({ create: [], cancel: [] });
+    });
+  });
+});
