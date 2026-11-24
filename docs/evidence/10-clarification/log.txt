@@ -44,3 +44,39 @@ $ npx vitest run
       Tests  171 passed (171)
 exit code: 0
 
+=== Cycle 2 Q3 red ===
+Time: 2026-11-24 13:20 PST
+Base commit: 8650025
+$ npx vitest run
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+ FAIL  src/domain/clarification/deadline-questions.test.ts > chooseDeadlineQuestions: a few questions at a time, never repeated (Q3) > puts follow-ups on this message's answers first, with their suggested target date
+AssertionError: expected [ { id: 't1:deadline', …(1) }, …(1) ] to deeply equal [ { id: 't0:deadline', …(2) }, …(1) ]
+- Expected
++ Received
+  [
+    {
+-     "id": "t0:deadline",
+-     "proposedDeadline": "2026-12-04T04:59:00Z",
+-     "taskId": "t0",
+-   },
+-   {
+      "id": "t1:deadline",
+      "taskId": "t1",
++   },
++   {
++     "id": "t2:deadline",
++     "taskId": "t2",
+    },
+  ]
+ ❯ src/domain/clarification/deadline-questions.test.ts:65:19
+     63|       followUps: [followUp],
+     64|     });
+     65|     expect(asked).toEqual([
+       |                   ^
+     66|       { id: "t0:deadline", taskId: "t0", proposedDeadline: "2026-12-04…
+     67|       { id: "t1:deadline", taskId: "t1" },
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+ Test Files  1 failed | 15 passed (16)
+      Tests  3 failed | 171 passed (174)
+exit code: 1
+

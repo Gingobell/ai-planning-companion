@@ -12,6 +12,8 @@ export interface ChooseDeadlineQuestionsInput {
   newTasks: Task[];
   // Every question the user already has, open or answered.
   existing: OpenQuestion[];
+  // Questions the user answered in this message that still need a reply, such as a suggested target date.
+  followUps?: OpenQuestion[];
 }
 
 // One deadline question per task, so its id can never be asked twice.
