@@ -150,3 +150,23 @@ exit code: 0
 
 === Cycles 2 to 5 refactor ===
 Skipped: each implementation is a few lines with clear names and no duplication worth extracting.
+=== Review follow-up red: finishTimeBlock rejects a block of another task (#53) ===
+Time: 2026-11-23 15:41 PST
+Base commit: 066ab3d
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × throws when the block belongs to another task, which is a caller error 3ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed | 9 passed (10)
+      Tests  1 failed | 108 passed (109)
+exit code: 1
+
+=== Review follow-up green ===
+Time: 2026-11-23 15:42 PST
+Base commit: 2b4295b
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  10 passed (10)
+      Tests  109 passed (109)
+exit code: 0
+
