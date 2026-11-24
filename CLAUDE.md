@@ -35,7 +35,7 @@ These files change as the project grows. A rule changes only after a human confi
 - **Show the rule diff.** Before every commit, show the rule file changes next to the code changes and say in the commit message which rule changed.
 - **Keep the record.** `DESIGN.md` keeps a changelog section with date, change and reason. Other rule files rely on git history and the commit message.
 
-Current phase: HW4 is complete. The repository contains a Next.js skeleton with Vitest and the first domain feature, time block recommendation (US-02, US-06), built with TDD. Sprint 1 has added the app shell with the DESIGN.md tokens. Chat, LLM integration, database, authentication, reminders and the Mac companion are not built yet.
+Current phase: HW4 is complete. The repository contains a Next.js skeleton with Vitest and the first domain feature, time block recommendation (US-02, US-06), built with TDD. Sprint 1 has added the app shell with the DESIGN.md tokens, the PostgreSQL data layer (#6), sign-in and account isolation (#7), CI checks and the progress rules (#30). Chat, LLM integration, running reminders and the Mac companion are not built yet.
 
 ## Commands
 
@@ -77,7 +77,7 @@ This project uses Next.js 16.4.6 and React 19.3, which have breaking changes com
 | Authentication | Neon Auth (managed Better Auth; users stored in the `neon_auth` schema of the same database) | In repo; enabled on the main branch, with the production URL and the `feat/auth` preview as trusted domains |
 | LLM (in the app) | Google Gemini API behind a provider-neutral adapter | Chosen, not in repo |
 | Mac companion | Electron thin shell: global shortcut, small window loading the web chat, notifications | Chosen, not in repo |
-| Hosting and CI | Vercel Hobby, production at https://ai-planning-companion.vercel.app, a preview deploy for every pull request; GitHub Actions | Vercel in use; GitHub Actions planned |
+| Hosting and CI | Vercel Hobby, production at https://ai-planning-companion.vercel.app, a preview deploy for every pull request; GitHub Actions | In repo |
 | MCP for Claude Code | Playwright MCP server in a shared `.mcp.json`, used for simulated-user acceptance testing | Chosen, not in repo |
 
 Why these providers: all are free, and the public app must stay reachable for grading and the showcase. Neon free compute scales to zero after 5 minutes idle and wakes on the next query in a few hundred milliseconds, but the project itself is never paused for inactivity (Supabase free projects pause after a week), and keeping authentication in the same database means one service and one set of secrets. Environment variable values live in Vercel and `.env.local`, never in the repository.
