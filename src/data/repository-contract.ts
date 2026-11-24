@@ -153,6 +153,7 @@ export function samples(userId: Id) {
         question: "When is lab 5 due?",
         status: "open" as const,
         proposedDeadline: "2026-11-27T04:59:00Z",
+        askedIn: "message-assistant:reply",
       },
       { ...base("question-min"), topic: "deadline" as const, question: "When is it due?", status: "answered" as const },
     ],

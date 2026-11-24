@@ -160,6 +160,7 @@ export const openQuestions = pgTable(
     question: text("question").notNull(),
     status: text("status").$type<"open" | "answered">().notNull(),
     proposedDeadline: instant("proposed_deadline"),
+    askedIn: text("asked_in"),
   },
   (t) => [index("open_questions_user_idx").on(t.userId)],
 );

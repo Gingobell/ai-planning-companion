@@ -143,12 +143,14 @@ export const openQuestionMapper = {
     ...question,
     taskId: question.taskId ?? null,
     proposedDeadline: question.proposedDeadline ?? null,
+    askedIn: question.askedIn ?? null,
   }),
   fromRow: (row: Row<typeof schema.openQuestions>): OpenQuestion =>
     compact({
       ...row,
       taskId: optional(row.taskId),
       proposedDeadline: optionalInstant(row.proposedDeadline),
+      askedIn: optional(row.askedIn),
     }),
 };
 

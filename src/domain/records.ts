@@ -134,6 +134,8 @@ export interface OpenQuestion extends OwnedRecord {
   status: "open" | "answered";
   // A target date the assistant suggested and the user has not agreed to yet; never a deadline by itself.
   proposedDeadline?: string;
+  // The assistant reply that last asked this question, so its answers show under that reply.
+  askedIn?: Id;
 }
 
 export type ProgressReportKind = "partial" | "blocker" | "completed" | "correction";
