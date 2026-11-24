@@ -134,3 +134,39 @@ $ npx vitest run
       Tests  130 passed (130)
 exit code: 0
 
+=== Cycle 5 C5 no duplicates on retry red ===
+Time: 2026-11-23 20:06 PST
+Base commit: cf639c3
+$ npx vitest run
+- Expected
++ Received
+- 1
++ 2
+ ❯ src/server/chat/capture-message.test.ts:177:24
+    175|
+    176|       expect(second).toEqual(first);
+    177|       expect(requests).toHaveLength(1);
+       |                        ^
+    178|       expect(await repos.tasks.list()).toHaveLength(1);
+    179|       expect((await repos.messages.listByChatDate("2026-11-24")).map((…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > C5: retrying the same message creates no duplicates > finishes a capture that failed at the model when the same message is sent again
+AssertionError: expected [ 'user' ] to deeply equal [ 'user', 'assistant' ]
+- Expected
++ Received
+  [
+    "user",
+-   "assistant",
+  ]
+ ❯ src/server/chat/capture-message.test.ts:187:86
+    185|       expect((await run()).kind).toBe("captured");
+    186|       expect(await repos.tasks.list()).toHaveLength(1);
+    187|       expect((await repos.messages.listByChatDate("2026-11-24")).map((…
+       |                                                                                      ^
+    188|     });
+    189|   });
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+ Test Files  1 failed | 12 passed (13)
+      Tests  2 failed | 130 passed (132)
+exit code: 1
+

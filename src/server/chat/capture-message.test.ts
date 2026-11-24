@@ -162,4 +162,29 @@ describe("captureMessage", () => {
       expect(goal.deadline).toBeUndefined();
     });
   });
+
+  describe("C5: retrying the same message creates no duplicates", () => {
+    it("recognizes a finished capture, asks the model only once and saves each record once", async () => {
+      const { run, requests } = capture(
+        "Lab 5 for CS6983 is due Thursday at 11:59 pm.",
+        extracted(lab),
+        extracted(lab),
+      );
+      const first = await run();
+      const second = await run();
+
+      expect(second).toEqual(first);
+      expect(requests).toHaveLength(1);
+      expect(await repos.tasks.list()).toHaveLength(1);
+      expect((await repos.messages.listByChatDate("2026-11-24")).map((m) => m.role)).toEqual(["user", "assistant"]);
+    });
+
+    it("finishes a capture that failed at the model when the same message is sent again", async () => {
+      const { run } = capture("Lab 5 for CS6983 is due Thursday.", { kind: "unavailable" }, extracted(lab));
+      expect(await run()).toEqual({ kind: "model-unavailable" });
+      expect((await run()).kind).toBe("captured");
+      expect(await repos.tasks.list()).toHaveLength(1);
+      expect((await repos.messages.listByChatDate("2026-11-24")).map((m) => m.role)).toEqual(["user", "assistant"]);
+    });
+  });
 });
