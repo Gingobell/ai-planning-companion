@@ -89,3 +89,14 @@ $ npx vitest run
       Tests  174 passed (174)
 exit code: 0
 
+Cycle 2 refactor skipped: chooseDeadlineQuestions is small and clear.
+
+=== Refactor: share localDeadlineToInstant from plan-capture for Q2 ===
+Time: 2026-11-24 13:23 PST
+Base commit: 39f5b15
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  16 passed (16)
+      Tests  174 passed (174)
+exit code: 0
+
