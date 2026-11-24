@@ -41,3 +41,19 @@ jobs:
                 ...["lines", "statements", "functions", "branches"].map(row)].join("\n"));
             ' >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  # Security gates 1 and 2: committed secrets and vulnerable dependencies.
+  security:
+    runs-on: ubuntu-latest
+    env:
+      GITLEAKS_VERSION: 8.30.1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Gitleaks (full history)
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" | tar -xz gitleaks
+          ./gitleaks git --redact --no-banner .
+      - name: npm audit (high and critical)
+        run: npm audit --audit-level=high

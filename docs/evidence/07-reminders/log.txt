@@ -1,0 +1,165 @@
+TDD evidence for reminder and check-in rules (#31). Plan: docs/plans/reminder-rules.md.
+Local paths in the Vitest output are replaced with <repo>. Test results are unchanged.
+
+=== Cycle 1 AC1 red ===
+Time: 2026-11-23 14:27 PST
+Base commit: 865a6f2
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × creates one check-in per agreed time for each day in the horizon 2ms
+       × skips a check-in time that has already passed today 0ms
+       × maps a check-in to the right instant on the spring-forward day 0ms
+       × moves a check-in time that does not exist on the spring-forward day to the next valid time 0ms
+       × maps a check-in to the right instant on the fall-back day 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+Error: not implemented
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 20 passed (25)
+exit code: 1
+
+=== Cycle 1 AC1 green ===
+Time: 2026-11-23 14:27 PST
+Base commit: 375e2a4
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  2 passed (2)
+      Tests  25 passed (25)
+exit code: 0
+
+=== Cycle 2 AC2 red (the negative cases pass until reminders exist; the positive case fails on missing behavior) ===
+Time: 2026-11-23 14:28 PST
+Base commit: 9210541
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × reminds at the start of an accepted block of a chosen task 4ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 30 passed (31)
+exit code: 1
+
+=== Cycle 2 AC2 green ===
+Time: 2026-11-23 14:28 PST
+Base commit: 7f2e3a4
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  2 passed (2)
+      Tests  31 passed (31)
+exit code: 0
+
+=== Cycle 3 AC3 red ===
+Time: 2026-11-23 14:28 PST
+Base commit: fad70a4
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × drops a check-in inside quiet hours that cross midnight 4ms
+       × drops a check-in inside quiet hours within one day 1ms
+       × drops a task reminder inside quiet hours 1ms
+       × drops reminders until a pause ends and keeps those after it 0ms
+       × drops every reminder while paused without an end 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 32 passed (37)
+exit code: 1
+
+=== Cycle 3 AC3 green ===
+Time: 2026-11-23 14:29 PST
+Base commit: 64592d3
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  2 passed (2)
+      Tests  37 passed (37)
+exit code: 0
+
+=== Cycle 4 AC4 red ===
+Time: 2026-11-23 14:29 PST
+Base commit: c7270a6
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × cancels the pending reminder of a completed task 4ms
+       × cancels the pending reminder of a canceled task 1ms
+       × cancels the old reminder and creates a new one when a block moves 1ms
+       × cancels the pending reminder of a block that was removed 0ms
+       × cancels a pending check-in at a time the user no longer wants 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 39 passed (44)
+exit code: 1
+
+=== Cycle 4 AC4 green ===
+Time: 2026-11-23 14:32 PST
+Base commit: 681dfcf
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  2 passed (2)
+      Tests  44 passed (44)
+exit code: 0
+
+=== Cycle 5 AC5 red ===
+Time: 2026-11-23 14:33 PST
+Base commit: ae9b167
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × does not recreate a pending reminder with the same key 3ms
+       × does not recreate a delivered reminder with the same key 1ms
+       × plans nothing new when run again on its own saved result 3ms
+       × gives the same key however the block start is written 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 44 passed (48)
+exit code: 1
+
+=== Cycle 5 AC5 green ===
+Time: 2026-11-23 14:33 PST
+Base commit: d129091
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  2 passed (2)
+      Tests  48 passed (48)
+exit code: 0
+
+=== Cycle 6 AC6 red (the no-follow-up case passes already: nothing creates follow-ups) ===
+Time: 2026-11-23 14:33 PST
+Base commit: 0c44d01
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+       × reports unknown for a delivered check-in without an answer 2ms
+       × reports answered once the user replied 0ms
+       × reports not-delivered for a check-in still pending 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+Error: not implemented
+Error: not implemented
+Error: not implemented
+ Test Files  1 failed | 2 passed (3)
+      Tests  3 failed | 49 passed (52)
+exit code: 1
+
+=== Cycle 6 AC6 green ===
+Time: 2026-11-23 14:34 PST
+Base commit: 334fe50
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  3 passed (3)
+      Tests  52 passed (52)
+exit code: 0
+
+=== Cycle 7 AC7 (passed on its first run, not a red step: the rules already build new objects) ===
+Time: 2026-11-23 14:34 PST
+Base commit: b40099c
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  3 passed (3)
+      Tests  53 passed (53)
+exit code: 0
+
+=== Refactor ===
+Time: 2026-11-23 14:35 PST
+Shared isBefore helper for instant comparisons, today computed once per plan, block start normalized in one place, drafts sorted by instant.
+$ npx vitest run
+ Test Files  3 passed (3)
+      Tests  53 passed (53)
+Cycles 1 to 6 had no separate refactor step; this one covers the whole file.
+

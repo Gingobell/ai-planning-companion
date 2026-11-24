@@ -1,0 +1,8 @@
+#!/bin/sh
+# Security gate 1: block a commit that contains a secret. Setup steps are in README.md.
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks is not installed, so staged changes cannot be checked for secrets." >&2
+  echo "Install it with 'brew install gitleaks' (see README.md), then commit again." >&2
+  exit 1
+fi
+exec gitleaks git --pre-commit --staged --redact --no-banner
