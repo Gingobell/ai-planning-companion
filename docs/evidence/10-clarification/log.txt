@@ -145,3 +145,41 @@ $ npx vitest run
       Tests  181 passed (181)
 exit code: 0
 
+=== Cycle 4 Q4 red ===
+Time: 2026-11-24 13:26 PST
+Base commit: 721a2a4
+$ npx vitest run
+    311|       expect(await repos.openQuestions.list()).toHaveLength(1);
+    312|     });
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > Q4: each question asked is saved as an open question, and answers in later messages count > keeps an unanswered question open and does not ask it again with every message
+AssertionError: expected 'Current local date and time: 2026-11-…' to contain 'Finish the CS6983 blog post'
+- Expected
++ Received
+- Finish the CS6983 blog post
++ Current local date and time: 2026-11-24T10:00:00 (America/Los_Angeles).
++ Message: Call the dentist tomorrow
+ ❯ src/server/chat/capture-message.test.ts:324:40
+    322|       await later.result;
+    323|
+    324|       expect(later.requests[0].prompt).toContain("Finish the CS6983 bl…
+       |                                        ^
+    325|       expect(later.requests[1].prompt).not.toContain("Finish the CS698…
+    326|       const questions = await repos.openQuestions.list();
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > Q4: each question asked is saved as an open question, and answers in later messages count > suggests a target date when there is no deadline, and saves it as agreed once the user says yes
+TypeError: Cannot read properties of undefined (reading 'prompt')
+ ❯ src/server/chat/capture-message.test.ts:342:37
+    340|       );
+    341|       await noDeadline.result;
+    342|       expect(noDeadline.requests[1].prompt).toContain("Dec 4");
+       |                                     ^
+    343|       expect((await repos.tasks.get(BLOG_ID))?.deadline).toBeUndefined…
+    344|
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+ Test Files  1 failed | 15 passed (16)
+      Tests  7 failed | 180 passed (187)
+exit code: 1
+
+Note: the C5 test now expects two model requests (extraction and reply phrasing); other #10 tests only gained a scripted phrasing result.
+
