@@ -45,6 +45,8 @@ export async function captureMessage(input: CaptureMessageInput): Promise<Captur
   if (extraction.kind === "invalid-output") return { kind: "model-invalid-output" };
 
   const plan = planCapture(extraction.value, { userId, messageId, timeZone });
+  // Goals first, so a task's goal exists before the task that points at it.
+  for (const goal of plan.goals) await repos.goals.save(goal);
   for (const task of plan.tasks) await repos.tasks.save(task);
   return { kind: "captured", goals: plan.goals, tasks: plan.tasks, reply: "" };
 }

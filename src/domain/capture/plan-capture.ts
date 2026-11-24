@@ -41,22 +41,43 @@ function itemId(context: CaptureContext, kind: ExtractedItem["kind"], index: num
 }
 
 export function planCapture(extraction: CaptureExtraction, context: CaptureContext): CapturePlan {
-  const tasks = extraction.items.flatMap((item, index): Task[] =>
-    item.kind === "task"
+  const { items } = extraction;
+  const goals = items.flatMap((item, index): Goal[] =>
+    item.kind === "goal"
       ? [
           {
-            id: itemId(context, "task", index),
+            id: itemId(context, "goal", index),
             userId: context.userId,
             version: 0,
             title: item.title,
             category: item.category,
-            priority: "medium",
-            status: "not-started",
-            remindersEnabled: false,
-            acceptance: "accepted",
+            horizon: item.horizon ?? "long",
+            status: "active",
           },
         ]
       : [],
   );
-  return { goals: [], tasks };
+  // A link counts only when it points at a goal from the same message.
+  const goalIdAt = (index: number | undefined) =>
+    index !== undefined && items[index]?.kind === "goal" ? itemId(context, "goal", index) : undefined;
+
+  const tasks = items.flatMap((item, index): Task[] => {
+    if (item.kind !== "task") return [];
+    const goalId = goalIdAt(item.goalIndex);
+    return [
+      {
+        id: itemId(context, "task", index),
+        userId: context.userId,
+        version: 0,
+        title: item.title,
+        category: item.category,
+        ...(goalId === undefined ? {} : { goalId }),
+        priority: "medium",
+        status: "not-started",
+        remindersEnabled: false,
+        acceptance: "accepted",
+      },
+    ];
+  });
+  return { goals, tasks };
 }
