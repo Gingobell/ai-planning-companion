@@ -80,3 +80,12 @@ $ npx vitest run
       Tests  124 passed (124)
 exit code: 0
 
+=== Cycle 3 C3 editable category (passes on first run, not a red step: planCapture already copies the suggested category) ===
+Time: 2026-11-23 20:04 PST
+Base commit: 4921924
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  13 passed (13)
+      Tests  125 passed (125)
+exit code: 0
+

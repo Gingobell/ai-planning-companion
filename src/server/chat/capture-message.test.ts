@@ -97,4 +97,23 @@ describe("captureMessage", () => {
       expect((await repos.tasks.list())[0].goalId).toBeUndefined();
     });
   });
+
+  describe("C3: each item gets a suggested category the user can edit", () => {
+    it("saves the suggested category as data, and a later edit replaces it", async () => {
+      const { run } = capture(
+        "I want to run a half marathon; sign up for the April race.",
+        extracted(
+          { kind: "goal", title: "Run a half marathon", category: "Health", horizon: "long" },
+          { kind: "task", title: "Sign up for the April race", category: "Running", goalIndex: 0 },
+        ),
+      );
+      await run();
+
+      expect((await repos.goals.list())[0].category).toBe("Health");
+      const [task] = await repos.tasks.list();
+      expect(task.category).toBe("Running");
+      expect(await repos.tasks.save({ ...task, category: "Fitness" })).toMatchObject({ kind: "saved" });
+      expect((await repos.tasks.get(task.id))?.category).toBe("Fitness");
+    });
+  });
 });
