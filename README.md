@@ -56,4 +56,15 @@ npm run dev         # http://localhost:3000
 
 Tests need no database, auth service or model key; model calls use a test double. To run the app against real ones, copy `.env.example` to `.env.local`, set `DATABASE_URL` and `DATABASE_URL_UNPOOLED` to a Neon development branch, set `NEON_AUTH_BASE_URL` to the project's Auth URL and `NEON_AUTH_COOKIE_SECRET` to the output of `openssl rand -base64 32`, set `GEMINI_API_KEY` to a key from https://aistudio.google.com/apikey created in a Google Cloud project without billing (free tier), then run `npm run db:migrate`. Every page except `/sign-in` and `/sign-up` asks you to sign in.
 
+### Secret scan before every commit
+
+A pre-commit hook runs [Gitleaks](https://github.com/gitleaks/gitleaks) on staged changes and blocks the commit if it finds a secret. Set it up once per clone:
+
+```bash
+brew install gitleaks
+git config core.hooksPath .githooks
+```
+
+If Gitleaks is missing, the hook stops the commit and says how to install it. CI also scans the full history with Gitleaks and runs `npm audit --audit-level=high`.
+
 Built with Next.js, TypeScript and Vitest. Stack decisions are recorded in [CLAUDE.md](CLAUDE.md).

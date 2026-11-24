@@ -45,7 +45,7 @@ Current phase: HW4 is complete. The repository contains a Next.js skeleton with 
 - `npm run typecheck` runs `next typegen` (generates route types such as `LayoutProps`) and then `tsc --noEmit`.
 - `npm test` runs Vitest once; `npm run test:watch` runs it in watch mode; `npm run test:coverage` adds a V8 coverage report.
 - `npm run format:check` runs Prettier (`.prettierrc.json`, print width 120); `npm run format` rewrites files. Markdown is excluded in `.prettierignore`.
-- CI (`.github/workflows/ci.yml`) runs lint, format check, typecheck and tests with coverage on every pull request and push to `main`.
+- CI (`.github/workflows/ci.yml`) runs lint, format check, typecheck and tests with coverage on every pull request and push to `main`, plus a security job with Gitleaks on the full history and `npm audit --audit-level=high`.
 - Single test file: `npx vitest run path/to/file.test.ts`. Single test by name: `npx vitest run -t "test name"`.
 - `npm run db:generate` writes a SQL migration into `drizzle/` after a change to `src/data/postgres/schema.ts`; commit it with the schema change. `npm run db:migrate` applies migrations to the database in `DATABASE_URL_UNPOOLED`. Vercel runs `vercel-build`, which migrates before `next build`, so production and every preview branch are migrated on deploy. Tests need no database.
 
@@ -54,7 +54,7 @@ Current phase: HW4 is complete. The repository contains a Next.js skeleton with 
 Configured in `.claude/settings.json`; scripts live in `.claude/hooks/`.
 
 - **PostToolUse, `post-edit.sh`:** after Claude edits or writes a `.ts` or `.tsx` file under `src/`, ESLint runs on that file and any error is sent back to Claude to fix. Editing a `.tsx` or `.css` file under `src/` also reminds Claude to follow `DESIGN.md`.
-- **Stop, `stop-tests.sh`:** before Claude ends a turn with uncommitted changes in `src/`, `npm test` and `npm run typecheck` run. A failure blocks the stop once so Claude fixes it. A TDD red step (only `*.test.ts` files changed) is reported but not blocked, and a second failure in a row is handed to the human instead of looping.
+- **Stop, `stop-tests.sh`:** before Claude ends a turn with uncommitted changes in `src/`, `npm test` and `npm run typecheck` run. A failure blocks the stop once so Claude fixes it. A TDD red step (test files changed, the type check passes and only tests fail, even with a stub file alongside) is reported but not blocked, and a second failure in a row is handed to the human instead of looping.
 
 ## Next.js version warning
 
@@ -71,7 +71,7 @@ This project uses Next.js 16.4.6 and React 19.3, which have breaking changes com
 | Test coverage | Vitest coverage with `@vitest/coverage-v8`, 70% target | In repo, reported in CI |
 | E2E tests | Playwright | Planned for P3 |
 | Formatting | Prettier, checked in CI with ESLint | In repo |
-| Secret scanning | Gitleaks as a pre-commit hook | Chosen, not in repo |
+| Secret scanning | Gitleaks as a pre-commit hook (`.githooks/pre-commit`, setup in README) and on the full history in CI | In repo |
 | Database | PostgreSQL on Neon (Free plan), added through the Vercel Marketplace integration, in the Washington, D.C. region (Vercel `iad1`, Neon `aws-us-east-1`). Each preview deploy gets its own database branch. The connection string is `DATABASE_URL` | In repo |
 | ORM and migrations | Drizzle ORM with drizzle-kit migrations; PGlite for database tests without a server | In repo |
 | Authentication | Neon Auth (managed Better Auth; users stored in the `neon_auth` schema of the same database) | In repo; enabled on the main branch, with the production URL and the `feat/auth` preview as trusted domains |
