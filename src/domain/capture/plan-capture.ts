@@ -34,7 +34,29 @@ export interface CapturePlan {
   tasks: Task[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- stub until capture is built
+// Ids come from the message and the item's position, so capturing the same message again
+// produces the same records instead of new ones.
+function itemId(context: CaptureContext, kind: ExtractedItem["kind"], index: number): Id {
+  return `${context.messageId}:${kind}:${index}`;
+}
+
 export function planCapture(extraction: CaptureExtraction, context: CaptureContext): CapturePlan {
-  throw new Error("not implemented");
+  const tasks = extraction.items.flatMap((item, index): Task[] =>
+    item.kind === "task"
+      ? [
+          {
+            id: itemId(context, "task", index),
+            userId: context.userId,
+            version: 0,
+            title: item.title,
+            category: item.category,
+            priority: "medium",
+            status: "not-started",
+            remindersEnabled: false,
+            acceptance: "accepted",
+          },
+        ]
+      : [],
+  );
+  return { goals: [], tasks };
 }

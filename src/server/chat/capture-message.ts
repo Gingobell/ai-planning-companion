@@ -1,6 +1,9 @@
+import { Temporal } from "temporal-polyfill";
+import { planCapture } from "@/domain/capture/plan-capture";
 import type { Goal, Id, Task } from "@/domain/records";
 import type { ScopedRepositories } from "@/data/scoped-repositories";
-import type { LanguageModel } from "@/llm/language-model";
+import { generateValidated, type LanguageModel } from "@/llm/language-model";
+import { captureExtractionSchema, capturePrompt, captureSystemPrompt } from "@/server/chat/capture-schema";
 
 export interface CaptureMessageInput {
   repos: ScopedRepositories;
@@ -18,7 +21,30 @@ export type CaptureMessageResult =
   | { kind: "model-unavailable" }
   | { kind: "model-invalid-output" };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- stub until capture is built
+// Saves the user's message first, then the goals and tasks the model finds in it (PRD US-01, US-06).
 export async function captureMessage(input: CaptureMessageInput): Promise<CaptureMessageResult> {
-  throw new Error("not implemented");
+  const { repos, model, userId, messageId, text, now, timeZone } = input;
+  const localNow = Temporal.Instant.from(now).toZonedDateTimeISO(timeZone);
+
+  await repos.messages.save({
+    id: messageId,
+    userId,
+    version: 0,
+    chatDate: localNow.toPlainDate().toString(),
+    role: "user",
+    text,
+    createdAt: now,
+  });
+
+  const extraction = await generateValidated(
+    model,
+    { system: captureSystemPrompt(), prompt: capturePrompt(text, localNow.toPlainDateTime().toString(), timeZone) },
+    captureExtractionSchema,
+  );
+  if (extraction.kind === "unavailable") return { kind: "model-unavailable" };
+  if (extraction.kind === "invalid-output") return { kind: "model-invalid-output" };
+
+  const plan = planCapture(extraction.value, { userId, messageId, timeZone });
+  for (const task of plan.tasks) await repos.tasks.save(task);
+  return { kind: "captured", goals: plan.goals, tasks: plan.tasks, reply: "" };
 }
