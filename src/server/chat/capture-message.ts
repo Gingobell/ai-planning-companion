@@ -1,10 +1,16 @@
 import { Temporal } from "temporal-polyfill";
 import { planCapture } from "@/domain/capture/plan-capture";
-import type { Goal, Id, Task } from "@/domain/records";
+import {
+  applyDeadlineAnswers,
+  chooseDeadlineQuestions,
+  type DeadlineQuestion,
+} from "@/domain/clarification/deadline-questions";
+import type { Goal, Id, OpenQuestion, Task } from "@/domain/records";
 import type { SaveResult } from "@/domain/repositories";
 import type { ScopedRepositories } from "@/data/scoped-repositories";
 import { generateValidated, type LanguageModel } from "@/llm/language-model";
 import { captureExtractionSchema, capturePrompt, captureSystemPrompt } from "@/server/chat/capture-schema";
+import { replyPrompt, replySchema, replySystemPrompt, type ReplyFacts } from "@/server/chat/reply-schema";
 
 export interface CaptureMessageInput {
   repos: ScopedRepositories;
@@ -48,18 +54,43 @@ function describeDeadline(at: string, timeZone: string): string {
   });
 }
 
-// The reply lists only what was saved; follow-up questions come later (#11).
-function replyText(goals: Goal[], tasks: Task[], timeZone: string): string {
+// The template reply, used when the model cannot word it. Built from the same facts the model gets.
+function templateReply(facts: ReplyFacts): { reply: string; questions: string[] } {
   const items = [
-    ...goals.map((goal) => `goal "${goal.title}"`),
-    ...tasks.map((task) =>
-      task.deadline === undefined
-        ? `task "${task.title}"`
-        : `task "${task.title}", due ${describeDeadline(task.deadline.at, timeZone)}`,
+    ...facts.saved.goals.map((title) => `goal "${title}"`),
+    ...facts.saved.tasks.map(({ title, due }) =>
+      due === undefined ? `task "${title}"` : `task "${title}", due ${due}`,
     ),
   ];
-  return items.length === 0 ? "I did not find a goal or task in that message." : `Saved ${items.join("; ")}.`;
+  const confirmations = [
+    ...(items.length === 0 && facts.deadlinesSet.length === 0
+      ? ["I did not find a goal or task in that message."]
+      : []),
+    ...(items.length === 0 ? [] : [`Saved ${items.join("; ")}.`]),
+    ...facts.deadlinesSet.map(({ task, due, kind }) => `Set the ${kind} of "${task}" to ${due}.`),
+  ];
+  const questions = facts.questions.map(({ task, suggestedTarget }) =>
+    suggestedTarget === undefined
+      ? `When is "${task}" due? If there is no fixed date, I can suggest a target.`
+      : `Shall we aim for ${suggestedTarget} as the target for "${task}"?`,
+  );
+  return { reply: [...confirmations, ...questions].join(" "), questions };
 }
+
+// The model words the reply in the user's language; any failure falls back to the template, so a
+// capture that saved is never reported as failed because of its wording.
+async function phraseReply(model: LanguageModel, facts: ReplyFacts) {
+  const phrased = await generateValidated(
+    model,
+    { system: replySystemPrompt(), prompt: replyPrompt(facts) },
+    replySchema,
+  );
+  const fits = phrased.kind === "ok" && phrased.value.questions.length === facts.questions.length;
+  return fits ? phrased.value : templateReply(facts);
+}
+
+const openDeadlineQuestion = (question: OpenQuestion) => question.status === "open" && question.topic === "deadline";
+const byId = (a: { id: Id }, b: { id: Id }) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
 // Saves the user's message first, then the goals and tasks the model finds in it (PRD US-01, US-06).
 // The assistant's reply is saved last, so its presence means the capture finished: a resend of the
@@ -87,9 +118,28 @@ export async function captureMessage(input: CaptureMessageInput): Promise<Captur
   });
   if (!isKept(saved)) return { kind: "save-failed" };
 
+  // Questions created by an earlier attempt at this same message are not shown as questions to answer.
+  const fromThisMessage = (question: OpenQuestion) => question.id.startsWith(`${messageId}:`);
+  const earlierQuestions = (await repos.openQuestions.list()).filter((question) => !fromThisMessage(question));
+  const openQuestions = earlierQuestions.filter(openDeadlineQuestion).sort(byId);
+  const tasksBefore = await repos.tasks.list();
+  const titleOf = (taskId: Id | undefined, tasks: Task[]) => tasks.find((task) => task.id === taskId)?.title ?? "";
+  const due = (at: string) => describeDeadline(at, timeZone);
+
   const extraction = await generateValidated(
     model,
-    { system: captureSystemPrompt(), prompt: capturePrompt(text, localNow.toPlainDateTime().toString(), timeZone) },
+    {
+      system: captureSystemPrompt(),
+      prompt: capturePrompt(
+        text,
+        localNow.toPlainDateTime().toString(),
+        timeZone,
+        openQuestions.map((question) => ({
+          taskTitle: titleOf(question.taskId, tasksBefore),
+          ...(question.proposedDeadline === undefined ? {} : { suggestedTarget: due(question.proposedDeadline) }),
+        })),
+      ),
+    },
     captureExtractionSchema,
   );
   if (extraction.kind === "unavailable") return { kind: "model-unavailable" };
@@ -104,7 +154,66 @@ export async function captureMessage(input: CaptureMessageInput): Promise<Captur
   const goals = fromMessage(await repos.goals.list(), messageId);
   const tasks = fromMessage(await repos.tasks.list(), messageId);
 
-  const reply = replyText(goals, tasks, timeZone);
+  // Answers to earlier deadline questions (PRD US-01): a named date is saved, a suggested target waits for "yes".
+  const changes = applyDeadlineAnswers(extraction.value.answers ?? [], {
+    questions: openQuestions,
+    tasks: tasksBefore,
+    now,
+    timeZone,
+  });
+  for (const task of changes.tasks) if (!isKept(await repos.tasks.save(task))) return { kind: "save-failed" };
+  for (const question of changes.questions) {
+    if (!isKept(await repos.openQuestions.save(question))) return { kind: "save-failed" };
+  }
+
+  const asked = chooseDeadlineQuestions({ newTasks: tasks, existing: earlierQuestions, followUps: changes.followUps });
+  const allTasks = [...tasksBefore, ...tasks];
+  const facts: ReplyFacts = {
+    userMessage: text,
+    saved: {
+      goals: goals.map((goal) => goal.title),
+      tasks: tasks.map((task) => ({
+        title: task.title,
+        ...(task.deadline === undefined ? {} : { due: due(task.deadline.at) }),
+      })),
+    },
+    deadlinesSet: changes.tasks.flatMap((task) =>
+      task.deadline === undefined
+        ? []
+        : [
+            {
+              task: task.title,
+              due: due(task.deadline.at),
+              kind: task.deadline.source === "agreed" ? ("agreed target" as const) : ("due date" as const),
+            },
+          ],
+    ),
+    questions: asked.map((question) => ({
+      task: titleOf(question.taskId, allTasks),
+      ...(question.proposedDeadline === undefined ? {} : { suggestedTarget: due(question.proposedDeadline) }),
+    })),
+  };
+  const { reply, questions } = await phraseReply(model, facts);
+
+  // New questions are saved before the reply (PRD US-06: a question survives a closed window).
+  // Follow-ups already exist; a retry finds its earlier question by id and keeps it.
+  const followUpIds = new Set(changes.followUps.map((question) => question.id));
+  const newQuestion = (question: DeadlineQuestion, wording: string): OpenQuestion => ({
+    id: question.id,
+    userId,
+    version: 0,
+    taskId: question.taskId,
+    topic: "deadline",
+    question: wording,
+    status: "open",
+  });
+  for (const [index, question] of asked.entries()) {
+    if (followUpIds.has(question.id)) continue;
+    if (!isKept(await repos.openQuestions.save(newQuestion(question, questions[index])))) {
+      return { kind: "save-failed" };
+    }
+  }
+
   // One millisecond after the user's message, so the day's messages sort in the order they were written.
   const replyAt = Temporal.Instant.from(now).add({ milliseconds: 1 }).toString();
   const replySaved = await repos.messages.save({

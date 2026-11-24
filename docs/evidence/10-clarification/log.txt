@@ -183,3 +183,12 @@ exit code: 1
 
 Note: the C5 test now expects two model requests (extraction and reply phrasing); other #10 tests only gained a scripted phrasing result.
 
+=== Cycle 4 Q4 green ===
+Time: 2026-11-24 13:29 PST
+Base commit: 90656d5
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  16 passed (16)
+      Tests  187 passed (187)
+exit code: 0
+
