@@ -179,3 +179,6 @@ $ npx vitest run
       Tests  132 passed (132)
 exit code: 0
 
+
+=== Cycles 1 to 5 refactor ===
+Skipped: planCapture and captureMessage are short with clear names; the only repetition is the record defaults for goals and tasks, which read more clearly inline.
