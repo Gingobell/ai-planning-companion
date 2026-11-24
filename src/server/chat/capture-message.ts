@@ -1,6 +1,7 @@
 import { Temporal } from "temporal-polyfill";
 import { planCapture } from "@/domain/capture/plan-capture";
 import type { Goal, Id, Task } from "@/domain/records";
+import type { SaveResult } from "@/domain/repositories";
 import type { ScopedRepositories } from "@/data/scoped-repositories";
 import { generateValidated, type LanguageModel } from "@/llm/language-model";
 import { captureExtractionSchema, capturePrompt, captureSystemPrompt } from "@/server/chat/capture-schema";
@@ -19,9 +20,14 @@ export interface CaptureMessageInput {
 export type CaptureMessageResult =
   | { kind: "captured"; goals: Goal[]; tasks: Task[]; reply: string }
   | { kind: "model-unavailable" }
-  | { kind: "model-invalid-output" };
+  | { kind: "model-invalid-output" }
+  | { kind: "save-failed" };
 
 const replyId = (messageId: Id) => `${messageId}:reply`;
+
+// "saved" is new, "conflict" means this user already has the record (a retry); "not-found" means it could
+// not be saved for this user, so the flow stops instead of reporting success (PRD Section 7).
+const isKept = (result: SaveResult<unknown>) => result.kind !== "not-found";
 
 // Records created from a message carry its id as a prefix and their position as a suffix (planCapture).
 function fromMessage<T extends { id: Id }>(records: T[], messageId: Id): T[] {
@@ -70,7 +76,16 @@ export async function captureMessage(input: CaptureMessageInput): Promise<Captur
     return { kind: "captured", goals, tasks, reply: finished.text };
   }
 
-  await repos.messages.save({ id: messageId, userId, version: 0, chatDate, role: "user", text, createdAt: now });
+  const saved = await repos.messages.save({
+    id: messageId,
+    userId,
+    version: 0,
+    chatDate,
+    role: "user",
+    text,
+    createdAt: now,
+  });
+  if (!isKept(saved)) return { kind: "save-failed" };
 
   const extraction = await generateValidated(
     model,
@@ -82,16 +97,17 @@ export async function captureMessage(input: CaptureMessageInput): Promise<Captur
 
   const plan = planCapture(extraction.value, { userId, messageId, timeZone });
   // Goals first, so a task's goal exists before the task that points at it. A record that already
-  // exists (an earlier attempt stopped before the reply) is kept as it is.
-  for (const goal of plan.goals) await repos.goals.save(goal);
-  for (const task of plan.tasks) await repos.tasks.save(task);
+  // exists (an earlier attempt stopped before the reply) is kept as it is. These saves are not one
+  // transaction; if one fails, a resend of the same message finishes the rest.
+  for (const goal of plan.goals) if (!isKept(await repos.goals.save(goal))) return { kind: "save-failed" };
+  for (const task of plan.tasks) if (!isKept(await repos.tasks.save(task))) return { kind: "save-failed" };
   const goals = fromMessage(await repos.goals.list(), messageId);
   const tasks = fromMessage(await repos.tasks.list(), messageId);
 
   const reply = replyText(goals, tasks, timeZone);
   // One millisecond after the user's message, so the day's messages sort in the order they were written.
   const replyAt = Temporal.Instant.from(now).add({ milliseconds: 1 }).toString();
-  await repos.messages.save({
+  const replySaved = await repos.messages.save({
     id: replyId(messageId),
     userId,
     version: 0,
@@ -100,5 +116,6 @@ export async function captureMessage(input: CaptureMessageInput): Promise<Captur
     text: reply,
     createdAt: replyAt,
   });
+  if (!isKept(replySaved)) return { kind: "save-failed" };
   return { kind: "captured", goals, tasks, reply };
 }

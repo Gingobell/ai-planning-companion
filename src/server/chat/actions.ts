@@ -50,6 +50,9 @@ export async function sendMessage(input: { text: string; messageId: string }): P
   refresh();
   if (result.kind === "captured") return { status: "saved" };
   if (result.kind === "model-unavailable") return { status: "error", error: UNAVAILABLE };
+  if (result.kind === "save-failed") {
+    return { status: "error", error: "Your message could not be saved. Please send it again." };
+  }
   return {
     status: "error",
     error: "The assistant's answer could not be read. Your message is kept; please try again.",

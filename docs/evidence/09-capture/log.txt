@@ -218,3 +218,12 @@ $ npx vitest run
       Tests  1 failed | 167 passed (168)
 exit code: 1
 
+=== Review follow-up green: stop when a save fails ===
+Time: 2026-11-24 11:44 PST
+Base commit: 83e51ea
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  15 passed (15)
+      Tests  168 passed (168)
+exit code: 0
+
