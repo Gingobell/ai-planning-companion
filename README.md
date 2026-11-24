@@ -52,6 +52,8 @@ npm run lint
 npm run dev         # http://localhost:3000
 ```
 
-Tests need no database or auth service. To run the app against real ones, copy `.env.example` to `.env.local`, set `DATABASE_URL` and `DATABASE_URL_UNPOOLED` to a Neon development branch, set `NEON_AUTH_BASE_URL` to the project's Auth URL and `NEON_AUTH_COOKIE_SECRET` to the output of `openssl rand -base64 32`, then run `npm run db:migrate`. Every page except `/sign-in` and `/sign-up` asks you to sign in.
+**About the assistant's model.** The assistant uses Google's Gemini API on the free tier, where Google may use what is typed in chat to improve its products. Only the current message, the time zone and the current time are sent with each request.
+
+Tests need no database, auth service or model key; model calls use a test double. To run the app against real ones, copy `.env.example` to `.env.local`, set `DATABASE_URL` and `DATABASE_URL_UNPOOLED` to a Neon development branch, set `NEON_AUTH_BASE_URL` to the project's Auth URL and `NEON_AUTH_COOKIE_SECRET` to the output of `openssl rand -base64 32`, set `GEMINI_API_KEY` to a key from https://aistudio.google.com/apikey created in a Google Cloud project without billing (free tier), then run `npm run db:migrate`. Every page except `/sign-in` and `/sign-up` asks you to sign in.
 
 Built with Next.js, TypeScript and Vitest. Stack decisions are recorded in [CLAUDE.md](CLAUDE.md).
