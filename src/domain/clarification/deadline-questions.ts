@@ -23,6 +23,26 @@ export const deadlineQuestionId = (taskId: Id): Id => `${taskId}:deadline`;
 const needsDeadline = (task: Task) =>
   task.deadline === undefined && task.status !== "completed" && task.status !== "canceled";
 
+// "A few questions at a time" (PRD US-01): more would bury the one that matters most.
+export const MAX_QUESTIONS_PER_REPLY = 2;
+
+// Follow-ups on what the user just answered come first, then new tasks in message order. Older open
+// questions the user did not touch are not asked again here, so the user is not asked on every message.
 export function chooseDeadlineQuestions(input: ChooseDeadlineQuestionsInput): DeadlineQuestion[] {
-  return input.newTasks.filter(needsDeadline).map((task) => ({ id: deadlineQuestionId(task.id), taskId: task.id }));
+  const followUps = (input.followUps ?? []).flatMap((question): DeadlineQuestion[] =>
+    question.taskId === undefined || question.status !== "open"
+      ? []
+      : [
+          {
+            id: question.id,
+            taskId: question.taskId,
+            ...(question.proposedDeadline === undefined ? {} : { proposedDeadline: question.proposedDeadline }),
+          },
+        ],
+  );
+  const known = new Set([...input.existing.map((question) => question.id), ...followUps.map((q) => q.id)]);
+  const fresh = input.newTasks
+    .filter((task) => needsDeadline(task) && !known.has(deadlineQuestionId(task.id)))
+    .map((task) => ({ id: deadlineQuestionId(task.id), taskId: task.id }));
+  return [...followUps, ...fresh].slice(0, MAX_QUESTIONS_PER_REPLY);
 }
