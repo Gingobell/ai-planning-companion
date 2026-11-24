@@ -241,3 +241,12 @@ exit code: 1
 
 Note: the Q4 helpers moved to the top of the test file and send() takes its model results as an array, so Q5 can pass a button choice.
 
+=== Cycle 5 Q5 green ===
+Time: 2026-11-24 13:47 PST
+Base commit: 9ce31ff
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  16 passed (16)
+      Tests  191 passed (191)
+exit code: 0
+

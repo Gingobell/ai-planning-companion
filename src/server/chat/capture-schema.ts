@@ -57,6 +57,8 @@ export const captureExtractionSchema = z.object({
     .describe("How the message answers the open deadline questions listed in the prompt; empty if it answers none"),
 });
 
+export type CaptureExtractionOutput = z.infer<typeof captureExtractionSchema>;
+
 export function captureSystemPrompt(): string {
   return [
     "You extract goals and tasks from one message a user sends to a planning assistant.",

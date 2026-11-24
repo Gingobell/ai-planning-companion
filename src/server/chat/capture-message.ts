@@ -8,8 +8,13 @@ import {
 import type { Goal, Id, OpenQuestion, Task } from "@/domain/records";
 import type { SaveResult } from "@/domain/repositories";
 import type { ScopedRepositories } from "@/data/scoped-repositories";
-import { generateValidated, type LanguageModel } from "@/llm/language-model";
-import { captureExtractionSchema, capturePrompt, captureSystemPrompt } from "@/server/chat/capture-schema";
+import { generateValidated, type LanguageModel, type ValidatedResult } from "@/llm/language-model";
+import {
+  captureExtractionSchema,
+  capturePrompt,
+  captureSystemPrompt,
+  type CaptureExtractionOutput,
+} from "@/server/chat/capture-schema";
 import { replyPrompt, replySchema, replySystemPrompt, type ReplyFacts } from "@/server/chat/reply-schema";
 
 export interface CaptureMessageInput {
@@ -144,6 +149,14 @@ export async function captureMessage(input: CaptureMessageInput): Promise<Captur
     return { kind: "captured", goals, tasks, reply: finished.text };
   }
 
+  // Questions created by an earlier attempt at this same message are not shown as questions to answer.
+  const fromThisMessage = (question: OpenQuestion) => question.id.startsWith(`${messageId}:`);
+  const earlierQuestions = (await repos.openQuestions.list()).filter((question) => !fromThisMessage(question));
+  const openQuestions = earlierQuestions.filter(openDeadlineQuestion).sort(byId);
+  // A button pressed on a question that was answered meanwhile (another tab, an older reply) does nothing.
+  const choiceIndex = input.choice && openQuestions.findIndex((question) => question.id === input.choice?.questionId);
+  if (choiceIndex === -1) return { kind: "question-closed" };
+
   const saved = await repos.messages.save({
     id: messageId,
     userId,
@@ -155,30 +168,30 @@ export async function captureMessage(input: CaptureMessageInput): Promise<Captur
   });
   if (!isKept(saved)) return { kind: "save-failed" };
 
-  // Questions created by an earlier attempt at this same message are not shown as questions to answer.
-  const fromThisMessage = (question: OpenQuestion) => question.id.startsWith(`${messageId}:`);
-  const earlierQuestions = (await repos.openQuestions.list()).filter((question) => !fromThisMessage(question));
-  const openQuestions = earlierQuestions.filter(openDeadlineQuestion).sort(byId);
   const tasksBefore = await repos.tasks.list();
   const titleOf = (taskId: Id | undefined, tasks: Task[]) => tasks.find((task) => task.id === taskId)?.title ?? "";
   const due = (at: string) => describeDeadline(at, timeZone);
 
-  const extraction = await generateValidated(
-    model,
-    {
-      system: captureSystemPrompt(),
-      prompt: capturePrompt(
-        text,
-        localNow.toPlainDateTime().toString(),
-        timeZone,
-        openQuestions.map((question) => ({
-          taskTitle: titleOf(question.taskId, tasksBefore),
-          ...(question.proposedDeadline === undefined ? {} : { suggestedTarget: due(question.proposedDeadline) }),
-        })),
-      ),
-    },
-    captureExtractionSchema,
-  );
+  // A button press is already an exact answer, so the model is not asked to read it.
+  const extraction: ValidatedResult<CaptureExtractionOutput> =
+    input.choice === undefined || choiceIndex === undefined
+      ? await generateValidated(
+          model,
+          {
+            system: captureSystemPrompt(),
+            prompt: capturePrompt(
+              text,
+              localNow.toPlainDateTime().toString(),
+              timeZone,
+              openQuestions.map((question) => ({
+                taskTitle: titleOf(question.taskId, tasksBefore),
+                ...(question.proposedDeadline === undefined ? {} : { suggestedTarget: due(question.proposedDeadline) }),
+              })),
+            ),
+          },
+          captureExtractionSchema,
+        )
+      : { kind: "ok", value: { items: [], answers: [{ questionIndex: choiceIndex, reply: input.choice.reply }] } };
   if (extraction.kind === "unavailable") return { kind: "model-unavailable" };
   if (extraction.kind === "invalid-output") return { kind: "model-invalid-output" };
 
@@ -198,12 +211,18 @@ export async function captureMessage(input: CaptureMessageInput): Promise<Captur
     now,
     timeZone,
   });
+  const asked = chooseDeadlineQuestions({ newTasks: tasks, existing: earlierQuestions, followUps: changes.followUps });
+  const askedIds = new Set(asked.map((question) => question.id));
+  // Follow-ups asked again now show their answers under this reply.
+  const questionUpdates = new Map(changes.questions.map((question) => [question.id, question]));
+  for (const followUp of changes.followUps) {
+    if (askedIds.has(followUp.id)) questionUpdates.set(followUp.id, { ...followUp, askedIn: replyId(messageId) });
+  }
   for (const task of changes.tasks) if (!isKept(await repos.tasks.save(task))) return { kind: "save-failed" };
-  for (const question of changes.questions) {
+  for (const question of questionUpdates.values()) {
     if (!isKept(await repos.openQuestions.save(question))) return { kind: "save-failed" };
   }
 
-  const asked = chooseDeadlineQuestions({ newTasks: tasks, existing: earlierQuestions, followUps: changes.followUps });
   const facts = replyFacts({
     text,
     goals,
@@ -226,6 +245,7 @@ export async function captureMessage(input: CaptureMessageInput): Promise<Captur
     topic: "deadline",
     question: wording,
     status: "open",
+    askedIn: replyId(messageId),
   });
   for (const [index, question] of asked.entries()) {
     if (followUpIds.has(question.id)) continue;
