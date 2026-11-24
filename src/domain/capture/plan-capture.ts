@@ -1,4 +1,5 @@
-import type { Goal, Id, Task } from "@/domain/records";
+import { Temporal } from "temporal-polyfill";
+import type { Deadline, Goal, Id, Task } from "@/domain/records";
 
 // What the model extracted from one chat message. It is a proposal: planCapture decides what is saved.
 export interface ExtractedDeadline {
@@ -40,6 +41,25 @@ function itemId(context: CaptureContext, kind: ExtractedItem["kind"], index: num
   return `${context.messageId}:${kind}:${index}`;
 }
 
+// The time used when the user names a day but no time: the end of that day.
+const END_OF_DAY = "23:59";
+
+// A deadline is kept only when the user stated it and it is a real local date and time; a guess
+// or an impossible date is dropped rather than repaired (PRD Section 6, "Deadlines").
+function statedDeadline(deadline: ExtractedDeadline | undefined, timeZone: string): Deadline | undefined {
+  if (deadline === undefined || !deadline.statedByUser) return undefined;
+  try {
+    const date = Temporal.PlainDate.from(deadline.localDate, { overflow: "reject" });
+    const time = Temporal.PlainTime.from(deadline.localTime ?? END_OF_DAY, { overflow: "reject" });
+    const at = date.toPlainDateTime(time).toZonedDateTime(timeZone, { disambiguation: "compatible" }).toInstant();
+    return { at: at.toString(), source: "external" };
+  } catch {
+    return undefined;
+  }
+}
+
+const withDeadline = (deadline: Deadline | undefined) => (deadline === undefined ? {} : { deadline });
+
 export function planCapture(extraction: CaptureExtraction, context: CaptureContext): CapturePlan {
   const { items } = extraction;
   const goals = items.flatMap((item, index): Goal[] =>
@@ -52,6 +72,7 @@ export function planCapture(extraction: CaptureExtraction, context: CaptureConte
             title: item.title,
             category: item.category,
             horizon: item.horizon ?? "long",
+            ...withDeadline(statedDeadline(item.deadline, context.timeZone)),
             status: "active",
           },
         ]
@@ -72,6 +93,7 @@ export function planCapture(extraction: CaptureExtraction, context: CaptureConte
         title: item.title,
         category: item.category,
         ...(goalId === undefined ? {} : { goalId }),
+        ...withDeadline(statedDeadline(item.deadline, context.timeZone)),
         priority: "medium",
         status: "not-started",
         remindersEnabled: false,
