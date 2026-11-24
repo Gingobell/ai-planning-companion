@@ -325,6 +325,16 @@ export function describeRepositoryContract(name: string, createHarness: () => Pr
     });
 
     describe("ownership", () => {
+      it("lets two users each keep a reminder with the same delivery key", async () => {
+        // Check-in keys such as "check-in:2026-11-24T09:00" are per user, so another user may reuse one.
+        const deliveryKey = "check-in:2026-11-24T09:00";
+        const [, checkIn] = samples(ALICE).reminders;
+        await h.repos.reminders.save(ALICE, { ...checkIn, id: "check-in-alice", deliveryKey });
+        const bobs = { ...checkIn, id: "check-in-bob", userId: BOB, deliveryKey };
+        expect(await h.repos.reminders.save(BOB, bobs)).toEqual({ kind: "saved", record: { ...bobs, version: 1 } });
+        expect((await h.repos.reminders.get(ALICE, "check-in-alice"))?.deliveryKey).toBe(deliveryKey);
+      });
+
       it.each(ownedRepoNames)("keeps each user's %s to that user for list, get and remove", async (repoName) => {
         const [aliceRecord] = samples(ALICE)[repoName];
         const bobRecord = { ...samples(BOB)[repoName][0], id: `${aliceRecord.id}-bob` };
