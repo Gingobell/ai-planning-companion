@@ -44,3 +44,25 @@ when both pass.
 
 On turns with no uncommitted changes in src/, the same hook ran and exited at once (about 35 ms).
 No failing run has occurred yet, so the block-once and TDD red-step paths were not exercised.
+
+== Stop hook after the red-step fix (PR #59) ==
+Sihui's Sprint 1 standup reported that the Stop hook blocked TDD red steps that add a no-logic stub,
+because only a change made of nothing but test files counted as a red step. The fix (committed as
+aa2e037) treats a change that includes test files and passes the type check as a red step.
+
+Checked by hand on 2026-11-23 (US Pacific) on the working tree with the fix applied, by piping '{}'
+into .claude/hooks/stop-tests.sh. Each case used temporary files that were removed afterwards.
+
+Case 1, red step with a stub: a new failing test plus a stub that throws "not implemented"; the type
+check passes.
+  exit 0
+  {"systemMessage":"TDD red step: test files changed and the type check passes, so failing tests are expected. Stop not blocked."}
+Case 2, type error: the same test plus a stub that returns a string where a number is declared.
+  exit 2 (blocked)
+Case 3, broken implementation with no test file changed: src/domain/progress/goal-progress.ts edited
+to report completed: 0; the existing tests fail. The file was restored with git checkout afterwards.
+  exit 2 (blocked)
+  "Tests or type check fail with uncommitted changes in src/. Fix them before finishing."
+
+A first attempt at case 3 used a file not named *.test.ts, so no test ran, every check passed and the
+hook exited 0 as it should; it was replaced by the case above.
