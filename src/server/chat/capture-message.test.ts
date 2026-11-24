@@ -116,4 +116,50 @@ describe("captureMessage", () => {
       expect((await repos.tasks.get(task.id))?.category).toBe("Fitness");
     });
   });
+
+  describe("C4: a deadline is saved only when the user stated one; long-term goals need none", () => {
+    const task = (deadline: ExtractedItem["deadline"]): ExtractedItem => ({
+      kind: "task",
+      title: "Lab 5",
+      category: "School",
+      deadline,
+    });
+
+    async function deadlineOf(item: ExtractedItem) {
+      await capture("Lab 5", extracted(item)).run();
+      return (await repos.tasks.list())[0].deadline;
+    }
+
+    it("turns a stated local date and time into a UTC instant marked external", async () => {
+      expect(await deadlineOf(task({ localDate: "2026-11-26", localTime: "23:59", statedByUser: true }))).toEqual({
+        at: "2026-11-27T07:59:00Z",
+        source: "external",
+      });
+    });
+
+    it("uses the end of the stated day when no time is given", async () => {
+      expect(await deadlineOf(task({ localDate: "2026-11-26", statedByUser: true }))).toEqual({
+        at: "2026-11-27T07:59:00Z",
+        source: "external",
+      });
+    });
+
+    it("drops a deadline the model guessed", async () => {
+      expect(await deadlineOf(task({ localDate: "2026-11-26", statedByUser: false }))).toBeUndefined();
+    });
+
+    it("drops a date that does not exist instead of failing", async () => {
+      expect(await deadlineOf(task({ localDate: "2026-02-30", statedByUser: true }))).toBeUndefined();
+    });
+
+    it("saves a long-term goal without a deadline", async () => {
+      await capture(
+        "I want to get better at public speaking.",
+        extracted({ kind: "goal", title: "Get better at public speaking", category: "Growth", horizon: "long" }),
+      ).run();
+      const [goal] = await repos.goals.list();
+      expect(goal).toMatchObject({ horizon: "long", status: "active" });
+      expect(goal.deadline).toBeUndefined();
+    });
+  });
 });

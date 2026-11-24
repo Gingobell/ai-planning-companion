@@ -89,3 +89,39 @@ $ npx vitest run
       Tests  125 passed (125)
 exit code: 0
 
+=== Cycle 4 C4 stated deadlines red (the three never-guess guards pass until deadlines are saved) ===
+Time: 2026-11-23 20:05 PST
+Base commit: 339011c
+$ npx vitest run
+}
++ Received:
+undefined
+ ❯ src/server/chat/capture-message.test.ts:134:107
+    132|
+    133|     it("turns a stated local date and time into a UTC instant marked e…
+    134|       expect(await deadlineOf(task({ localDate: "2026-11-26", localTim…
+       |                                                                                                           ^
+    135|         at: "2026-11-27T07:59:00Z",
+    136|         source: "external",
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > C4: a deadline is saved only when the user stated one; long-term goals need none > uses the end of the stated day when no time is given
+AssertionError: expected undefined to deeply equal { at: '2026-11-27T07:59:00Z', …(1) }
+- Expected:
+{
+  "at": "2026-11-27T07:59:00Z",
+  "source": "external",
+}
++ Received:
+undefined
+ ❯ src/server/chat/capture-message.test.ts:141:87
+    139|
+    140|     it("uses the end of the stated day when no time is given", async (…
+    141|       expect(await deadlineOf(task({ localDate: "2026-11-26", statedBy…
+       |                                                                                       ^
+    142|         at: "2026-11-27T07:59:00Z",
+    143|         source: "external",
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+ Test Files  1 failed | 12 passed (13)
+      Tests  2 failed | 128 passed (130)
+exit code: 1
+
