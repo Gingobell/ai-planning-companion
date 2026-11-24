@@ -21,20 +21,56 @@ export type CaptureMessageResult =
   | { kind: "model-unavailable" }
   | { kind: "model-invalid-output" };
 
+const replyId = (messageId: Id) => `${messageId}:reply`;
+
+// Records created from a message carry its id as a prefix and their position as a suffix (planCapture).
+function fromMessage<T extends { id: Id }>(records: T[], messageId: Id): T[] {
+  const position = (id: Id) => Number(id.slice(id.lastIndexOf(":") + 1));
+  return records
+    .filter((record) => record.id.startsWith(`${messageId}:`))
+    .sort((a, b) => position(a.id) - position(b.id));
+}
+
+function describeDeadline(at: string, timeZone: string): string {
+  const local = Temporal.Instant.from(at).toZonedDateTimeISO(timeZone);
+  return local.toLocaleString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+// The reply lists only what was saved; follow-up questions come later (#11).
+function replyText(goals: Goal[], tasks: Task[], timeZone: string): string {
+  const items = [
+    ...goals.map((goal) => `goal "${goal.title}"`),
+    ...tasks.map((task) =>
+      task.deadline === undefined
+        ? `task "${task.title}"`
+        : `task "${task.title}", due ${describeDeadline(task.deadline.at, timeZone)}`,
+    ),
+  ];
+  return items.length === 0 ? "I did not find a goal or task in that message." : `Saved ${items.join("; ")}.`;
+}
+
 // Saves the user's message first, then the goals and tasks the model finds in it (PRD US-01, US-06).
+// The assistant's reply is saved last, so its presence means the capture finished: a resend of the
+// same message returns the saved result without asking the model again.
 export async function captureMessage(input: CaptureMessageInput): Promise<CaptureMessageResult> {
   const { repos, model, userId, messageId, text, now, timeZone } = input;
   const localNow = Temporal.Instant.from(now).toZonedDateTimeISO(timeZone);
+  const chatDate = localNow.toPlainDate().toString();
 
-  await repos.messages.save({
-    id: messageId,
-    userId,
-    version: 0,
-    chatDate: localNow.toPlainDate().toString(),
-    role: "user",
-    text,
-    createdAt: now,
-  });
+  const finished = await repos.messages.get(replyId(messageId));
+  if (finished !== undefined) {
+    const goals = fromMessage(await repos.goals.list(), messageId);
+    const tasks = fromMessage(await repos.tasks.list(), messageId);
+    return { kind: "captured", goals, tasks, reply: finished.text };
+  }
+
+  await repos.messages.save({ id: messageId, userId, version: 0, chatDate, role: "user", text, createdAt: now });
 
   const extraction = await generateValidated(
     model,
@@ -45,8 +81,24 @@ export async function captureMessage(input: CaptureMessageInput): Promise<Captur
   if (extraction.kind === "invalid-output") return { kind: "model-invalid-output" };
 
   const plan = planCapture(extraction.value, { userId, messageId, timeZone });
-  // Goals first, so a task's goal exists before the task that points at it.
+  // Goals first, so a task's goal exists before the task that points at it. A record that already
+  // exists (an earlier attempt stopped before the reply) is kept as it is.
   for (const goal of plan.goals) await repos.goals.save(goal);
   for (const task of plan.tasks) await repos.tasks.save(task);
-  return { kind: "captured", goals: plan.goals, tasks: plan.tasks, reply: "" };
+  const goals = fromMessage(await repos.goals.list(), messageId);
+  const tasks = fromMessage(await repos.tasks.list(), messageId);
+
+  const reply = replyText(goals, tasks, timeZone);
+  // One millisecond after the user's message, so the day's messages sort in the order they were written.
+  const replyAt = Temporal.Instant.from(now).add({ milliseconds: 1 }).toString();
+  await repos.messages.save({
+    id: replyId(messageId),
+    userId,
+    version: 0,
+    chatDate,
+    role: "assistant",
+    text: reply,
+    createdAt: replyAt,
+  });
+  return { kind: "captured", goals, tasks, reply };
 }

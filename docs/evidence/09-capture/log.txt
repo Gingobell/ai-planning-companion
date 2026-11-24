@@ -170,3 +170,12 @@ AssertionError: expected [ 'user' ] to deeply equal [ 'user', 'assistant' ]
       Tests  2 failed | 130 passed (132)
 exit code: 1
 
+=== Cycle 5 C5 no duplicates on retry green ===
+Time: 2026-11-23 20:07 PST
+Base commit: def687a
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  13 passed (13)
+      Tests  132 passed (132)
+exit code: 0
+
