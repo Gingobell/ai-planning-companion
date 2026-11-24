@@ -1,0 +1,20 @@
+Security gates 1 and 2 (#33): secret scan and dependency scan.
+
+=== Gitleaks pre-commit hook blocks a staged secret ===
+Time: 2026-11-23 15:34 PST
+Setup: git config core.hooksPath .githooks; gitleaks 8.30.1
+A file with a randomly generated fake GitHub token was staged and committed with "git commit -m 'test leak'".
+Hook output:
+  INF 0 commits scanned.
+  INF scanned ~58 bytes (58 bytes) in 20.3ms
+  WRN leaks found: 1
+Result: the commit was not created (HEAD stayed at 066ab3d). The file was unstaged and deleted.
+
+=== Gitleaks on the full history ===
+$ gitleaks git --redact --no-banner .
+  INF 114 commits scanned.
+  INF no leaks found
+
+=== npm audit ===
+$ npm audit --audit-level=high
+found 0 vulnerabilities

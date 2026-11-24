@@ -20,10 +20,10 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 | --- | --- | --- |
 | Polished, production-ready app solving a real problem; publicly deployed | Partial | Deployed at https://ai-planning-companion.vercel.app; product defined in [PRD](../product/PRD.md) |
 | 2+ user roles or distinct feature areas | Planned | Four distinct feature areas (PRD Section 5); multiple user roles are not planned |
-| Next.js full stack | Partial | Next.js skeleton in `src/app/` |
-| Database (PostgreSQL recommended) | Partial | Neon PostgreSQL provisioned through Vercel; schema and repositories in #6 |
-| Authentication | Not started | Neon Auth chosen; built in #7 |
-| Hosting with preview deploys (Vercel) | Partial | Production deploys from `main`; preview deploys checked on the next pull request (#8) |
+| Next.js full stack | Partial | App shell, sign-in and sign-up pages, server actions and the auth API route in `src/app/` |
+| Database (PostgreSQL recommended) | Done | Neon PostgreSQL with a Drizzle schema, migrations and repositories ([#6](https://github.com/Gingobell/ai-planning-companion/issues/6), PR #49) |
+| Authentication | Done | Neon Auth sign-up, sign-in and sign-out; every read and write scoped to the signed-in user ([#7](https://github.com/Gingobell/ai-planning-companion/issues/7), PR #51) |
+| Hosting with preview deploys (Vercel) | Done | Production deploys from `main`; every pull request gets a preview deploy and its own database branch ([#8](https://github.com/Gingobell/ai-planning-companion/issues/8), PR #47) |
 
 ## Claude Code mastery
 
@@ -42,24 +42,24 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 
 | Requirement | Status | Evidence or next step |
 | --- | --- | --- |
-| Strict red-green-refactor for at least 3 features, failing tests committed before implementation | Partial (1 of 3) | Time block recommendation: [plan](time-block-recommendation.md), [TDD log](../evidence/03-tdd/log.txt). Six TDD features are planned, listed under Testing in [p3-work-split.md](p3-work-split.md) |
-| Unit and integration tests (Vitest) | Partial | Unit tests in `src/domain/`; no integration tests yet |
+| Strict red-green-refactor for at least 3 features, failing tests committed before implementation | Done (3 of 3) | Time block recommendation ([plan](time-block-recommendation.md), [log](../evidence/03-tdd/log.txt)), database and repositories ([plan](database.md), [log](../evidence/05-database/log.txt)), progress rules ([plan](progress-rules.md), [log](../evidence/06-progress/log.txt)). The other TDD features listed under Testing in [p3-work-split.md](p3-work-split.md) add more |
+| Unit and integration tests (Vitest) | Partial | Unit tests in `src/domain/`; database integration tests on PGlite (the shared repository suite and the two-account isolation tests); route handler tests still to come |
 | At least 1 Playwright end-to-end test | Not started | Playwright planned (CLAUDE.md tech stack) |
-| 70%+ coverage | Partial | Measured with `npm run test:coverage` and shown in the CI run summary; 96% lines at setup, not enforced as a threshold |
+| 70%+ coverage | Partial | Measured with `npm run test:coverage` and shown in the CI run summary; 86% lines after #7, not enforced as a threshold |
 
 ## CI/CD and security
 
 | Requirement | Status | Evidence or next step |
 | --- | --- | --- |
-| GitHub Actions with all 8 stages passing: ESLint + Prettier, `tsc --noEmit`, unit/integration tests, Playwright E2E, `npm audit`, AI PR review (claude-code-action or `claude -p`), preview deploy, production deploy on merge to main | Partial | `.github/workflows/ci.yml` runs ESLint, Prettier, `tsc --noEmit` and unit tests with coverage (#32); other stages not added yet |
-| At least 4 security gates from the course's 8-gate pipeline | Planned | The course's eight gates (Week 13, "AI Security & Code Quality"): 1 secrets detection (Gitleaks), 2 dependency scanning, 3 SAST, 4 DAST, 5 container scanning, 6 license compliance, 7 security acceptance criteria, 8 SBOM. Planned: gates 1, 2, 3 (a security review sub-agent) and 7 (Definition of Done), see [p3-work-split.md](p3-work-split.md). OWASP Top 10 awareness in CLAUDE.md is done but is not one of the eight |
+| GitHub Actions with all 8 stages passing: ESLint + Prettier, `tsc --noEmit`, unit/integration tests, Playwright E2E, `npm audit`, AI PR review (claude-code-action or `claude -p`), preview deploy, production deploy on merge to main | Partial | `.github/workflows/ci.yml` runs ESLint, Prettier, `tsc --noEmit` and unit tests with coverage (#32), and `npm audit` (#33); other stages not added yet |
+| At least 4 security gates from the course's 8-gate pipeline | Partial | Gates 1 and 2 are in place (#33): a Gitleaks pre-commit hook plus Gitleaks and `npm audit` in CI. The course's eight gates (Week 13, "AI Security & Code Quality"): 1 secrets detection (Gitleaks), 2 dependency scanning, 3 SAST, 4 DAST, 5 container scanning, 6 license compliance, 7 security acceptance criteria, 8 SBOM. Planned: gates 1, 2, 3 (a security review sub-agent) and 7 (Definition of Done), see [p3-work-split.md](p3-work-split.md). OWASP Top 10 awareness in CLAUDE.md is done but is not one of the eight |
 
 ## Pair process
 
 | Requirement | Status | Evidence or next step |
 | --- | --- | --- |
 | At least 2 sprints, each with planning and a retrospective | Planned | Dates and goals in [p3-sprints.md](p3-sprints.md) |
-| GitHub Issues with acceptance criteria as testable specs; a branch per issue; PR reviews with C.L.E.A.R. | Not started | |
+| GitHub Issues with acceptance criteria as testable specs; a branch per issue; PR reviews with C.L.E.A.R. | Partial | Issues #2 to #44 and #52 from the feature template; one branch per issue; C.L.E.A.R. reviews on PRs #47, #48, #49, #50, #51, #53, #54, #55, #56 |
 | At least 3 async standups per sprint per partner (12 entries for 2 sprints) | Not started | Record real activity only |
 
 ## Documentation and demo

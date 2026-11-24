@@ -30,6 +30,9 @@ export function correctTaskStatus(task: Task, status: TaskStatus): ProgressResul
 
 // Scheduled time and completion are separate: the caller asks the user instead of assuming progress.
 export function finishTimeBlock(task: Task, block: TimeBlock): { kind: "progress-unknown"; task: Task } {
-  void block;
+  // A block of another task means the caller passed the wrong record: a programming error, not an outcome.
+  if (block.taskId !== task.id) {
+    throw new Error(`Time block ${block.id} belongs to task ${block.taskId}, not ${task.id}`);
+  }
   return { kind: "progress-unknown", task };
 }
