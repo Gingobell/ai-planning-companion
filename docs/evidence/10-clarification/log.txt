@@ -192,3 +192,14 @@ $ npx vitest run
       Tests  187 passed (187)
 exit code: 0
 
+Cycle 3 refactor skipped: applyDeadlineAnswers already splits each reply kind into outcomeOf.
+
+=== Cycle 4 refactor: build the reply facts outside captureMessage ===
+Time: 2026-11-24 13:31 PST
+Base commit: 4d5550c
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  16 passed (16)
+      Tests  187 passed (187)
+exit code: 0
+

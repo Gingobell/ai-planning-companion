@@ -89,6 +89,40 @@ async function phraseReply(model: LanguageModel, facts: ReplyFacts) {
   return fits ? phrased.value : templateReply(facts);
 }
 
+interface ReplyFactsInput {
+  text: string;
+  goals: Goal[];
+  tasks: Task[];
+  // Earlier tasks whose deadline this message set.
+  updatedTasks: Task[];
+  asked: DeadlineQuestion[];
+  titleOf: (taskId: Id) => string;
+  due: (at: string) => string;
+}
+
+function replyFacts(input: ReplyFactsInput): ReplyFacts {
+  const { due } = input;
+  return {
+    userMessage: input.text,
+    saved: {
+      goals: input.goals.map((goal) => goal.title),
+      tasks: input.tasks.map((task) => ({
+        title: task.title,
+        ...(task.deadline === undefined ? {} : { due: due(task.deadline.at) }),
+      })),
+    },
+    deadlinesSet: input.updatedTasks.flatMap(({ title, deadline }) =>
+      deadline === undefined
+        ? []
+        : [{ task: title, due: due(deadline.at), kind: deadline.source === "agreed" ? "agreed target" : "due date" }],
+    ),
+    questions: input.asked.map((question) => ({
+      task: input.titleOf(question.taskId),
+      ...(question.proposedDeadline === undefined ? {} : { suggestedTarget: due(question.proposedDeadline) }),
+    })),
+  };
+}
+
 const openDeadlineQuestion = (question: OpenQuestion) => question.status === "open" && question.topic === "deadline";
 const byId = (a: { id: Id }, b: { id: Id }) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
@@ -167,32 +201,15 @@ export async function captureMessage(input: CaptureMessageInput): Promise<Captur
   }
 
   const asked = chooseDeadlineQuestions({ newTasks: tasks, existing: earlierQuestions, followUps: changes.followUps });
-  const allTasks = [...tasksBefore, ...tasks];
-  const facts: ReplyFacts = {
-    userMessage: text,
-    saved: {
-      goals: goals.map((goal) => goal.title),
-      tasks: tasks.map((task) => ({
-        title: task.title,
-        ...(task.deadline === undefined ? {} : { due: due(task.deadline.at) }),
-      })),
-    },
-    deadlinesSet: changes.tasks.flatMap((task) =>
-      task.deadline === undefined
-        ? []
-        : [
-            {
-              task: task.title,
-              due: due(task.deadline.at),
-              kind: task.deadline.source === "agreed" ? ("agreed target" as const) : ("due date" as const),
-            },
-          ],
-    ),
-    questions: asked.map((question) => ({
-      task: titleOf(question.taskId, allTasks),
-      ...(question.proposedDeadline === undefined ? {} : { suggestedTarget: due(question.proposedDeadline) }),
-    })),
-  };
+  const facts = replyFacts({
+    text,
+    goals,
+    tasks,
+    updatedTasks: changes.tasks,
+    asked,
+    titleOf: (taskId) => titleOf(taskId, [...tasksBefore, ...tasks]),
+    due,
+  });
   const { reply, questions } = await phraseReply(model, facts);
 
   // New questions are saved before the reply (PRD US-06: a question survives a closed window).
