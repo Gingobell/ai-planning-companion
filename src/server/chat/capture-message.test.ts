@@ -67,4 +67,34 @@ describe("captureMessage", () => {
       expect((await repos.messages.listByChatDate("2026-11-24")).map((m) => m.role)).toEqual(["user"]);
     });
   });
+
+  describe("C2: goals and tasks are told apart, and a task can be linked to a goal or stand alone", () => {
+    it("saves a goal, a task linked to it and a task on its own", async () => {
+      const { run } = capture(
+        "I want to land a summer internship, so update my resume this week. Also call the dentist.",
+        extracted(
+          { kind: "goal", title: "Land a summer internship", category: "Career", horizon: "long" },
+          { kind: "task", title: "Update my resume", category: "Career", goalIndex: 0 },
+          { kind: "task", title: "Call the dentist", category: "Health" },
+        ),
+      );
+      await run();
+
+      const goals = await repos.goals.list();
+      expect(goals.map((g) => g.title)).toEqual(["Land a summer internship"]);
+      const tasks = await repos.tasks.list();
+      const byTitle = Object.fromEntries(tasks.map((t) => [t.title, t]));
+      expect(byTitle["Update my resume"].goalId).toBe(goals[0].id);
+      expect(byTitle["Call the dentist"].goalId).toBeUndefined();
+    });
+
+    it("ignores a goal link that does not point at a goal in the same message", async () => {
+      const { run } = capture(
+        "Update my resume.",
+        extracted({ kind: "task", title: "Update my resume", category: "Career", goalIndex: 3 }),
+      );
+      await run();
+      expect((await repos.tasks.list())[0].goalId).toBeUndefined();
+    });
+  });
 });
