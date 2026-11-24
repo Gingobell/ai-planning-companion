@@ -46,9 +46,9 @@ Out (noted as later options, no issue yet): email verification (off by default; 
 6. **Verify on the PR preview:** sign up, sign out, sign in, a signed-out redirect, and a second account. If the preview wildcard is rejected (the docs do not confirm our host pattern), add the PR's stable alias `ai-planning-companion-git-<branch>-gingobell.vercel.app` as an exact domain instead and say so in the PR.
 7. **Docs in the same PR:** CLAUDE.md (data access through `getCurrentUser`, layout, tech stack status), README (local `.env.local` for auth), and `docs/plans/auth.md` (this plan).
 
-## Known trade-off
+## Known trade-off (replaced 2026-11-24)
 
-Vercel sets one `NEON_AUTH_BASE_URL` for Production and Preview, so preview sign-ups are stored in the main branch's `neon_auth` users while their app data stays in the preview database branch. This is harmless for a class project; the PR says so.
+The first version read a hand-set `NEON_AUTH_BASE_URL`, so every preview used the main branch's Auth and each preview URL had to be added to its trusted domains by hand. The app now reads `DATABASE_NEON_AUTH_BASE_URL`, which the Neon integration sets per deployment: each preview uses the Auth of its own database branch (users copied from main when the branch is created) and that Auth already trusts the preview URL. Accounts made on a preview stay in that preview's branch.
 
 ## Verification
 
