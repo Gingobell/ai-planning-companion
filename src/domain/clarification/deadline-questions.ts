@@ -14,7 +14,13 @@ export interface ChooseDeadlineQuestionsInput {
   existing: OpenQuestion[];
 }
 
+// One deadline question per task, so its id can never be asked twice.
+export const deadlineQuestionId = (taskId: Id): Id => `${taskId}:deadline`;
+
+// Only work still to do needs a deadline before it can be scheduled (PRD Section 6, "Deadlines").
+const needsDeadline = (task: Task) =>
+  task.deadline === undefined && task.status !== "completed" && task.status !== "canceled";
+
 export function chooseDeadlineQuestions(input: ChooseDeadlineQuestionsInput): DeadlineQuestion[] {
-  void input;
-  throw new Error("not implemented");
+  return input.newTasks.filter(needsDeadline).map((task) => ({ id: deadlineQuestionId(task.id), taskId: task.id }));
 }
