@@ -51,8 +51,8 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 
 | Requirement | Status | Evidence or next step |
 | --- | --- | --- |
-| GitHub Actions with all 8 stages passing: ESLint + Prettier, `tsc --noEmit`, unit/integration tests, Playwright E2E, `npm audit`, AI PR review (claude-code-action or `claude -p`), preview deploy, production deploy on merge to main | Partial | `.github/workflows/ci.yml` runs ESLint, Prettier, `tsc --noEmit` and unit tests with coverage (#32); other stages not added yet |
-| At least 4 security gates from the course's 8-gate pipeline | Planned | The course's eight gates (Week 13, "AI Security & Code Quality"): 1 secrets detection (Gitleaks), 2 dependency scanning, 3 SAST, 4 DAST, 5 container scanning, 6 license compliance, 7 security acceptance criteria, 8 SBOM. Planned: gates 1, 2, 3 (a security review sub-agent) and 7 (Definition of Done), see [p3-work-split.md](p3-work-split.md). OWASP Top 10 awareness in CLAUDE.md is done but is not one of the eight |
+| GitHub Actions with all 8 stages passing: ESLint + Prettier, `tsc --noEmit`, unit/integration tests, Playwright E2E, `npm audit`, AI PR review (claude-code-action or `claude -p`), preview deploy, production deploy on merge to main | Partial | `.github/workflows/ci.yml` runs ESLint, Prettier, `tsc --noEmit` and unit tests with coverage (#32), and `npm audit` (#33); other stages not added yet |
+| At least 4 security gates from the course's 8-gate pipeline | Partial | Gates 1 and 2 are in place (#33): a Gitleaks pre-commit hook plus Gitleaks and `npm audit` in CI. The course's eight gates (Week 13, "AI Security & Code Quality"): 1 secrets detection (Gitleaks), 2 dependency scanning, 3 SAST, 4 DAST, 5 container scanning, 6 license compliance, 7 security acceptance criteria, 8 SBOM. Planned: gates 1, 2, 3 (a security review sub-agent) and 7 (Definition of Done), see [p3-work-split.md](p3-work-split.md). OWASP Top 10 awareness in CLAUDE.md is done but is not one of the eight |
 
 ## Pair process
 
