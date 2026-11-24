@@ -46,6 +46,7 @@ Current phase: HW4 is complete. The repository contains a Next.js skeleton with 
 - `npm test` runs Vitest once; `npm run test:watch` runs it in watch mode; `npm run test:coverage` adds a V8 coverage report.
 - `npm run format:check` runs Prettier (`.prettierrc.json`, print width 120); `npm run format` rewrites files. Markdown is excluded in `.prettierignore`.
 - CI (`.github/workflows/ci.yml`) runs lint, format check, typecheck and tests with coverage on every pull request and push to `main`.
+- `.github/workflows/neon-branch-cleanup.yml` deletes a pull request's Neon preview branch (`preview/<git branch>`) when the pull request is merged or closed, so the Free plan's 10-branch limit is not reached. It needs the repository variable `NEON_PROJECT_ID` and the secret `NEON_API_KEY` (a project-scoped Neon API key).
 - Single test file: `npx vitest run path/to/file.test.ts`. Single test by name: `npx vitest run -t "test name"`.
 - `npm run db:generate` writes a SQL migration into `drizzle/` after a change to `src/data/postgres/schema.ts`; commit it with the schema change. `npm run db:migrate` applies migrations to the database in `DATABASE_URL_UNPOOLED`. Vercel runs `vercel-build`, which migrates before `next build`, so production and every preview branch are migrated on deploy. Tests need no database.
 
