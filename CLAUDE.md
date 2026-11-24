@@ -54,7 +54,7 @@ Current phase: HW4 is complete. The repository contains a Next.js skeleton with 
 Configured in `.claude/settings.json`; scripts live in `.claude/hooks/`.
 
 - **PostToolUse, `post-edit.sh`:** after Claude edits or writes a `.ts` or `.tsx` file under `src/`, ESLint runs on that file and any error is sent back to Claude to fix. Editing a `.tsx` or `.css` file under `src/` also reminds Claude to follow `DESIGN.md`.
-- **Stop, `stop-tests.sh`:** before Claude ends a turn with uncommitted changes in `src/`, `npm test` and `npm run typecheck` run. A failure blocks the stop once so Claude fixes it. A TDD red step (only `*.test.ts` files changed) is reported but not blocked, and a second failure in a row is handed to the human instead of looping.
+- **Stop, `stop-tests.sh`:** before Claude ends a turn with uncommitted changes in `src/`, `npm test` and `npm run typecheck` run. A failure blocks the stop once so Claude fixes it. A TDD red step (test files changed, the type check passes and only tests fail, even with a stub file alongside) is reported but not blocked, and a second failure in a row is handed to the human instead of looping.
 
 ## Next.js version warning
 
