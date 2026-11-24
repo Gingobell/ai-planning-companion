@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chooseDeadlineQuestions } from "@/domain/clarification/deadline-questions";
+import { applyDeadlineAnswers, chooseDeadlineQuestions } from "@/domain/clarification/deadline-questions";
 import type { OpenQuestion, Task } from "@/domain/records";
 
 const task = (id: string, extra: Partial<Task> = {}): Task => ({
@@ -66,5 +66,88 @@ describe("chooseDeadlineQuestions: a few questions at a time, never repeated (Q3
       { id: "t0:deadline", taskId: "t0", proposedDeadline: "2026-12-04T04:59:00Z" },
       { id: "t1:deadline", taskId: "t1" },
     ]);
+  });
+});
+
+describe("applyDeadlineAnswers: a target date is saved only after the user agrees (Q2)", () => {
+  // Tuesday, Nov 24, 2026, noon in Los Angeles.
+  const context = (questions: OpenQuestion[]) => ({
+    questions,
+    tasks: [task("t1")],
+    now: "2026-11-24T20:00:00Z",
+    timeZone: "America/Los_Angeles",
+  });
+  // Friday, Dec 4, 2026, 11:59 pm in Los Angeles.
+  const DEC_4 = "2026-12-05T07:59:00Z";
+
+  it("stores a suggested target date as a proposal and leaves the task without a deadline", () => {
+    const changes = applyDeadlineAnswers(
+      [{ questionIndex: 0, reply: "no-deadline", suggestedTarget: { localDate: "2026-12-04" } }],
+      context([question("t1")]),
+    );
+    expect(changes.tasks).toEqual([]);
+    expect(changes.questions).toEqual([question("t1", { proposedDeadline: DEC_4 })]);
+    expect(changes.followUps).toEqual(changes.questions);
+  });
+
+  it("saves the proposal as an agreed deadline when the user agrees", () => {
+    const changes = applyDeadlineAnswers(
+      [{ questionIndex: 0, reply: "agrees" }],
+      context([question("t1", { proposedDeadline: DEC_4 })]),
+    );
+    expect(changes.tasks).toEqual([task("t1", { deadline: { at: DEC_4, source: "agreed" } })]);
+    expect(changes.questions).toEqual([question("t1", { status: "answered" })]);
+    expect(changes.followUps).toEqual([]);
+  });
+
+  it("changes nothing when the user agrees but no target date was suggested", () => {
+    const changes = applyDeadlineAnswers([{ questionIndex: 0, reply: "agrees" }], context([question("t1")]));
+    expect(changes).toEqual({ tasks: [], questions: [], followUps: [] });
+  });
+
+  it("does not propose a target date in the past or an impossible date", () => {
+    for (const localDate of ["2026-11-20", "2026-02-30"]) {
+      const changes = applyDeadlineAnswers(
+        [{ questionIndex: 0, reply: "no-deadline", suggestedTarget: { localDate } }],
+        context([question("t1")]),
+      );
+      expect(changes.tasks).toEqual([]);
+      expect(changes.questions.some((q) => q.proposedDeadline !== undefined)).toBe(false);
+    }
+  });
+
+  it("clears the proposal when the user declines, and keeps the question open", () => {
+    const changes = applyDeadlineAnswers(
+      [{ questionIndex: 0, reply: "declines" }],
+      context([question("t1", { proposedDeadline: DEC_4 })]),
+    );
+    expect(changes.tasks).toEqual([]);
+    expect(changes.questions).toEqual([question("t1")]);
+    expect(changes.followUps).toEqual([question("t1")]);
+  });
+
+  it("saves a date the user names: external when it is due then, agreed when the user picks it", () => {
+    for (const [dateKind, source] of [
+      ["external", "external"],
+      ["target", "agreed"],
+    ] as const) {
+      const changes = applyDeadlineAnswers(
+        [{ questionIndex: 0, reply: "gave-date", date: { localDate: "2026-12-04" }, dateKind }],
+        context([question("t1", { proposedDeadline: "2026-12-01T07:59:00Z" })]),
+      );
+      expect(changes.tasks).toEqual([task("t1", { deadline: { at: DEC_4, source } })]);
+      expect(changes.questions).toEqual([question("t1", { status: "answered" })]);
+    }
+  });
+
+  it("ignores answers to questions that do not exist or are already answered", () => {
+    const changes = applyDeadlineAnswers(
+      [
+        { questionIndex: 3, reply: "gave-date", date: { localDate: "2026-12-04" }, dateKind: "external" },
+        { questionIndex: 0, reply: "gave-date", date: { localDate: "2026-12-04" }, dateKind: "external" },
+      ],
+      context([question("t1", { status: "answered" })]),
+    );
+    expect(changes).toEqual({ tasks: [], questions: [], followUps: [] });
   });
 });

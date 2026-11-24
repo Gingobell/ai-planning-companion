@@ -1,3 +1,4 @@
+import type { LocalDateTime } from "@/domain/capture/plan-capture";
 import type { Id, OpenQuestion, Task } from "@/domain/records";
 
 // A deadline question the assistant will ask in this reply; its wording comes later.
@@ -45,4 +46,42 @@ export function chooseDeadlineQuestions(input: ChooseDeadlineQuestionsInput): De
     .filter((task) => needsDeadline(task) && !known.has(deadlineQuestionId(task.id)))
     .map((task) => ({ id: deadlineQuestionId(task.id), taskId: task.id }));
   return [...followUps, ...fresh].slice(0, MAX_QUESTIONS_PER_REPLY);
+}
+
+// How the user answered one open deadline question, as the model read it. It is a proposal:
+// applyDeadlineAnswers decides what changes.
+export interface DeadlineAnswer {
+  // Position of the question in the list the model was shown.
+  questionIndex: number;
+  reply: "gave-date" | "no-deadline" | "agrees" | "declines";
+  // gave-date: the date the user named; "target" when the user picked it, "external" when it is due then.
+  date?: LocalDateTime;
+  dateKind?: "external" | "target";
+  // no-deadline: a target date the assistant suggests, saved only as a proposal.
+  suggestedTarget?: LocalDateTime;
+}
+
+export interface ApplyDeadlineAnswersContext {
+  // The open questions in the order the model was shown them.
+  questions: OpenQuestion[];
+  tasks: Task[];
+  now: string;
+  timeZone: string;
+}
+
+export interface DeadlineAnswerChanges {
+  // Only records that changed.
+  tasks: Task[];
+  questions: OpenQuestion[];
+  // Changed questions that are still open and need a reply in this message.
+  followUps: OpenQuestion[];
+}
+
+export function applyDeadlineAnswers(
+  answers: DeadlineAnswer[],
+  context: ApplyDeadlineAnswersContext,
+): DeadlineAnswerChanges {
+  void answers;
+  void context;
+  throw new Error("not implemented");
 }

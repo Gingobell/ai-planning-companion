@@ -100,3 +100,39 @@ $ npx vitest run
       Tests  174 passed (174)
 exit code: 0
 
+=== Cycle 3 Q2 red ===
+Time: 2026-11-24 13:24 PST
+Base commit: b67938e
+$ npx vitest run
+     86|   throw new Error("not implemented");
+       |         ^
+     87| }
+     88|
+ ❯ src/domain/clarification/deadline-questions.test.ts:120:21
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+ FAIL  src/domain/clarification/deadline-questions.test.ts > applyDeadlineAnswers: a target date is saved only after the user agrees (Q2) > saves a date the user names: external when it is due then, agreed when the user picks it
+Error: not implemented
+ ❯ applyDeadlineAnswers src/domain/clarification/deadline-questions.ts:86:9
+     84|   void answers;
+     85|   void context;
+     86|   throw new Error("not implemented");
+       |         ^
+     87| }
+     88|
+ ❯ src/domain/clarification/deadline-questions.test.ts:134:23
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+ FAIL  src/domain/clarification/deadline-questions.test.ts > applyDeadlineAnswers: a target date is saved only after the user agrees (Q2) > ignores answers to questions that do not exist or are already answered
+Error: not implemented
+ ❯ applyDeadlineAnswers src/domain/clarification/deadline-questions.ts:86:9
+     84|   void answers;
+     85|   void context;
+     86|   throw new Error("not implemented");
+       |         ^
+     87| }
+     88|
+ ❯ src/domain/clarification/deadline-questions.test.ts:144:21
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+ Test Files  1 failed | 15 passed (16)
+      Tests  7 failed | 174 passed (181)
+exit code: 1
+
