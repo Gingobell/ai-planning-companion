@@ -203,3 +203,41 @@ $ npx vitest run
       Tests  187 passed (187)
 exit code: 0
 
+=== Cycle 5 Q5 red ===
+Time: 2026-11-24 13:44 PST
+Base commit: d1a816f
+$ npx vitest run
+    359|       expect((await accept.result).kind).toBe("captured");
+       |                                          ^
+    360|
+    361|       expect(accept.requests.map((request) => request.system)).toEqual…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > Q5: a button answers an open question in one step, and a closed question ignores it > clears the suggestion when Another time is pressed and asks for the user's own date
+AssertionError: expected [] to include 'When is "Finish the CS6983 blog post"…'
+ ❯ src/server/chat/capture-message.test.ts:373:58
+    371|       const result = await another.result;
+    372|
+    373|       expect(result.kind === "captured" && result.reply).toContain('Wh…
+       |                                                          ^
+    374|       const question = await repos.openQuestions.get(BLOG_QUESTION);
+    375|       expect(question).toMatchObject({ status: "open", askedIn: "msg-3…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > Q5: a button answers an open question in one step, and a closed question ignores it > changes nothing when a button is pressed on a question that is no longer open
+Error: The fake language model has no scripted result left
+ ❯ Object.generateJson src/llm/fake-language-model.ts:11:37
+      9|       requests.push(request);
+     10|       const next = results.shift();
+     11|       if (next === undefined) throw new Error("The fake language model…
+       |                                     ^
+     12|       return next;
+     13|     },
+ ❯ generateValidated src/llm/language-model.ts:28:30
+ ❯ captureMessage src/server/chat/capture-message.ts:166:28
+ ❯ src/server/chat/capture-message.test.ts:385:14
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+ Test Files  1 failed | 15 passed (16)
+      Tests  5 failed | 186 passed (191)
+exit code: 1
+
+Note: the Q4 helpers moved to the top of the test file and send() takes its model results as an array, so Q5 can pass a button choice.
+

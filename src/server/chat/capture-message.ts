@@ -21,13 +21,16 @@ export interface CaptureMessageInput {
   text: string;
   now: string;
   timeZone: string;
+  // A button the user pressed under an open question; `text` is then the button's label.
+  choice?: { questionId: Id; reply: "agrees" | "declines" };
 }
 
 export type CaptureMessageResult =
   | { kind: "captured"; goals: Goal[]; tasks: Task[]; reply: string }
   | { kind: "model-unavailable" }
   | { kind: "model-invalid-output" }
-  | { kind: "save-failed" };
+  | { kind: "save-failed" }
+  | { kind: "question-closed" };
 
 const replyId = (messageId: Id) => `${messageId}:reply`;
 

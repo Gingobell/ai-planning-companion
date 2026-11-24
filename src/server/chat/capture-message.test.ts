@@ -8,7 +8,10 @@ import { ALICE, BOB, makeUser } from "@/data/repository-contract";
 import { scopeToUser, type ScopedRepositories } from "@/data/scoped-repositories";
 import { createFakeLanguageModel } from "@/llm/fake-language-model";
 import type { GenerateJsonResult } from "@/llm/language-model";
-import { captureMessage } from "@/server/chat/capture-message";
+import { captureMessage, type CaptureMessageInput } from "@/server/chat/capture-message";
+import { replySystemPrompt } from "@/server/chat/reply-schema";
+
+type CaptureChoice = NonNullable<CaptureMessageInput["choice"]>;
 
 const NOW = "2026-11-24T18:00:00Z"; // Tuesday 10:00 in Los Angeles
 const TZ = "America/Los_Angeles";
@@ -45,6 +48,26 @@ function capture(text: string, ...results: GenerateJsonResult[]) {
   const run = (messageId = "msg-1") =>
     captureMessage({ repos, model: fake.model, userId: ALICE, messageId, text, now: NOW, timeZone: TZ });
   return { run, requests: fake.requests };
+}
+
+const blog: ExtractedItem = { kind: "task", title: "Finish the CS6983 blog post", category: "School" };
+const BLOG_ID = "msg-1:task:0";
+const BLOG_QUESTION = `${BLOG_ID}:deadline`;
+
+function withAnswers(answers: DeadlineAnswer[], ...items: ExtractedItem[]): GenerateJsonResult {
+  return { kind: "ok", value: { items, answers } };
+}
+
+function phrased(reply: string, ...questions: string[]): GenerateJsonResult {
+  return { kind: "ok", value: { reply, questions } };
+}
+
+// `choice` is a button press under an open question; the text is then the button's label.
+function send(messageId: string, text: string, results: GenerateJsonResult[], choice?: CaptureChoice) {
+  const fake = createFakeLanguageModel(...results);
+  const input = { repos, model: fake.model, userId: ALICE, messageId, text, now: NOW, timeZone: TZ };
+  const result = captureMessage(choice === undefined ? input : { ...input, choice });
+  return { result, requests: fake.requests };
 }
 
 const lab: ExtractedItem = {
@@ -223,38 +246,11 @@ describe("captureMessage", () => {
   });
 
   describe("Q4: each question asked is saved as an open question, and answers in later messages count", () => {
-    const blog: ExtractedItem = { kind: "task", title: "Finish the CS6983 blog post", category: "School" };
-    const BLOG_ID = "msg-1:task:0";
-
-    function withAnswers(answers: DeadlineAnswer[], ...items: ExtractedItem[]): GenerateJsonResult {
-      return { kind: "ok", value: { items, answers } };
-    }
-
-    function phrased(reply: string, ...questions: string[]): GenerateJsonResult {
-      return { kind: "ok", value: { reply, questions } };
-    }
-
-    function send(messageId: string, text: string, ...results: GenerateJsonResult[]) {
-      const fake = createFakeLanguageModel(...results);
-      const result = captureMessage({
-        repos,
-        model: fake.model,
-        userId: ALICE,
-        messageId,
-        text,
-        now: NOW,
-        timeZone: TZ,
-      });
-      return { result, requests: fake.requests };
-    }
-
     it("asks for the deadline of a new task, saves the question and replies with the phrased text", async () => {
-      const { result } = send(
-        "msg-1",
-        "Finish the CS6983 blog post",
+      const { result } = send("msg-1", "Finish the CS6983 blog post", [
         extracted(blog),
         phrased("Saved it. When is the blog post due?", "When is the blog post due?"),
-      );
+      ]);
       expect(await result).toMatchObject({ kind: "captured", reply: "Saved it. When is the blog post due?" });
       expect(await repos.openQuestions.list()).toEqual([
         {
@@ -265,24 +261,23 @@ describe("captureMessage", () => {
           topic: "deadline",
           question: "When is the blog post due?",
           status: "open",
+          askedIn: "msg-1:reply",
         },
       ]);
     });
 
     it("asks nothing about goals or tasks whose deadline the user stated", async () => {
-      const { result, requests } = send(
-        "msg-1",
-        "Lab 5 is due Thursday; I want to land an internship.",
+      const { result, requests } = send("msg-1", "Lab 5 is due Thursday; I want to land an internship.", [
         extracted(lab, { kind: "goal", title: "Land an internship", category: "Career", horizon: "long" }),
         phrased("Saved both."),
-      );
+      ]);
       await result;
       expect(await repos.openQuestions.list()).toEqual([]);
       expect(requests[1].prompt).toContain('"questions":[]');
     });
 
     it("uses a template question when the reply cannot be phrased", async () => {
-      const { result } = send("msg-1", "Finish the CS6983 blog post", extracted(blog), NO_PHRASING);
+      const { result } = send("msg-1", "Finish the CS6983 blog post", [extracted(blog), NO_PHRASING]);
       const captured = await result;
       expect(captured.kind === "captured" && captured.reply).toContain('When is "Finish the CS6983 blog post" due?');
       const [question] = await repos.openQuestions.list();
@@ -300,25 +295,23 @@ describe("captureMessage", () => {
         text: "Bob's reply",
         createdAt: NOW,
       });
-      expect(await send("msg-1", "Finish the blog post", extracted(blog), NO_PHRASING).result).toEqual({
+      expect(await send("msg-1", "Finish the blog post", [extracted(blog), NO_PHRASING]).result).toEqual({
         kind: "save-failed",
       });
       await bobRepos.messages.remove("msg-1:reply");
 
-      const retry = send("msg-1", "Finish the blog post", extracted(blog), NO_PHRASING);
+      const retry = send("msg-1", "Finish the blog post", [extracted(blog), NO_PHRASING]);
       const captured = await retry.result;
       expect(captured.kind === "captured" && captured.reply).toContain("When is");
       expect(await repos.openQuestions.list()).toHaveLength(1);
     });
 
     it("keeps an unanswered question open and does not ask it again with every message", async () => {
-      await send("msg-1", "Finish the blog post", extracted(blog), NO_PHRASING).result;
-      const later = send(
-        "msg-2",
-        "Call the dentist tomorrow",
+      await send("msg-1", "Finish the blog post", [extracted(blog), NO_PHRASING]).result;
+      const later = send("msg-2", "Call the dentist tomorrow", [
         extracted({ kind: "task", title: "Call the dentist", category: "Health" }),
         phrased("Saved. When should you call?", "When should you call the dentist?"),
-      );
+      ]);
       await later.result;
 
       expect(later.requests[0].prompt).toContain("Finish the CS6983 blog post");
@@ -331,20 +324,67 @@ describe("captureMessage", () => {
     });
 
     it("suggests a target date when there is no deadline, and saves it as agreed once the user says yes", async () => {
-      await send("msg-1", "Finish the blog post", extracted(blog), NO_PHRASING).result;
-      const noDeadline = send(
-        "msg-2",
-        "There is no fixed date",
+      await send("msg-1", "Finish the blog post", [extracted(blog), NO_PHRASING]).result;
+      const noDeadline = send("msg-2", "There is no fixed date", [
         withAnswers([{ questionIndex: 0, reply: "no-deadline", suggestedTarget: { localDate: "2026-12-04" } }]),
         phrased("How about Friday, Dec 4?", "How about Friday, Dec 4?"),
-      );
+      ]);
       await noDeadline.result;
       expect(noDeadline.requests[1].prompt).toContain("Dec 4");
       expect((await repos.tasks.get(BLOG_ID))?.deadline).toBeUndefined();
 
-      await send("msg-3", "Yes", withAnswers([{ questionIndex: 0, reply: "agrees" }]), NO_PHRASING).result;
+      await send("msg-3", "Yes", [withAnswers([{ questionIndex: 0, reply: "agrees" }]), NO_PHRASING]).result;
       expect((await repos.tasks.get(BLOG_ID))?.deadline).toEqual({ at: "2026-12-05T07:59:00Z", source: "agreed" });
       expect((await repos.openQuestions.get(`${BLOG_ID}:deadline`))?.status).toBe("answered");
+    });
+  });
+
+  describe("Q5: a button answers an open question in one step, and a closed question ignores it", () => {
+    async function withSuggestedTarget() {
+      await send("msg-1", "Finish the blog post", [extracted(blog), NO_PHRASING]).result;
+      await send("msg-2", "There is no fixed date", [
+        withAnswers([{ questionIndex: 0, reply: "no-deadline", suggestedTarget: { localDate: "2026-12-04" } }]),
+        NO_PHRASING,
+      ]).result;
+    }
+
+    it("shows a follow-up under the reply that asked it last", async () => {
+      await withSuggestedTarget();
+      expect((await repos.openQuestions.get(BLOG_QUESTION))?.askedIn).toBe("msg-2:reply");
+    });
+
+    it("saves the suggested target as agreed when Accept is pressed, without asking the model to read it", async () => {
+      await withSuggestedTarget();
+      const accept = send("msg-3", "Accept Fri, Dec 4", [NO_PHRASING], { questionId: BLOG_QUESTION, reply: "agrees" });
+      expect((await accept.result).kind).toBe("captured");
+
+      expect(accept.requests.map((request) => request.system)).toEqual([replySystemPrompt()]);
+      expect((await repos.tasks.get(BLOG_ID))?.deadline).toEqual({ at: "2026-12-05T07:59:00Z", source: "agreed" });
+      expect((await repos.openQuestions.get(BLOG_QUESTION))?.status).toBe("answered");
+      const texts = (await repos.messages.listByChatDate("2026-11-24")).map((message) => message.text);
+      expect(texts).toContain("Accept Fri, Dec 4");
+    });
+
+    it("clears the suggestion when Another time is pressed and asks for the user's own date", async () => {
+      await withSuggestedTarget();
+      const another = send("msg-3", "Another time", [NO_PHRASING], { questionId: BLOG_QUESTION, reply: "declines" });
+      const result = await another.result;
+
+      expect(result.kind === "captured" && result.reply).toContain('When is "Finish the CS6983 blog post" due?');
+      const question = await repos.openQuestions.get(BLOG_QUESTION);
+      expect(question).toMatchObject({ status: "open", askedIn: "msg-3:reply" });
+      expect(question?.proposedDeadline).toBeUndefined();
+      expect((await repos.tasks.get(BLOG_ID))?.deadline).toBeUndefined();
+    });
+
+    it("changes nothing when a button is pressed on a question that is no longer open", async () => {
+      await withSuggestedTarget();
+      await send("msg-3", "Accept", [NO_PHRASING], { questionId: BLOG_QUESTION, reply: "agrees" }).result;
+      const late = send("msg-4", "Accept", [], { questionId: BLOG_QUESTION, reply: "agrees" });
+
+      expect(await late.result).toEqual({ kind: "question-closed" });
+      expect(late.requests).toHaveLength(0);
+      expect((await repos.messages.listByChatDate("2026-11-24")).map((message) => message.id)).not.toContain("msg-4");
     });
   });
 });
