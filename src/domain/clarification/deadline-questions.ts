@@ -1,5 +1,6 @@
-import type { LocalDateTime } from "@/domain/capture/plan-capture";
-import type { Id, OpenQuestion, Task } from "@/domain/records";
+import { Temporal } from "temporal-polyfill";
+import { localDeadlineToInstant, type LocalDateTime } from "@/domain/capture/plan-capture";
+import type { Deadline, Id, OpenQuestion, Task } from "@/domain/records";
 
 // A deadline question the assistant will ask in this reply; its wording comes later.
 export interface DeadlineQuestion {
@@ -77,11 +78,71 @@ export interface DeadlineAnswerChanges {
   followUps: OpenQuestion[];
 }
 
+type AnswerOutcome = { task?: Task; question?: OpenQuestion; followUp?: OpenQuestion };
+
+const withoutProposal = ({ proposedDeadline, ...question }: OpenQuestion): OpenQuestion => {
+  void proposedDeadline;
+  return question;
+};
+
+const answered = (question: OpenQuestion): OpenQuestion => ({ ...withoutProposal(question), status: "answered" });
+
+const isAfter = (at: string, now: string) => Temporal.Instant.compare(at, now) > 0;
+
+function outcomeOf(
+  answer: DeadlineAnswer,
+  question: OpenQuestion,
+  task: Task,
+  context: ApplyDeadlineAnswersContext,
+): AnswerOutcome {
+  const withDeadline = (deadline: Deadline): AnswerOutcome => ({
+    task: { ...task, deadline },
+    question: answered(question),
+  });
+  switch (answer.reply) {
+    case "gave-date": {
+      const at = answer.date === undefined ? undefined : localDeadlineToInstant(answer.date, context.timeZone);
+      if (at === undefined) return {};
+      return withDeadline({ at, source: answer.dateKind === "target" ? "agreed" : "external" });
+    }
+    case "agrees":
+      // The assistant never invents a deadline: agreeing only counts when a target was suggested.
+      return question.proposedDeadline === undefined
+        ? {}
+        : withDeadline({ at: question.proposedDeadline, source: "agreed" });
+    case "no-deadline": {
+      const suggested = answer.suggestedTarget;
+      const at = suggested === undefined ? undefined : localDeadlineToInstant(suggested, context.timeZone);
+      if (at === undefined || !isAfter(at, context.now)) return { followUp: question };
+      const proposed = { ...question, proposedDeadline: at };
+      return { question: proposed, followUp: proposed };
+    }
+    case "declines": {
+      const cleared = withoutProposal(question);
+      return { question: cleared, followUp: cleared };
+    }
+  }
+}
+
+// Turns the user's answers to open deadline questions into record changes (PRD US-01, Section 6
+// "Deadlines"): a named date is saved, a suggested target stays a proposal until the user agrees.
+// Answers to unknown or already answered questions, and repeated answers, are ignored.
 export function applyDeadlineAnswers(
   answers: DeadlineAnswer[],
   context: ApplyDeadlineAnswersContext,
 ): DeadlineAnswerChanges {
-  void answers;
-  void context;
-  throw new Error("not implemented");
+  const changes: DeadlineAnswerChanges = { tasks: [], questions: [], followUps: [] };
+  const seen = new Set<number>();
+  for (const answer of answers) {
+    const question = context.questions[answer.questionIndex];
+    if (seen.has(answer.questionIndex) || question === undefined || question.status !== "open") continue;
+    seen.add(answer.questionIndex);
+    const task = context.tasks.find((candidate) => candidate.id === question.taskId);
+    if (task === undefined) continue;
+    const outcome = outcomeOf(answer, question, task, context);
+    if (outcome.task !== undefined) changes.tasks.push(outcome.task);
+    if (outcome.question !== undefined) changes.questions.push(outcome.question);
+    if (outcome.followUp !== undefined) changes.followUps.push(outcome.followUp);
+  }
+  return changes;
 }
