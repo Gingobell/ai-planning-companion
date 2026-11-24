@@ -124,10 +124,16 @@ export interface Message extends OwnedRecord {
   createdAt: string;
 }
 
+// What an open question asks about. Later stories add topics, such as effort (#18).
+export type OpenQuestionTopic = "deadline";
+
 export interface OpenQuestion extends OwnedRecord {
   taskId?: Id;
+  topic: OpenQuestionTopic;
   question: string;
   status: "open" | "answered";
+  // A target date the assistant suggested and the user has not agreed to yet; never a deadline by itself.
+  proposedDeadline?: string;
 }
 
 export type ProgressReportKind = "partial" | "blocker" | "completed" | "correction";

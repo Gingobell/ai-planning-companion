@@ -3,6 +3,7 @@ import type {
   Deadline,
   GoalStatus,
   LocalWindow,
+  OpenQuestionTopic,
   PreferenceStatus,
   ProgressReportKind,
   Reminder,
@@ -155,8 +156,10 @@ export const openQuestions = pgTable(
   {
     ...owned(),
     taskId: text("task_id"),
+    topic: text("topic").$type<OpenQuestionTopic>().notNull(),
     question: text("question").notNull(),
     status: text("status").$type<"open" | "answered">().notNull(),
+    proposedDeadline: instant("proposed_deadline"),
   },
   (t) => [index("open_questions_user_idx").on(t.userId)],
 );
