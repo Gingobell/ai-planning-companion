@@ -14,6 +14,8 @@ Scope: deadline questions only. Effort estimates are #18 and bringing old open q
 - **Q3** At most two questions per reply. No question for anything the user already said (a stated deadline, a task that already has an open deadline question), and a question is never duplicated.
 - **Q4** Every question asked is saved as an open question linked to its task, before the reply. It stays open until answered; a retry of the same message creates no second question.
 
+- **Q5** (added 2026-11-24 after review against DESIGN.md section 10) The latest reply shows answers with each question it asked: a deadline question lists "No fixed date, suggest a target" and "Type my own answer"; a suggested target date is a card with Accept and Another time. Accept saves the target as the agreed deadline without asking the model to read anything; Another time clears the proposal and asks for the user's own date. A button on a question that is no longer open changes nothing. Typing an answer still works.
+
 A user answer like "it's due Friday" sets the deadline (source `external`; "let's aim for Friday" is `agreed`) and marks the question answered.
 
 ## Design
@@ -30,7 +32,9 @@ A user answer like "it's due Friday" sets the deadline (source `external`; "let'
 
 **Flow** in `captureMessage` (`capture-message.ts`): save user message, extraction, save goals and tasks (as now), load open questions and apply answers (save task and question updates, checking every `SaveResult` with `isKept`), choose questions, phrase the reply, save the new open questions, then save the reply last (its presence still marks a finished capture). Updates are computed from the stored records, so a retry after a partial failure is a no-op for what already happened.
 
-**UI**: none beyond the reply text; the composer and thread from #10 are reused.
+**Buttons (Q5)**: `OpenQuestion` also gains `askedIn` (the id of the reply that last asked it), so the thread shows answers only under the reply that asked. `captureMessage` takes an optional `choice: { questionId, reply: "agrees" | "declines" }`; with it, no extraction call is made and the answer goes straight to `applyDeadlineAnswers`, and a closed question returns `question-closed`. A server action `answerQuestion` sends the button's label as the user's message with that choice. "No fixed date, suggest a target" is sent as ordinary text, because the model picks the date. "Type my own answer" focuses the composer. Number keys pick an answer when the composer is not focused.
+
+**UI**: answer list and decision card under the latest reply (DESIGN.md sections 6, 7 and 10), checked at desktop and 400 px with Chinese text.
 
 ## Steps (branch `feat/clarify`)
 
