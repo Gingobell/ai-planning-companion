@@ -182,3 +182,39 @@ exit code: 0
 
 === Cycles 1 to 5 refactor ===
 Skipped: planCapture and captureMessage are short with clear names; the only repetition is the record defaults for goals and tasks, which read more clearly inline.
+=== Review follow-up red: stop when the user's message cannot be saved (#62 review) ===
+Time: 2026-11-24 11:42 PST
+Base commit: cb6d539
+$ npx vitest run
++   "kind": "captured",
++   "reply": "Saved task \"Lab 5 for CS6983\", due Thu, Nov 26, 11:59 PM.",
++   "tasks": [
++     {
++       "acceptance": "accepted",
++       "category": "School",
++       "deadline": {
++         "at": "2026-11-27T07:59:00Z",
++         "source": "external",
++       },
++       "id": "msg-1:task:0",
++       "priority": "medium",
++       "remindersEnabled": false,
++       "status": "not-started",
++       "title": "Lab 5 for CS6983",
++       "userId": "user-alice",
++       "version": 1,
++     },
++   ],
+  }
+ ❯ src/server/chat/capture-message.test.ts:85:27
+     83|       });
+     84|       const { run, requests } = capture("Lab 5 for CS6983 is due Thurs…
+     85|       expect(await run()).toEqual({ kind: "save-failed" });
+       |                           ^
+     86|       expect(requests).toHaveLength(0);
+     87|       expect(await repos.tasks.list()).toEqual([]);
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+ Test Files  1 failed | 14 passed (15)
+      Tests  1 failed | 167 passed (168)
+exit code: 1
+

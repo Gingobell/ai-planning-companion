@@ -3,7 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { ExtractedItem } from "@/domain/capture/plan-capture";
 import { createPostgresRepositories } from "@/data/postgres/repositories";
 import { createTestDb } from "@/data/postgres/test-db";
-import { ALICE, makeUser } from "@/data/repository-contract";
+import { ALICE, BOB, makeUser } from "@/data/repository-contract";
 import { scopeToUser, type ScopedRepositories } from "@/data/scoped-repositories";
 import { createFakeLanguageModel } from "@/llm/fake-language-model";
 import type { GenerateJsonResult } from "@/llm/language-model";
@@ -14,15 +14,18 @@ const TZ = "America/Los_Angeles";
 
 let testDb: Awaited<ReturnType<typeof createTestDb>>;
 let repos: ScopedRepositories;
+let bobRepos: ScopedRepositories;
 
 beforeAll(async () => {
   testDb = await createTestDb();
   repos = scopeToUser(createPostgresRepositories(testDb.db), ALICE);
+  bobRepos = scopeToUser(createPostgresRepositories(testDb.db), BOB);
 });
 
 beforeEach(async () => {
   await testDb.db.execute(sql`truncate table users cascade`);
   await repos.user.save(makeUser(ALICE));
+  await bobRepos.user.save(makeUser(BOB));
 });
 
 afterAll(async () => {
@@ -65,6 +68,23 @@ describe("captureMessage", () => {
       expect(await run()).toEqual({ kind: "model-unavailable" });
       expect(await repos.tasks.list()).toEqual([]);
       expect((await repos.messages.listByChatDate("2026-11-24")).map((m) => m.role)).toEqual(["user"]);
+    });
+
+    it("stops with save-failed, without asking the model, when the message cannot be saved", async () => {
+      // An id another account already uses cannot be saved for this user (PRD Section 7: success only after saving).
+      await bobRepos.messages.save({
+        id: "msg-1",
+        userId: BOB,
+        version: 0,
+        chatDate: "2026-11-24",
+        role: "user",
+        text: "Bob's message",
+        createdAt: NOW,
+      });
+      const { run, requests } = capture("Lab 5 for CS6983 is due Thursday.", extracted(lab));
+      expect(await run()).toEqual({ kind: "save-failed" });
+      expect(requests).toHaveLength(0);
+      expect(await repos.tasks.list()).toEqual([]);
     });
   });
 
