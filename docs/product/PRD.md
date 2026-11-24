@@ -167,7 +167,7 @@ Daily check-ins and reminders follow the user's timezone and notification settin
 | Web application | Next.js and TypeScript, deployed on Vercel |
 | Persistence | PostgreSQL on Neon for accounts, goals, tasks, plans, preferences and feedback |
 | Authentication | Managed authentication with Neon Auth |
-| AI | Google Gemini API for clarification, task breakdown and planning suggestions, behind a provider-neutral interface |
+| AI | Google Gemini API for clarification, task breakdown and planning suggestions, behind a provider-neutral interface. The free tier is used; Google may use chat content to improve its products, and users are told so at sign-up |
 | Mac companion | Electron shell for the global shortcut, small chat window and notifications |
 | Reminders | Scheduled processing connected to saved plans and user settings; delivery service to be selected |
 
