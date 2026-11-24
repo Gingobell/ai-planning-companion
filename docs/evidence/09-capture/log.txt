@@ -1,0 +1,36 @@
+=== Cycle 1 C1 save first red ===
+Time: 2026-11-23 19:58 PST
+Base commit: 49b682e
+$ npx vitest run
+ ❯ src/server/chat/capture-message.test.ts (2 tests | 2 failed) 2058ms
+       × saves the user's message and the task it mentions 13ms
+       × keeps the user's message when the model is unavailable, and saves nothing else 8ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > C1: a mentioned goal or task is saved before anything is asked > saves the user's message and the task it mentions
+Error: not implemented
+ ❯ captureMessage src/server/chat/capture-message.ts:23:9
+     21| // eslint-disable-next-line @typescript-eslint/no-unused-vars -- stub …
+     22| export async function captureMessage(input: CaptureMessageInput): Prom…
+     23|   throw new Error("not implemented");
+       |         ^
+     24| }
+     25|
+ ❯ run src/server/chat/capture-message.test.ts:39:5
+ ❯ src/server/chat/capture-message.test.ts:54:28
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > C1: a mentioned goal or task is saved before anything is asked > keeps the user's message when the model is unavailable, and saves nothing else
+Error: not implemented
+ ❯ captureMessage src/server/chat/capture-message.ts:23:9
+     21| // eslint-disable-next-line @typescript-eslint/no-unused-vars -- stub …
+     22| export async function captureMessage(input: CaptureMessageInput): Prom…
+     23|   throw new Error("not implemented");
+       |         ^
+     24| }
+     25|
+ ❯ run src/server/chat/capture-message.test.ts:39:5
+ ❯ src/server/chat/capture-message.test.ts:65:20
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+ Test Files  1 failed | 12 passed (13)
+      Tests  2 failed | 120 passed (122)
+exit code: 1
+
