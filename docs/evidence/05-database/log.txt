@@ -286,3 +286,39 @@ $ npx vitest run
       Tests  68 passed (68)
 exit code: 0
 
+=== Review follow-up red: delivery keys unique per user, not across users (#54 review) ===
+Time: 2026-11-23 18:51 PST
+Base commit: 066ab3d
+$ npx vitest run
+ ❯ src/data/postgres/repositories.test.ts (35 tests | 1 failed) 2272ms
+       × lets two users each keep a reminder with the same delivery key 9ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/data/postgres/repositories.test.ts > PostgreSQL repositories > ownership > lets two users each keep a reminder with the same delivery key
+AssertionError: expected { kind: 'not-found' } to deeply equal { kind: 'saved', record: { …(7) } }
+- Expected
++ Received
+  {
+-   "kind": "saved",
+-   "record": {
+-     "deliveryKey": "check-in:2026-11-24T09:00",
+-     "id": "check-in-bob",
+-     "kind": "check-in",
+-     "scheduledFor": "2026-11-24T17:00:00Z",
+-     "status": "pending",
+-     "userId": "user-bob",
+-     "version": 1,
+-   },
++   "kind": "not-found",
+  }
+ ❯ src/data/repository-contract.ts:334:57
+    332|         await h.repos.reminders.save(ALICE, { ...checkIn, id: "check-i…
+    333|         const bobs = { ...checkIn, id: "check-in-bob", userId: BOB, de…
+    334|         expect(await h.repos.reminders.save(BOB, bobs)).toEqual({ kind…
+       |                                                         ^
+    335|         expect((await h.repos.reminders.get(ALICE, "check-in-alice"))?…
+    336|       });
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+ Test Files  1 failed | 9 passed (10)
+      Tests  1 failed | 108 passed (109)
+exit code: 1
+
