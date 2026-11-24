@@ -51,7 +51,8 @@ function fromMessage<T extends { id: Id }>(records: T[], messageId: Id): T[] {
     .sort((a, b) => position(a.id) - position(b.id));
 }
 
-function describeDeadline(at: string, timeZone: string): string {
+// A deadline as the user reads it, such as "Fri, Dec 4, 11:59 PM", in their time zone.
+export function describeDeadline(at: string, timeZone: string): string {
   const local = Temporal.Instant.from(at).toZonedDateTimeISO(timeZone);
   return local.toLocaleString("en-US", {
     weekday: "short",
