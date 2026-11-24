@@ -8,7 +8,7 @@ Built by Jingyi Fu and Sihui Lyu for CS6983 Project 3.
 
 Live app: https://ai-planning-companion.vercel.app
 
-Project 3 is being built in stages. Homework 4 is the first stage and is complete: the time block recommendation rules. Sprint 1 starts on November 24. The app shell is in place: run `npm run dev` and open http://localhost:3000 to see the sidebar with Chat, Today, Week, Goals & tasks and Preferences. Chat works: tell it a goal or task in a sentence and it saves it, then asks for the deadline of any task without one (at most two questions at a time). If there is no fixed date, say so and it suggests a target date, which is saved only after you agree. The other pages are placeholders until their features are built.
+Project 3 is being built in stages. Homework 4 is the first stage and is complete: the time block recommendation rules. Sprint 1 starts on November 24. The app shell is in place: run `npm run dev` and open http://localhost:3000 to see the sidebar with Chat, Today, Week, Goals & tasks and Preferences. Chat works: tell it a goal or task in a sentence and it saves it, then asks for the deadline of any task without one (at most two questions at a time). Pick a numbered answer under the question (or press its number key) or just type. If there is no fixed date, it suggests a target date on a card; Accept saves it, Another time lets you give your own date. The other pages are placeholders until their features are built.
 
 ## Project 3 plan
 
