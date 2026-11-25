@@ -55,6 +55,7 @@ Current phase: HW4 is complete. The repository contains a Next.js skeleton with 
 Configured in `.claude/settings.json`; scripts live in `.claude/hooks/`.
 
 - **PostToolUse, `post-edit.sh`:** after Claude edits or writes a `.ts` or `.tsx` file under `src/`, ESLint runs on that file and any error is sent back to Claude to fix. Editing a `.tsx` or `.css` file under `src/` also reminds Claude to follow `DESIGN.md`.
+- **PreToolUse, `pre-push-sync.sh`:** before Claude runs `git push`, it fetches and lists main's new commits, the other partner's open PRs, the files they share with this branch and any merge conflicts. If there is anything, the push is paused once so Claude explains it and agrees on an order with the human; pushing again with the same findings passes, even after new commits on the branch. Steps are in the `clear-review` skill.
 - **Stop, `stop-tests.sh`:** before Claude ends a turn with uncommitted changes in `src/`, `npm test` and `npm run typecheck` run. A failure blocks the stop once so Claude fixes it. A TDD red step (test files changed, the type check passes and only tests fail, even with a stub file alongside) is reported but not blocked, and a second failure in a row is handed to the human instead of looping.
 
 ## Next.js version warning
