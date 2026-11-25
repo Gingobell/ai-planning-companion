@@ -105,6 +105,14 @@ describe("applyDeadlineAnswers: a target date is saved only after the user agree
     expect(changes).toEqual({ tasks: [], questions: [], followUps: [] });
   });
 
+  it("does not save a proposal that has passed when the user agrees, and asks again", () => {
+    const passed = question("t1", { proposedDeadline: "2026-11-21T07:59:00Z" });
+    const changes = applyDeadlineAnswers([{ questionIndex: 0, reply: "agrees" }], context([passed]));
+    expect(changes.tasks).toEqual([]);
+    expect(changes.questions).toEqual([question("t1")]);
+    expect(changes.followUps).toEqual([question("t1")]);
+  });
+
   it("does not propose a target date in the past or an impossible date", () => {
     for (const localDate of ["2026-11-20", "2026-02-30"]) {
       const changes = applyDeadlineAnswers(
