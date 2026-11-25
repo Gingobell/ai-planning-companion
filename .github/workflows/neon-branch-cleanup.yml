@@ -1,0 +1,22 @@
+name: Neon preview branch cleanup
+
+# The Vercel integration creates a Neon branch named preview/<git branch> for every pull request
+# preview, and only deletes it when Vercel deletes the deployment, which rarely happens. The Free
+# plan allows 10 branches, so this removes a pull request's branch as soon as it is merged or closed.
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  delete-branch:
+    runs-on: ubuntu-latest
+    steps:
+      # Pinned to the commit behind the v3 tag, so a moved tag cannot change what runs with the API key.
+      - uses: neondatabase/delete-branch-action@4468d825d5a88ef4012f1705a82f02ec3072f776 # v3
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: preview/${{ github.head_ref }}
+          api_key: ${{ secrets.NEON_API_KEY }}

@@ -14,6 +14,9 @@ export default function SignUpPage() {
         switchLabel="Sign in"
         switchHref={SIGN_IN_PATH}
       />
+      <p className="text-sm text-muted">
+        The assistant uses Google&apos;s Gemini free tier. Google may use what you type in chat to improve its products.
+      </p>
     </>
   );
 }
