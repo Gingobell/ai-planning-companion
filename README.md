@@ -54,7 +54,7 @@ npm run dev         # http://localhost:3000
 
 **About the assistant's model.** The assistant uses Google's Gemini API on the free tier, where Google may use what is typed in chat to improve its products. Each request sends only what it needs: the current message, the time zone and the current time, plus the titles of tasks with an open deadline question and of what the message just saved, so the assistant can ask about them.
 
-Tests need no database, auth service or model key; model calls use a test double. To run the app against real ones, copy `.env.example` to `.env.local`, set `DATABASE_URL` and `DATABASE_URL_UNPOOLED` to a Neon development branch, set `NEON_AUTH_BASE_URL` to the project's Auth URL and `NEON_AUTH_COOKIE_SECRET` to the output of `openssl rand -base64 32`, set `GEMINI_API_KEY` to a key from https://aistudio.google.com/apikey created in a Google Cloud project without billing (free tier), then run `npm run db:migrate`. Every page except `/sign-in` and `/sign-up` asks you to sign in.
+Tests need no database, auth service or model key; model calls use a test double. To run the app against real ones, copy `.env.example` to `.env.local`, set `DATABASE_URL` and `DATABASE_URL_UNPOOLED` to a Neon development branch, set `DATABASE_NEON_AUTH_BASE_URL` to that branch's Auth URL (Neon Console, Auth settings) and `NEON_AUTH_COOKIE_SECRET` to the output of `openssl rand -base64 32`, set `GEMINI_API_KEY` to a key from https://aistudio.google.com/apikey created in a Google Cloud project without billing (free tier), then run `npm run db:migrate`. Every page except `/sign-in` and `/sign-up` asks you to sign in.
 
 ### Secret scan before every commit
 
