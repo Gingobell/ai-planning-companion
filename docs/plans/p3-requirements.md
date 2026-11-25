@@ -31,7 +31,7 @@ Status values: **Done**, **Configured** (set up, real usage evidence still neede
 | --- | --- | --- |
 | Comprehensive CLAUDE.md with modular @imports, conventions, architecture, testing strategy; evolution visible in git | Done | [CLAUDE.md](../../CLAUDE.md) imports the PRD and the TDD protocol; history in `git log -- CLAUDE.md`; original `/init` output in [docs/evidence/01-init/](../evidence/01-init/) |
 | Auto-memory usage | Not started | Record real use when it happens |
-| At least 2 custom skills in `.claude/skills/`, with team usage evidence and at least one iterated v1 to v2 from real use (the Excellent rubric asks for 2+ iterated skills) | Not started | |
+| At least 2 custom skills in `.claude/skills/`, with team usage evidence and at least one iterated v1 to v2 from real use (the Excellent rubric asks for 2+ iterated skills) | Partial | Jingyi: `clear-review` v1 in `.claude/skills/clear-review/` (#28); real use on the next PR review and v2 to follow |
 | At least 2 hooks in `.claude/settings.json`: one PreToolUse or PostToolUse, one quality gate | Configured | PostToolUse lint and Stop test gate, see "Hooks" in [CLAUDE.md](../../CLAUDE.md); record first real runs in `docs/evidence/` |
 | At least 1 MCP server, shared `.mcp.json`, real workflow evidence | Planned | Playwright MCP server for simulated-user acceptance testing, see [p3-work-split.md](p3-work-split.md) |
 | At least 1 agent option (custom sub-agents in `.claude/agents/`, agent teams, or an Agent SDK feature), with real usage | Planned | Custom sub-agents in `.claude/agents/` |
