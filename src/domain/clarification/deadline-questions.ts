@@ -58,6 +58,8 @@ export interface DeadlineAnswer {
   // gave-date: the date the user named; "target" when the user picked it, "external" when it is due then.
   date?: LocalDateTime;
   dateKind?: "external" | "target";
+  // gave-date: true only when the user named the date, not when the model read one into a vague answer.
+  statedByUser?: boolean;
   // no-deadline: a target date the assistant suggests, saved only as a proposal.
   suggestedTarget?: LocalDateTime;
 }

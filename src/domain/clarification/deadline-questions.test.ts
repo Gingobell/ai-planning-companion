@@ -140,7 +140,7 @@ describe("applyDeadlineAnswers: a target date is saved only after the user agree
       ["target", "agreed"],
     ] as const) {
       const changes = applyDeadlineAnswers(
-        [{ questionIndex: 0, reply: "gave-date", date: { localDate: "2026-12-04" }, dateKind }],
+        [{ questionIndex: 0, reply: "gave-date", date: { localDate: "2026-12-04" }, dateKind, statedByUser: true }],
         context([question("t1", { proposedDeadline: "2026-12-01T07:59:00Z" })]),
       );
       expect(changes.tasks).toEqual([task("t1", { deadline: { at: DEC_4, source } })]);
@@ -148,11 +148,41 @@ describe("applyDeadlineAnswers: a target date is saved only after the user agree
     }
   });
 
+  it('does not save a date the user did not state, such as "maybe next week", and asks again', () => {
+    const changes = applyDeadlineAnswers(
+      [
+        {
+          questionIndex: 0,
+          reply: "gave-date",
+          date: { localDate: "2026-12-01" },
+          dateKind: "external",
+          statedByUser: false,
+        },
+      ],
+      context([question("t1")]),
+    );
+    expect(changes.tasks).toEqual([]);
+    expect(changes.questions).toEqual([]);
+    expect(changes.followUps).toEqual([question("t1")]);
+  });
+
   it("ignores answers to questions that do not exist or are already answered", () => {
     const changes = applyDeadlineAnswers(
       [
-        { questionIndex: 3, reply: "gave-date", date: { localDate: "2026-12-04" }, dateKind: "external" },
-        { questionIndex: 0, reply: "gave-date", date: { localDate: "2026-12-04" }, dateKind: "external" },
+        {
+          questionIndex: 3,
+          reply: "gave-date",
+          date: { localDate: "2026-12-04" },
+          dateKind: "external",
+          statedByUser: true,
+        },
+        {
+          questionIndex: 0,
+          reply: "gave-date",
+          date: { localDate: "2026-12-04" },
+          dateKind: "external",
+          statedByUser: true,
+        },
       ],
       context([question("t1", { status: "answered" })]),
     );
