@@ -66,3 +66,14 @@ to report completed: 0; the existing tests fail. The file was restored with git 
 
 A first attempt at case 3 used a file not named *.test.ts, so no test ran, every check passed and the
 hook exited 0 as it should; it was replaced by the case above.
+
+=== PreToolUse pre-push-sync.sh, first real runs (2026-11-24) ===
+Claude pushed chore/clear-review-skill. The hook paused the push (exit 2) and reported:
+- Open PR #64 by BeautySharon: feat: tdd-cycle skill v1 (#44). Shares files with this branch: docs/plans/p3-requirements.md.
+- Open PR #63 by BeautySharon: feat: in-memory repositories that pass the contract suite (#52). Shares files with this branch: CLAUDE.md.
+Outcome: both overlaps are separate lines in rule files with no code dependency, so the human agreed to push as is;
+whichever PR merges second resolves a one-line conflict.
+The runs exposed two problems, fixed before the push:
+1. "Already discussed" was keyed on the commit, so any new commit paused the push again; it now compares the findings.
+2. A command that only wrote text mentioning the push command was paused too; the hook now matches only a command
+   that starts with it (at the start of a line or after ; && || | or a parenthesis).
