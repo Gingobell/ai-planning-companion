@@ -103,6 +103,8 @@ function outcomeOf(
   });
   switch (answer.reply) {
     case "gave-date": {
+      // Same guard as capture: a date the model read into a vague answer is not a deadline.
+      if (answer.statedByUser !== true) return { followUp: question };
       const at = answer.date === undefined ? undefined : localDeadlineToInstant(answer.date, context.timeZone);
       if (at === undefined) return {};
       return withDeadline({ at, source: answer.dateKind === "target" ? "agreed" : "external" });

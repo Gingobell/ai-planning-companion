@@ -48,6 +48,10 @@ export const captureExtractionSchema = z.object({
           .enum(["external", "target"])
           .optional()
           .describe("gave-date only: external when the work is due then; target when the user picked the date"),
+        statedByUser: z
+          .boolean()
+          .optional()
+          .describe("gave-date only: true only if the user named this date; false for vague answers or any guess"),
         suggestedTarget: localDateTime
           .optional()
           .describe("no-deadline only: a realistic target date after the current date that you suggest"),

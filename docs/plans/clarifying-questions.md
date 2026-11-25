@@ -16,7 +16,7 @@ Scope: deadline questions only. Effort estimates are #18 and bringing old open q
 
 - **Q5** (added 2026-11-24 after review against DESIGN.md section 10) The latest reply shows answers with each question it asked: a deadline question lists "No fixed date, suggest a target" and "Type my own answer"; a suggested target date is a card with Accept and Another time. Accept saves the target as the agreed deadline without asking the model to read anything; Another time clears the proposal and asks for the user's own date. A button on a question that is no longer open changes nothing. Typing an answer still works.
 
-A user answer like "it's due Friday" sets the deadline (source `external`; "let's aim for Friday" is `agreed`) and marks the question answered.
+A user answer that names a date, like "it's due Friday", sets the deadline (source `external`; "let's aim for Friday" is `agreed`) and marks the question answered. Only a date the user stated counts: a vague answer such as "maybe next week" changes nothing and the question is asked again (review of #65).
 
 ## Design
 
