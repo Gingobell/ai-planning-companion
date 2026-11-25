@@ -250,3 +250,95 @@ $ npx vitest run
       Tests  191 passed (191)
 exit code: 0
 
+=== Cycle 6 Q2 review point: agreeing to a passed proposal (red) ===
+Time: 2026-11-25 11:29 PST
+Base commit: 8815fec
+$ npx vitest run
+- Expected
++ Received
+- []
++ [
++   {
++     "acceptance": "accepted",
++     "category": "School",
++     "deadline": {
++       "at": "2026-11-21T07:59:00Z",
++       "source": "agreed",
++     },
++     "id": "t1",
++     "priority": "medium",
++     "remindersEnabled": false,
++     "status": "not-started",
++     "title": "Task t1",
++     "userId": "alice",
++     "version": 1,
++   },
++ ]
+ ❯ src/domain/clarification/deadline-questions.test.ts:111:27
+    109|     const passed = question("t1", { proposedDeadline: "2026-11-21T07:5…
+    110|     const changes = applyDeadlineAnswers([{ questionIndex: 0, reply: "…
+    111|     expect(changes.tasks).toEqual([]);
+       |                           ^
+    112|     expect(changes.questions).toEqual([question("t1")]);
+    113|     expect(changes.followUps).toEqual([question("t1")]);
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+ Test Files  1 failed | 17 passed (18)
+      Tests  1 failed | 230 passed (231)
+exit code: 1
+
+=== Cycle 6 Q2 review point: agreeing to a passed proposal (green) ===
+Time: 2026-11-25 11:31 PST
+Base commit: 3f115e0
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  18 passed (18)
+      Tests  231 passed (231)
+exit code: 0
+
+=== Cycle 7 Q2 review point: a named date must be stated by the user (red) ===
+Time: 2026-11-25 11:32 PST
+Base commit: a98a1de
+$ npx vitest run
+- Expected
++ Received
+- []
++ [
++   {
++     "acceptance": "accepted",
++     "category": "School",
++     "deadline": {
++       "at": "2026-12-02T07:59:00Z",
++       "source": "external",
++     },
++     "id": "t1",
++     "priority": "medium",
++     "remindersEnabled": false,
++     "status": "not-started",
++     "title": "Task t1",
++     "userId": "alice",
++     "version": 1,
++   },
++ ]
+ ❯ src/domain/clarification/deadline-questions.test.ts:164:27
+    162|       context([question("t1")]),
+    163|     );
+    164|     expect(changes.tasks).toEqual([]);
+       |                           ^
+    165|     expect(changes.questions).toEqual([]);
+    166|     expect(changes.followUps).toEqual([question("t1")]);
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+ Test Files  1 failed | 17 passed (18)
+      Tests  1 failed | 231 passed (232)
+exit code: 1
+
+=== Cycle 7 Q2 review point: a named date must be stated by the user (green) ===
+Time: 2026-11-25 11:33 PST
+Base commit: ab3f547
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  18 passed (18)
+      Tests  232 passed (232)
+exit code: 0
+
+Note: cycles 6 and 7 answer the two review points on #65. No refactor commit: the changes are two small guards.
+
