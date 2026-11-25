@@ -10,7 +10,7 @@ Scope: deadline questions only. Effort estimates are #18 and bringing old open q
 ## Acceptance criteria (from issue #11, as testable statements)
 
 - **Q1** After capture, each new task without a deadline gets a deadline question. Goals, tasks with a stated deadline, and completed or canceled tasks get none. The deadline is the first and, in #11, the only topic asked (#18 adds effort after it).
-- **Q2** When the user says there is no external deadline or they are unsure, the assistant suggests a target date and stores it on the open question as a proposal; the task's deadline does not change. Only when the user agrees is it saved as the task's deadline with source `agreed`. A suggestion in the past, an impossible date, or an agreement when no proposal exists changes nothing.
+- **Q2** When the user says there is no external deadline or they are unsure, the assistant suggests a target date and stores it on the open question as a proposal; the task's deadline does not change. Only when the user agrees is it saved as the task's deadline with source `agreed`. A suggestion in the past, an impossible date, or an agreement when no proposal exists changes nothing. If the user agrees after the proposed date has passed, nothing is saved; the proposal is dropped and the question is asked again (review of #65).
 - **Q3** At most two questions per reply. No question for anything the user already said (a stated deadline, a task that already has an open deadline question), and a question is never duplicated.
 - **Q4** Every question asked is saved as an open question linked to its task, before the reply. It stays open until answered; a retry of the same message creates no second question.
 

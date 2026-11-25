@@ -105,11 +105,17 @@ function outcomeOf(
       if (at === undefined) return {};
       return withDeadline({ at, source: answer.dateKind === "target" ? "agreed" : "external" });
     }
-    case "agrees":
+    case "agrees": {
       // The assistant never invents a deadline: agreeing only counts when a target was suggested.
-      return question.proposedDeadline === undefined
-        ? {}
-        : withDeadline({ at: question.proposedDeadline, source: "agreed" });
+      const at = question.proposedDeadline;
+      if (at === undefined) return {};
+      // The user may answer days later; a suggestion that has passed is dropped and asked again.
+      if (!isAfter(at, context.now)) {
+        const cleared = withoutProposal(question);
+        return { question: cleared, followUp: cleared };
+      }
+      return withDeadline({ at, source: "agreed" });
+    }
     case "no-deadline": {
       const suggested = answer.suggestedTarget;
       const at = suggested === undefined ? undefined : localDeadlineToInstant(suggested, context.timeZone);
