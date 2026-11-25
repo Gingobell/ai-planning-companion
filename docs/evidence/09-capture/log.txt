@@ -1,0 +1,229 @@
+=== Cycle 1 C1 save first red ===
+Time: 2026-11-23 19:58 PST
+Base commit: 49b682e
+$ npx vitest run
+ ❯ src/server/chat/capture-message.test.ts (2 tests | 2 failed) 2058ms
+       × saves the user's message and the task it mentions 13ms
+       × keeps the user's message when the model is unavailable, and saves nothing else 8ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > C1: a mentioned goal or task is saved before anything is asked > saves the user's message and the task it mentions
+Error: not implemented
+ ❯ captureMessage src/server/chat/capture-message.ts:23:9
+     21| // eslint-disable-next-line @typescript-eslint/no-unused-vars -- stub …
+     22| export async function captureMessage(input: CaptureMessageInput): Prom…
+     23|   throw new Error("not implemented");
+       |         ^
+     24| }
+     25|
+ ❯ run src/server/chat/capture-message.test.ts:39:5
+ ❯ src/server/chat/capture-message.test.ts:54:28
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > C1: a mentioned goal or task is saved before anything is asked > keeps the user's message when the model is unavailable, and saves nothing else
+Error: not implemented
+ ❯ captureMessage src/server/chat/capture-message.ts:23:9
+     21| // eslint-disable-next-line @typescript-eslint/no-unused-vars -- stub …
+     22| export async function captureMessage(input: CaptureMessageInput): Prom…
+     23|   throw new Error("not implemented");
+       |         ^
+     24| }
+     25|
+ ❯ run src/server/chat/capture-message.test.ts:39:5
+ ❯ src/server/chat/capture-message.test.ts:65:20
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+ Test Files  1 failed | 12 passed (13)
+      Tests  2 failed | 120 passed (122)
+exit code: 1
+
+=== Cycle 1 C1 save first green ===
+Time: 2026-11-23 20:02 PST
+Base commit: 2320c0f
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  13 passed (13)
+      Tests  122 passed (122)
+exit code: 0
+
+=== Cycle 2 C2 goals and links red (the bad-link guard passes until links exist) ===
+Time: 2026-11-23 20:03 PST
+Base commit: 2dce8c5
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ ❯ src/server/chat/capture-message.test.ts (4 tests | 1 failed) 1572ms
+       × saves a goal, a task linked to it and a task on its own 12ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > C2: goals and tasks are told apart, and a task can be linked to a goal or stand alone > saves a goal, a task linked to it and a task on its own
+AssertionError: expected [] to deeply equal [ 'Land a summer internship' ]
+- Expected
++ Received
+- [
+-   "Land a summer internship",
+- ]
++ []
+ ❯ src/server/chat/capture-message.test.ts:84:41
+     82|
+     83|       const goals = await repos.goals.list();
+     84|       expect(goals.map((g) => g.title)).toEqual(["Land a summer intern…
+       |                                         ^
+     85|       const tasks = await repos.tasks.list();
+     86|       const byTitle = Object.fromEntries(tasks.map((t) => [t.title, t]…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+ Test Files  1 failed | 12 passed (13)
+      Tests  1 failed | 123 passed (124)
+exit code: 1
+
+=== Cycle 2 C2 goals and links green ===
+Time: 2026-11-23 20:03 PST
+Base commit: 7ca0124
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  13 passed (13)
+      Tests  124 passed (124)
+exit code: 0
+
+=== Cycle 3 C3 editable category (passes on first run, not a red step: planCapture already copies the suggested category) ===
+Time: 2026-11-23 20:04 PST
+Base commit: 4921924
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  13 passed (13)
+      Tests  125 passed (125)
+exit code: 0
+
+=== Cycle 4 C4 stated deadlines red (the three never-guess guards pass until deadlines are saved) ===
+Time: 2026-11-23 20:05 PST
+Base commit: 339011c
+$ npx vitest run
+}
++ Received:
+undefined
+ ❯ src/server/chat/capture-message.test.ts:134:107
+    132|
+    133|     it("turns a stated local date and time into a UTC instant marked e…
+    134|       expect(await deadlineOf(task({ localDate: "2026-11-26", localTim…
+       |                                                                                                           ^
+    135|         at: "2026-11-27T07:59:00Z",
+    136|         source: "external",
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > C4: a deadline is saved only when the user stated one; long-term goals need none > uses the end of the stated day when no time is given
+AssertionError: expected undefined to deeply equal { at: '2026-11-27T07:59:00Z', …(1) }
+- Expected:
+{
+  "at": "2026-11-27T07:59:00Z",
+  "source": "external",
+}
++ Received:
+undefined
+ ❯ src/server/chat/capture-message.test.ts:141:87
+    139|
+    140|     it("uses the end of the stated day when no time is given", async (…
+    141|       expect(await deadlineOf(task({ localDate: "2026-11-26", statedBy…
+       |                                                                                       ^
+    142|         at: "2026-11-27T07:59:00Z",
+    143|         source: "external",
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+ Test Files  1 failed | 12 passed (13)
+      Tests  2 failed | 128 passed (130)
+exit code: 1
+
+=== Cycle 4 C4 stated deadlines green ===
+Time: 2026-11-23 20:05 PST
+Base commit: 6bf1c33
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  13 passed (13)
+      Tests  130 passed (130)
+exit code: 0
+
+=== Cycle 5 C5 no duplicates on retry red ===
+Time: 2026-11-23 20:06 PST
+Base commit: cf639c3
+$ npx vitest run
+- Expected
++ Received
+- 1
++ 2
+ ❯ src/server/chat/capture-message.test.ts:177:24
+    175|
+    176|       expect(second).toEqual(first);
+    177|       expect(requests).toHaveLength(1);
+       |                        ^
+    178|       expect(await repos.tasks.list()).toHaveLength(1);
+    179|       expect((await repos.messages.listByChatDate("2026-11-24")).map((…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > C5: retrying the same message creates no duplicates > finishes a capture that failed at the model when the same message is sent again
+AssertionError: expected [ 'user' ] to deeply equal [ 'user', 'assistant' ]
+- Expected
++ Received
+  [
+    "user",
+-   "assistant",
+  ]
+ ❯ src/server/chat/capture-message.test.ts:187:86
+    185|       expect((await run()).kind).toBe("captured");
+    186|       expect(await repos.tasks.list()).toHaveLength(1);
+    187|       expect((await repos.messages.listByChatDate("2026-11-24")).map((…
+       |                                                                                      ^
+    188|     });
+    189|   });
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+ Test Files  1 failed | 12 passed (13)
+      Tests  2 failed | 130 passed (132)
+exit code: 1
+
+=== Cycle 5 C5 no duplicates on retry green ===
+Time: 2026-11-23 20:07 PST
+Base commit: def687a
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  13 passed (13)
+      Tests  132 passed (132)
+exit code: 0
+
+
+=== Cycles 1 to 5 refactor ===
+Skipped: planCapture and captureMessage are short with clear names; the only repetition is the record defaults for goals and tasks, which read more clearly inline.
+=== Review follow-up red: stop when the user's message cannot be saved (#62 review) ===
+Time: 2026-11-24 11:42 PST
+Base commit: cb6d539
+$ npx vitest run
++   "kind": "captured",
++   "reply": "Saved task \"Lab 5 for CS6983\", due Thu, Nov 26, 11:59 PM.",
++   "tasks": [
++     {
++       "acceptance": "accepted",
++       "category": "School",
++       "deadline": {
++         "at": "2026-11-27T07:59:00Z",
++         "source": "external",
++       },
++       "id": "msg-1:task:0",
++       "priority": "medium",
++       "remindersEnabled": false,
++       "status": "not-started",
++       "title": "Lab 5 for CS6983",
++       "userId": "user-alice",
++       "version": 1,
++     },
++   ],
+  }
+ ❯ src/server/chat/capture-message.test.ts:85:27
+     83|       });
+     84|       const { run, requests } = capture("Lab 5 for CS6983 is due Thurs…
+     85|       expect(await run()).toEqual({ kind: "save-failed" });
+       |                           ^
+     86|       expect(requests).toHaveLength(0);
+     87|       expect(await repos.tasks.list()).toEqual([]);
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+ Test Files  1 failed | 14 passed (15)
+      Tests  1 failed | 167 passed (168)
+exit code: 1
+
+=== Review follow-up green: stop when a save fails ===
+Time: 2026-11-24 11:44 PST
+Base commit: 83e51ea
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  15 passed (15)
+      Tests  168 passed (168)
+exit code: 0
+

@@ -133,7 +133,8 @@ export const reminders = pgTable(
   (t) => [
     index("reminders_user_scheduled_idx").on(t.userId, t.scheduledFor),
     index("reminders_status_scheduled_idx").on(t.status, t.scheduledFor),
-    uniqueIndex("reminders_delivery_key_idx").on(t.deliveryKey),
+    // Delivery keys identify a reminder within one user, so two users may share one.
+    uniqueIndex("reminders_user_delivery_key_idx").on(t.userId, t.deliveryKey),
   ],
 );
 

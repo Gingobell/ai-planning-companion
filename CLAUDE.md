@@ -35,7 +35,7 @@ These files change as the project grows. A rule changes only after a human confi
 - **Show the rule diff.** Before every commit, show the rule file changes next to the code changes and say in the commit message which rule changed.
 - **Keep the record.** `DESIGN.md` keeps a changelog section with date, change and reason. Other rule files rely on git history and the commit message.
 
-Current phase: HW4 is complete. The repository contains a Next.js skeleton with Vitest and the first domain feature, time block recommendation (US-02, US-06), built with TDD. Sprint 1 has added the app shell with the DESIGN.md tokens, the PostgreSQL data layer (#6), sign-in and account isolation (#7), CI checks and the progress rules (#30). Chat, LLM integration, running reminders and the Mac companion are not built yet.
+Current phase: HW4 is complete. The repository contains a Next.js skeleton with Vitest and the first domain feature, time block recommendation (US-02, US-06), built with TDD. Sprint 1 has added the app shell with the DESIGN.md tokens, the PostgreSQL data layer (#6), sign-in and account isolation (#7), CI checks, the progress rules (#30), the Gemini adapter (#9) and capture from one sentence in chat (#10). Clarifying questions, planning, running reminders and the Mac companion are not built yet.
 
 ## Commands
 
@@ -46,6 +46,7 @@ Current phase: HW4 is complete. The repository contains a Next.js skeleton with 
 - `npm test` runs Vitest once; `npm run test:watch` runs it in watch mode; `npm run test:coverage` adds a V8 coverage report.
 - `npm run format:check` runs Prettier (`.prettierrc.json`, print width 120); `npm run format` rewrites files. Markdown is excluded in `.prettierignore`.
 - CI (`.github/workflows/ci.yml`) runs lint, format check, typecheck and tests with coverage on every pull request and push to `main`, plus a security job with Gitleaks on the full history and `npm audit --audit-level=high`.
+- `.github/workflows/neon-branch-cleanup.yml` deletes a pull request's Neon preview branch (`preview/<git branch>`) when the pull request is merged or closed, so the Free plan's 10-branch limit is not reached. It needs the repository variable `NEON_PROJECT_ID` and the secret `NEON_API_KEY` (a project-scoped Neon API key).
 - Single test file: `npx vitest run path/to/file.test.ts`. Single test by name: `npx vitest run -t "test name"`.
 - `npm run db:generate` writes a SQL migration into `drizzle/` after a change to `src/data/postgres/schema.ts`; commit it with the schema change. `npm run db:migrate` applies migrations to the database in `DATABASE_URL_UNPOOLED`. Vercel runs `vercel-build`, which migrates before `next build`, so production and every preview branch are migrated on deploy. Tests need no database.
 
@@ -54,7 +55,7 @@ Current phase: HW4 is complete. The repository contains a Next.js skeleton with 
 Configured in `.claude/settings.json`; scripts live in `.claude/hooks/`.
 
 - **PostToolUse, `post-edit.sh`:** after Claude edits or writes a `.ts` or `.tsx` file under `src/`, ESLint runs on that file and any error is sent back to Claude to fix. Editing a `.tsx` or `.css` file under `src/` also reminds Claude to follow `DESIGN.md`.
-- **Stop, `stop-tests.sh`:** before Claude ends a turn with uncommitted changes in `src/`, `npm test` and `npm run typecheck` run. A failure blocks the stop once so Claude fixes it. A TDD red step (only `*.test.ts` files changed) is reported but not blocked, and a second failure in a row is handed to the human instead of looping.
+- **Stop, `stop-tests.sh`:** before Claude ends a turn with uncommitted changes in `src/`, `npm test` and `npm run typecheck` run. A failure blocks the stop once so Claude fixes it. A TDD red step (test files changed, the type check passes and only tests fail, even with a stub file alongside) is reported but not blocked, and a second failure in a row is handed to the human instead of looping.
 
 ## Next.js version warning
 
@@ -75,7 +76,7 @@ This project uses Next.js 16.4.6 and React 19.3, which have breaking changes com
 | Database | PostgreSQL on Neon (Free plan), added through the Vercel Marketplace integration, in the Washington, D.C. region (Vercel `iad1`, Neon `aws-us-east-1`). Each preview deploy gets its own database branch. The connection string is `DATABASE_URL` | In repo |
 | ORM and migrations | Drizzle ORM with drizzle-kit migrations; PGlite for database tests without a server | In repo |
 | Authentication | Neon Auth (managed Better Auth; users stored in the `neon_auth` schema of the same database) | In repo; enabled on the main branch, with the production URL and the `feat/auth` preview as trusted domains |
-| LLM (in the app) | Google Gemini API behind a provider-neutral adapter | Chosen, not in repo |
+| LLM (in the app) | Google Gemini API (`@google/genai`) behind the `LanguageModel` adapter in `src/llm/`; zod checks every answer. Free tier, where Google uses submitted content to improve its products; this is disclosed at sign-up and in the README. Key in `GEMINI_API_KEY`, model in `GEMINI_MODEL` (default `gemini-3.5-flash-lite`), so a paid key can replace it without code changes | In repo |
 | Mac companion | Electron thin shell: global shortcut, small window loading the web chat, notifications | Chosen, not in repo |
 | Hosting and CI | Vercel Hobby, production at https://ai-planning-companion.vercel.app, a preview deploy for every pull request; GitHub Actions | In repo |
 | MCP for Claude Code | Playwright MCP server in a shared `.mcp.json`, used for simulated-user acceptance testing | Chosen, not in repo |
@@ -101,6 +102,8 @@ Current layout:
 - The app shell (sidebar, nav items, brand mark, page placeholder) lives in `src/components/app-shell/`. Nav destinations are defined once in `nav-items.ts`.
 - Domain code goes under `src/domain/<area>/`, with tests next to the code as `*.test.ts`. The first area is `src/domain/scheduling/` (`recommend-time-block.ts`).
 - Shared record types are defined once in `src/domain/records.ts`, and data access interfaces in `src/domain/repositories.ts`. Every repository call takes the owner's `userId`. Implementations (in-memory, PostgreSQL) live outside `src/domain/`. Changes to either file go through their owner (see [docs/plans/p3-work-split.md](docs/plans/p3-work-split.md)).
+- Model calls go through `LanguageModel` in `src/llm/language-model.ts`; `generateValidated` sends a JSON Schema derived from a zod schema and checks the answer against it. `src/llm/gemini.ts` is the Gemini implementation (lazy `getLanguageModel()`), and tests use `createFakeLanguageModel` from `src/llm/fake-language-model.ts`. Send the model only what the request needs.
+- Chat lives in `src/server/chat/`: `captureMessage` saves the user's message, the goals and tasks the model finds (rules in `src/domain/capture/plan-capture.ts`) and the reply, in that order; ids come from the client's message id so a retry saves nothing twice. The page is `src/app/(app)/page.tsx` with components in `src/components/chat/`.
 - Data access implementations live in `src/data/`. `src/data/postgres/` holds the Drizzle schema, row mappers, repositories and the client (`createDatabase`, which reads `DATABASE_URL`). `src/data/memory/` holds in-memory repositories (`createMemoryStore`) for tests and local work without a database. `src/data/repository-contract.ts` is the shared test suite every implementation runs; database tests use PGlite through `src/data/postgres/test-db.ts`. SQL migrations live in `drizzle/`.
 - Import alias `@/*` maps to `./src/*` in `tsconfig.json` and in `vitest.config.mts` (`.mts` so Vite loads it as ESM).
 - `next.config.ts` enables `cacheComponents` and `partialPrefetching`, and wires Tailwind CSS v4 through a Turbopack loader rule (`@tailwindcss/turbopack`) for `*.css` instead of PostCSS. `globals.css` uses `@import "tailwindcss"` and `@theme inline` tokens.
