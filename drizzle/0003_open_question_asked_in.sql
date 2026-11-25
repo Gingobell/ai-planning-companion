@@ -1,0 +1,1 @@
+ALTER TABLE "open_questions" ADD COLUMN "asked_in" text;

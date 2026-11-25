@@ -139,8 +139,19 @@ export const messageMapper = {
 };
 
 export const openQuestionMapper = {
-  toRow: (question: OpenQuestion) => ({ ...question, taskId: question.taskId ?? null }),
-  fromRow: (row: Row<typeof schema.openQuestions>): OpenQuestion => compact({ ...row, taskId: optional(row.taskId) }),
+  toRow: (question: OpenQuestion) => ({
+    ...question,
+    taskId: question.taskId ?? null,
+    proposedDeadline: question.proposedDeadline ?? null,
+    askedIn: question.askedIn ?? null,
+  }),
+  fromRow: (row: Row<typeof schema.openQuestions>): OpenQuestion =>
+    compact({
+      ...row,
+      taskId: optional(row.taskId),
+      proposedDeadline: optionalInstant(row.proposedDeadline),
+      askedIn: optional(row.askedIn),
+    }),
 };
 
 export const progressReportMapper = {

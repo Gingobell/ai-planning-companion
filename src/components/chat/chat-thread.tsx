@@ -1,5 +1,7 @@
 import { Temporal } from "temporal-polyfill";
 import { RouteMark } from "@/components/app-shell/route-mark";
+import { QuestionAnswers, type AskedQuestion } from "@/components/chat/question-answers";
+import { describeDeadline } from "@/server/chat/capture-message";
 import { getCurrentUser } from "@/server/session";
 
 // Today's conversation in the user's time zone (one chat per local day, PRD Section 6).
@@ -8,10 +10,26 @@ export async function ChatThread() {
   const current = await getCurrentUser();
   if (current === undefined) return null;
   const settings = await current.repos.user.get();
-  const today = Temporal.Now.zonedDateTimeISO(settings?.timeZone ?? "UTC")
-    .toPlainDate()
-    .toString();
+  const timeZone = settings?.timeZone ?? "UTC";
+  const today = Temporal.Now.zonedDateTimeISO(timeZone).toPlainDate().toString();
   const messages = await current.repos.messages.listByChatDate(today);
+
+  // Answers show only under the latest reply, for the questions it asked that are still open.
+  const latest = messages.at(-1);
+  const asked: AskedQuestion[] = [];
+  if (latest?.role === "assistant") {
+    const [questions, tasks] = await Promise.all([current.repos.openQuestions.list(), current.repos.tasks.list()]);
+    for (const question of questions) {
+      if (question.status !== "open" || question.askedIn !== latest.id) continue;
+      asked.push({
+        id: question.id,
+        taskTitle: tasks.find((task) => task.id === question.taskId)?.title ?? "",
+        ...(question.proposedDeadline === undefined
+          ? {}
+          : { proposed: describeDeadline(question.proposedDeadline, timeZone) }),
+      });
+    }
+  }
 
   if (messages.length === 0) {
     return (
@@ -36,6 +54,11 @@ export async function ChatThread() {
             <p className="text-chat break-words text-ink">{message.text}</p>
           </li>
         ),
+      )}
+      {asked.length > 0 && (
+        <li>
+          <QuestionAnswers questions={asked} />
+        </li>
       )}
     </ol>
   );
