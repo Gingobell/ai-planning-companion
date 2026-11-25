@@ -1,6 +1,6 @@
 ---
 name: clear-review
-description: Review a pull request in this repo the way the team does, with one comment point per C.L.E.A.R. letter, checks run on the PR merged with current main, and a draft shown to the human before anything is posted. Use when the user asks to review, look at or approve a PR, or to draft review comments for one.
+description: Review a pull request in this repo the way the team does, with one comment point per C.L.E.A.R. letter, checks run on the PR merged with current main, and a draft shown to the human before anything is posted; and, before pushing your own work, check what the partner and main changed and agree on an order. Use when the user asks to review, look at or approve a PR, to draft review comments, to see what the partner changed, or when the pre-push hook pauses a push.
 ---
 
 # C.L.E.A.R. review (v1)
@@ -33,6 +33,18 @@ The review rules live in CLAUDE.md ("Code review (C.L.E.A.R.)", "Security", "Arc
 1. Write the review in English, one short point per letter, plus a verdict: approve, comment with requested changes, or request changes. Name small differences that are fine to keep, so the author can decide.
 2. Show the draft to the human and post only after they approve, with `gh pr review <n> --approve|--comment|--request-changes -F -`. Posting is always in the human's name.
 3. Follow-ups that need the author (merge main, fix a preview) go in the same review, not in a second comment.
+
+## Before pushing your own work
+
+The PreToolUse hook `.claude/hooks/pre-push-sync.sh` runs this check automatically and pauses a push once when it finds something. Run it by hand when the user asks what the partner changed.
+
+1. `git fetch origin`; list main's new commits (`git log --oneline HEAD..origin/main`) and the partner's open PRs (`gh pr list --state open`).
+2. Compare files: what this branch changed (`git diff --name-only origin/main...HEAD`) against main's new commits and each open PR's files. Check conflicts with `git merge-tree --write-tree HEAD origin/main`.
+3. Decide the order with the human:
+   - The partner's PR changes something this branch uses (a shared record type, a repository interface, a rule file both edit): review it first with this skill, and once it is merged, merge main into this branch and rerun the checks before pushing.
+   - Main moved and touches the same files: merge main into this branch (never rebase), fix conflicts, rerun the checks.
+   - Only unrelated changes: push as is, and mention any PR waiting for the human's review.
+4. Explain the findings in plain words and push only after the human agrees.
 
 ## Pitfalls seen in this repo
 
