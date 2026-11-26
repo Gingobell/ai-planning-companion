@@ -21,7 +21,7 @@ Decision (Gin, 2026-11-23): use Gemini's free tier, where Google states content 
 - **C2** Goals and tasks are told apart; a task can be linked to a goal from the same message or stay on its own.
 - **C3** Each item gets a free-text category suggestion, saved as editable data.
 - **C4** A long-term goal can be saved without a deadline, and a deadline is saved only when the user stated one (source `external`); the model never invents one.
-- **C5** Retrying the same message creates no duplicate records.
+- **C5** Retrying the same message creates no duplicate records. Text edited after a failure is sent as a new message, so the edited text is saved (fix found testing #65).
 
 ## Design
 
