@@ -16,7 +16,7 @@ Scope: deadline questions only. Effort estimates are #18 and bringing old open q
 
 - **Q5** (added 2026-11-24 after review against DESIGN.md section 10) The latest reply shows answers with each question it asked: a deadline question lists "No fixed date, suggest a target" and "Type my own answer"; a suggested target date is a card with Accept and Another time. Accept saves the target as the agreed deadline without asking the model to read anything; Another time clears the proposal and asks for the user's own date. A button on a question that is no longer open changes nothing. Typing an answer still works.
 
-A user answer that names a date, like "it's due Friday", sets the deadline (source `external`; "let's aim for Friday" is `agreed`) and marks the question answered. Only a date the user stated counts: a vague answer such as "maybe next week" changes nothing and the question is asked again (review of #65).
+A user answer that names a date, like "it's due Friday", sets the deadline (source `external`; "let's aim for Friday" is `agreed`) and marks the question answered. Only a date the user stated counts: a vague answer such as "maybe next week" changes nothing and the question is asked again (review of #65). A message that only mentions new goals or tasks answers no open question; silence about a question is never read as "no fixed date" (found testing #65 on production).
 
 ## Design
 
@@ -51,4 +51,4 @@ A user answer that names a date, like "it's due Friday", sets the deadline (sour
 ## Verification
 
 - `npm run lint`, `npm run typecheck`, `npm test`, `npm run format:check`, `npm run build`; `npm run db:migrate` runs on the preview deploy.
-- On the preview, signed in: "Finish the CS6983 blog post" gets one deadline question; "no fixed date" gets a suggested target; "yes" saves it (reply confirms the agreed date); a Chinese message gets a Chinese question; three tasks in one message get two questions; the same message resent after a failure adds no second question.
+- On the preview, signed in: "Finish the CS6983 blog post" gets one deadline question; "no fixed date" gets a suggested target; "yes" saves it (reply confirms the agreed date); three tasks in one message get two questions; the same message resent after a failure adds no second question; a message that only adds a new task leaves an earlier open question unanswered. Users are assumed to write in English; a Chinese version is out of scope (decided 2026-11-25).
