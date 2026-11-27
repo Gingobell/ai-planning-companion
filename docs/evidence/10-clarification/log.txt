@@ -1,0 +1,344 @@
+Issue #11, plan docs/plans/clarifying-questions.md. Criteria Q1 to Q4.
+=== Cycle 1 Q1 red ===
+Time: 2026-11-24 13:19 PST
+Base commit: 3e9a995
+$ npx vitest run
+     19|   throw new Error("not implemented");
+       |         ^
+     20| }
+     21|
+ ❯ src/domain/clarification/deadline-questions.test.ts:20:12
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+ FAIL  src/domain/clarification/deadline-questions.test.ts > chooseDeadlineQuestions: a deadline question for each new task without one (Q1) > does not ask when the user already stated the deadline
+Error: not implemented
+ ❯ chooseDeadlineQuestions src/domain/clarification/deadline-questions.ts:19:9
+     17| export function chooseDeadlineQuestions(input: ChooseDeadlineQuestions…
+     18|   void input;
+     19|   throw new Error("not implemented");
+       |         ^
+     20| }
+     21|
+ ❯ src/domain/clarification/deadline-questions.test.ts:27:12
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+ FAIL  src/domain/clarification/deadline-questions.test.ts > chooseDeadlineQuestions: a deadline question for each new task without one (Q1) > does not ask about completed or canceled tasks
+Error: not implemented
+ ❯ chooseDeadlineQuestions src/domain/clarification/deadline-questions.ts:19:9
+     17| export function chooseDeadlineQuestions(input: ChooseDeadlineQuestions…
+     18|   void input;
+     19|   throw new Error("not implemented");
+       |         ^
+     20| }
+     21|
+ ❯ src/domain/clarification/deadline-questions.test.ts:32:12
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+ Test Files  1 failed | 15 passed (16)
+      Tests  3 failed | 168 passed (171)
+exit code: 1
+
+=== Cycle 1 Q1 green ===
+Time: 2026-11-24 13:20 PST
+Base commit: 7e37870
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  16 passed (16)
+      Tests  171 passed (171)
+exit code: 0
+
+=== Cycle 2 Q3 red ===
+Time: 2026-11-24 13:20 PST
+Base commit: 8650025
+$ npx vitest run
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+ FAIL  src/domain/clarification/deadline-questions.test.ts > chooseDeadlineQuestions: a few questions at a time, never repeated (Q3) > puts follow-ups on this message's answers first, with their suggested target date
+AssertionError: expected [ { id: 't1:deadline', …(1) }, …(1) ] to deeply equal [ { id: 't0:deadline', …(2) }, …(1) ]
+- Expected
++ Received
+  [
+    {
+-     "id": "t0:deadline",
+-     "proposedDeadline": "2026-12-04T04:59:00Z",
+-     "taskId": "t0",
+-   },
+-   {
+      "id": "t1:deadline",
+      "taskId": "t1",
++   },
++   {
++     "id": "t2:deadline",
++     "taskId": "t2",
+    },
+  ]
+ ❯ src/domain/clarification/deadline-questions.test.ts:65:19
+     63|       followUps: [followUp],
+     64|     });
+     65|     expect(asked).toEqual([
+       |                   ^
+     66|       { id: "t0:deadline", taskId: "t0", proposedDeadline: "2026-12-04…
+     67|       { id: "t1:deadline", taskId: "t1" },
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+ Test Files  1 failed | 15 passed (16)
+      Tests  3 failed | 171 passed (174)
+exit code: 1
+
+=== Cycle 2 Q3 green ===
+Time: 2026-11-24 13:21 PST
+Base commit: 08ad36b
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  16 passed (16)
+      Tests  174 passed (174)
+exit code: 0
+
+Cycle 2 refactor skipped: chooseDeadlineQuestions is small and clear.
+
+=== Refactor: share localDeadlineToInstant from plan-capture for Q2 ===
+Time: 2026-11-24 13:23 PST
+Base commit: 39f5b15
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  16 passed (16)
+      Tests  174 passed (174)
+exit code: 0
+
+=== Cycle 3 Q2 red ===
+Time: 2026-11-24 13:24 PST
+Base commit: b67938e
+$ npx vitest run
+     86|   throw new Error("not implemented");
+       |         ^
+     87| }
+     88|
+ ❯ src/domain/clarification/deadline-questions.test.ts:120:21
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+ FAIL  src/domain/clarification/deadline-questions.test.ts > applyDeadlineAnswers: a target date is saved only after the user agrees (Q2) > saves a date the user names: external when it is due then, agreed when the user picks it
+Error: not implemented
+ ❯ applyDeadlineAnswers src/domain/clarification/deadline-questions.ts:86:9
+     84|   void answers;
+     85|   void context;
+     86|   throw new Error("not implemented");
+       |         ^
+     87| }
+     88|
+ ❯ src/domain/clarification/deadline-questions.test.ts:134:23
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+ FAIL  src/domain/clarification/deadline-questions.test.ts > applyDeadlineAnswers: a target date is saved only after the user agrees (Q2) > ignores answers to questions that do not exist or are already answered
+Error: not implemented
+ ❯ applyDeadlineAnswers src/domain/clarification/deadline-questions.ts:86:9
+     84|   void answers;
+     85|   void context;
+     86|   throw new Error("not implemented");
+       |         ^
+     87| }
+     88|
+ ❯ src/domain/clarification/deadline-questions.test.ts:144:21
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+ Test Files  1 failed | 15 passed (16)
+      Tests  7 failed | 174 passed (181)
+exit code: 1
+
+=== Cycle 3 Q2 green ===
+Time: 2026-11-24 13:25 PST
+Base commit: adcfd58
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  16 passed (16)
+      Tests  181 passed (181)
+exit code: 0
+
+=== Cycle 4 Q4 red ===
+Time: 2026-11-24 13:26 PST
+Base commit: 721a2a4
+$ npx vitest run
+    311|       expect(await repos.openQuestions.list()).toHaveLength(1);
+    312|     });
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > Q4: each question asked is saved as an open question, and answers in later messages count > keeps an unanswered question open and does not ask it again with every message
+AssertionError: expected 'Current local date and time: 2026-11-…' to contain 'Finish the CS6983 blog post'
+- Expected
++ Received
+- Finish the CS6983 blog post
++ Current local date and time: 2026-11-24T10:00:00 (America/Los_Angeles).
++ Message: Call the dentist tomorrow
+ ❯ src/server/chat/capture-message.test.ts:324:40
+    322|       await later.result;
+    323|
+    324|       expect(later.requests[0].prompt).toContain("Finish the CS6983 bl…
+       |                                        ^
+    325|       expect(later.requests[1].prompt).not.toContain("Finish the CS698…
+    326|       const questions = await repos.openQuestions.list();
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > Q4: each question asked is saved as an open question, and answers in later messages count > suggests a target date when there is no deadline, and saves it as agreed once the user says yes
+TypeError: Cannot read properties of undefined (reading 'prompt')
+ ❯ src/server/chat/capture-message.test.ts:342:37
+    340|       );
+    341|       await noDeadline.result;
+    342|       expect(noDeadline.requests[1].prompt).toContain("Dec 4");
+       |                                     ^
+    343|       expect((await repos.tasks.get(BLOG_ID))?.deadline).toBeUndefined…
+    344|
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+ Test Files  1 failed | 15 passed (16)
+      Tests  7 failed | 180 passed (187)
+exit code: 1
+
+Note: the C5 test now expects two model requests (extraction and reply phrasing); other #10 tests only gained a scripted phrasing result.
+
+=== Cycle 4 Q4 green ===
+Time: 2026-11-24 13:29 PST
+Base commit: 90656d5
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  16 passed (16)
+      Tests  187 passed (187)
+exit code: 0
+
+Cycle 3 refactor skipped: applyDeadlineAnswers already splits each reply kind into outcomeOf.
+
+=== Cycle 4 refactor: build the reply facts outside captureMessage ===
+Time: 2026-11-24 13:31 PST
+Base commit: 4d5550c
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  16 passed (16)
+      Tests  187 passed (187)
+exit code: 0
+
+=== Cycle 5 Q5 red ===
+Time: 2026-11-24 13:44 PST
+Base commit: d1a816f
+$ npx vitest run
+    359|       expect((await accept.result).kind).toBe("captured");
+       |                                          ^
+    360|
+    361|       expect(accept.requests.map((request) => request.system)).toEqual…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > Q5: a button answers an open question in one step, and a closed question ignores it > clears the suggestion when Another time is pressed and asks for the user's own date
+AssertionError: expected [] to include 'When is "Finish the CS6983 blog post"…'
+ ❯ src/server/chat/capture-message.test.ts:373:58
+    371|       const result = await another.result;
+    372|
+    373|       expect(result.kind === "captured" && result.reply).toContain('Wh…
+       |                                                          ^
+    374|       const question = await repos.openQuestions.get(BLOG_QUESTION);
+    375|       expect(question).toMatchObject({ status: "open", askedIn: "msg-3…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+ FAIL  src/server/chat/capture-message.test.ts > captureMessage > Q5: a button answers an open question in one step, and a closed question ignores it > changes nothing when a button is pressed on a question that is no longer open
+Error: The fake language model has no scripted result left
+ ❯ Object.generateJson src/llm/fake-language-model.ts:11:37
+      9|       requests.push(request);
+     10|       const next = results.shift();
+     11|       if (next === undefined) throw new Error("The fake language model…
+       |                                     ^
+     12|       return next;
+     13|     },
+ ❯ generateValidated src/llm/language-model.ts:28:30
+ ❯ captureMessage src/server/chat/capture-message.ts:166:28
+ ❯ src/server/chat/capture-message.test.ts:385:14
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+ Test Files  1 failed | 15 passed (16)
+      Tests  5 failed | 186 passed (191)
+exit code: 1
+
+Note: the Q4 helpers moved to the top of the test file and send() takes its model results as an array, so Q5 can pass a button choice.
+
+=== Cycle 5 Q5 green ===
+Time: 2026-11-24 13:47 PST
+Base commit: 9ce31ff
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  16 passed (16)
+      Tests  191 passed (191)
+exit code: 0
+
+=== Cycle 6 Q2 review point: agreeing to a passed proposal (red) ===
+Time: 2026-11-25 11:29 PST
+Base commit: 8815fec
+$ npx vitest run
+- Expected
++ Received
+- []
++ [
++   {
++     "acceptance": "accepted",
++     "category": "School",
++     "deadline": {
++       "at": "2026-11-21T07:59:00Z",
++       "source": "agreed",
++     },
++     "id": "t1",
++     "priority": "medium",
++     "remindersEnabled": false,
++     "status": "not-started",
++     "title": "Task t1",
++     "userId": "alice",
++     "version": 1,
++   },
++ ]
+ ❯ src/domain/clarification/deadline-questions.test.ts:111:27
+    109|     const passed = question("t1", { proposedDeadline: "2026-11-21T07:5…
+    110|     const changes = applyDeadlineAnswers([{ questionIndex: 0, reply: "…
+    111|     expect(changes.tasks).toEqual([]);
+       |                           ^
+    112|     expect(changes.questions).toEqual([question("t1")]);
+    113|     expect(changes.followUps).toEqual([question("t1")]);
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+ Test Files  1 failed | 17 passed (18)
+      Tests  1 failed | 230 passed (231)
+exit code: 1
+
+=== Cycle 6 Q2 review point: agreeing to a passed proposal (green) ===
+Time: 2026-11-25 11:31 PST
+Base commit: 3f115e0
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  18 passed (18)
+      Tests  231 passed (231)
+exit code: 0
+
+=== Cycle 7 Q2 review point: a named date must be stated by the user (red) ===
+Time: 2026-11-25 11:32 PST
+Base commit: a98a1de
+$ npx vitest run
+- Expected
++ Received
+- []
++ [
++   {
++     "acceptance": "accepted",
++     "category": "School",
++     "deadline": {
++       "at": "2026-12-02T07:59:00Z",
++       "source": "external",
++     },
++     "id": "t1",
++     "priority": "medium",
++     "remindersEnabled": false,
++     "status": "not-started",
++     "title": "Task t1",
++     "userId": "alice",
++     "version": 1,
++   },
++ ]
+ ❯ src/domain/clarification/deadline-questions.test.ts:164:27
+    162|       context([question("t1")]),
+    163|     );
+    164|     expect(changes.tasks).toEqual([]);
+       |                           ^
+    165|     expect(changes.questions).toEqual([]);
+    166|     expect(changes.followUps).toEqual([question("t1")]);
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+ Test Files  1 failed | 17 passed (18)
+      Tests  1 failed | 231 passed (232)
+exit code: 1
+
+=== Cycle 7 Q2 review point: a named date must be stated by the user (green) ===
+Time: 2026-11-25 11:33 PST
+Base commit: ab3f547
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  18 passed (18)
+      Tests  232 passed (232)
+exit code: 0
+
+Note: cycles 6 and 7 answer the two review points on #65. No refactor commit: the changes are two small guards.
+
