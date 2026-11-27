@@ -19,8 +19,8 @@ Follows [docs/engineering/tdd-workflow.md](../../../docs/engineering/tdd-workflo
 1. Add the smallest tests that express the AC. Type test helpers with the domain types (for example `ReminderDraft`), or literals such as `kind: "task"` widen to `string` and the type check fails.
 2. If the function does not exist yet, add a stub with the final signature and no logic: `void` each parameter and `throw new Error("not implemented")`.
 3. Run `npm run typecheck`. It must pass; a type or import error is not a red step.
-4. Run the tests and read why they fail. Valid reasons: `not implemented`, or an assertion on the missing behavior. Negative cases ("creates nothing when ...") may pass during red; that is fine when at least one case fails on the behavior, and the log says so.
-5. A test that passes on its first run (for example a purity check on code that already returns new objects) is not a red step. Never break the code to fake one. Log it as "passed on its first run, not a red step" and commit it as `test: <behavior>` without `(red)`.
+4. Run the tests and read why they fail. Valid reasons: `not implemented`, or an assertion on the missing behavior. Negative cases that pass during red are allowed under the rules in the workflow's Red step.
+5. A test that passes on its first run is not a red step; follow the workflow's Red step for how to commit and log it.
 6. Log: `TDD_LOG=docs/evidence/NN-<feature>/log.txt scripts/tdd-log.sh "Cycle N ACx red"`.
 7. Commit the tests, the stub and the log: `test: <behavior> (red)`.
 
@@ -44,4 +44,4 @@ Improve names, structure or duplication only if something is worth it, run the f
 
 ## Finish
 
-Push the branch and open a PR that starts with `Closes #<issue>`, links the plan and the evidence log, and keeps the body short (see the PR template). List any decision taken during the cycles that the plan did not state, so the reviewer can check it.
+Show the human the commits to push and the PR text first (CLAUDE.md asks for this before every push). After they approve, push the branch and open a PR that starts with `Closes #<issue>`, links the plan and the evidence log, and keeps the body short (see the PR template). List any decision taken during the cycles that the plan did not state, so the reviewer can check it.
