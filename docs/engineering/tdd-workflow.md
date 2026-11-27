@@ -10,6 +10,8 @@ This protocol applies to the TDD features listed under Testing in [p3-work-split
 ## One cycle per acceptance criterion
 
 1. **Red.** Write the smallest test that expresses the criterion. Run it and confirm it fails because the behavior is missing, not because of a syntax error, missing import or missing package. Add any stub needed only to make the test compile, with no logic. Commit as `test: <behavior> (red)`.
+   - Cases that only check that nothing happens (for example "creates no reminder when ...") may pass during red, as long as at least one case fails on the missing behavior; the evidence log says so.
+   - A test that passes on its first run, such as a purity check on code that already returns new objects, is not a red step. Never break the code to fake one: commit it as `test: <behavior>` without `(red)` and note "passed on its first run, not a red step" in the log.
 2. **Green.** Write the minimum implementation that makes the test pass. Run the full suite. Commit as `feat: <behavior> (green)`.
 3. **Refactor.** Improve names, structure or duplication without changing behavior. Run the full suite again and confirm it still passes. Commit as `refactor: <what changed>`. Skip the refactor commit when there is nothing worth changing, and say so in the session log.
 
