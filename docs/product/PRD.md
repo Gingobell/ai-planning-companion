@@ -31,7 +31,7 @@ Core features:
 - Daily check-ins at user-agreed times and reminders for important tasks.
 - Task breakdown and progress feedback connected to larger goals.
 
-Out of scope: a Windows desktop companion, native mobile apps, shared team task management, external calendar synchronization, and automatic monitoring of computer activity. Users can enter existing commitments through chat or direct editing.
+Out of scope: a Windows desktop companion, native mobile apps, shared team task management, external calendar synchronization, automatic monitoring of computer activity, and languages other than English: users are assumed to write in English. Users can enter existing commitments through chat or direct editing.
 
 All six user stories below are P0 for the first release, because together they form one planning and feedback cycle. The most important first-use moment is quick capture through the shortcut window: it shows that planning can start from a single sentence.
 

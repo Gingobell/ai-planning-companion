@@ -51,4 +51,4 @@ A user answer that names a date, like "it's due Friday", sets the deadline (sour
 ## Verification
 
 - `npm run lint`, `npm run typecheck`, `npm test`, `npm run format:check`, `npm run build`; `npm run db:migrate` runs on the preview deploy.
-- On the preview, signed in: "Finish the CS6983 blog post" gets one deadline question; "no fixed date" gets a suggested target; "yes" saves it (reply confirms the agreed date); three tasks in one message get two questions; the same message resent after a failure adds no second question; a message that only adds a new task leaves an earlier open question unanswered. Users are assumed to write in English; a Chinese version is out of scope (decided 2026-11-25).
+- On the preview, signed in: "Finish the CS6983 blog post" gets one deadline question; "no fixed date" gets a suggested target; "yes" saves it (reply confirms the agreed date); three tasks in one message get two questions; the same message resent after a failure adds no second question; a message that only adds a new task leaves an earlier open question unanswered. Language scope is in the PRD (Section 3, out of scope).
