@@ -274,3 +274,38 @@ exit code: 0
 
 Note: no refactor commit; the change is one small function.
 
+=== Composer resend: surrounding spaces keep the id, review of #69 (red) ===
+Time: 2026-11-27 16:20 PST
+Base commit: e3dce2c
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ ❯ src/components/chat/submission-id.test.ts (4 tests | 1 failed) 6ms
+     × reuses the id when the retried text differs only by surrounding spaces, as the server trims them 3ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/chat/submission-id.test.ts > submissionFor: a retry reuses the message id only for the same text > reuses the id when the retried text differs only by surrounding spaces, as the server trims them
+AssertionError: expected 'id-2' to be 'id-1' // Object.is equality
+Expected: "id-1"
+Received: "id-2"
+ ❯ src/components/chat/submission-id.test.ts:21:74
+     19|   it("reuses the id when the retried text differs only by surrounding …
+     20|     const failed = { id: "id-1", text: "Email my advisor" };
+     21|     expect(submissionFor(failed, "Email my advisor  ", () => "id-2").i…
+       |                                                                          ^
+     22|   });
+     23|
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+ Test Files  1 failed | 18 passed (19)
+      Tests  1 failed | 235 passed (236)
+exit code: 1
+
+=== Composer resend: surrounding spaces keep the id, review of #69 (green) ===
+Time: 2026-11-27 16:27 PST
+Base commit: c00b7fc
+$ npx vitest run
+ RUN  v4.1.12 <repo>
+ Test Files  19 passed (19)
+      Tests  236 passed (236)
+exit code: 0
+
+Note: the first run of this test passed by accident (the id generator also returned id-1); it was fixed before the red commit.
+
