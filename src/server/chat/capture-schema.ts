@@ -58,7 +58,7 @@ export const captureExtractionSchema = z.object({
       }),
     )
     .optional()
-    .describe("How the message answers the open deadline questions listed in the prompt; empty if it answers none"),
+    .describe("Only the open deadline questions this message clearly replies to; empty if it only mentions new items"),
 });
 
 export type CaptureExtractionOutput = z.infer<typeof captureExtractionSchema>;
@@ -71,8 +71,12 @@ export function captureSystemPrompt(): string {
     "Never invent a deadline. Include one only when the message names a date or day; resolve relative",
     "days such as 'Thursday' against the current local date given in the prompt, and set statedByUser",
     "to true only when the user said it. Keep titles in the user's language.",
-    "If the prompt lists open deadline questions, report in answers how the message answers each of them;",
-    "an answer is not a new task. When the user has no fixed date or is unsure, suggest a realistic target date.",
+    "If the prompt lists open deadline questions, add an answer only for a question the message clearly",
+    "replies to: it names a date for that task, says that task has no fixed date or the user is unsure, or",
+    "accepts or rejects its suggested target. A message that only mentions new goals or tasks answers no",
+    "question, even while questions are open; never treat silence about a question as 'no fixed date'.",
+    "An answer is not a new task. When the user says there is no fixed date or is unsure, suggest a",
+    "realistic target date.",
   ].join(" ");
 }
 
