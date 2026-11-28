@@ -1,28 +1,29 @@
 "use client";
 
 import { useState, useTransition, type FormEvent, type KeyboardEvent } from "react";
+import { submissionFor, type Submission } from "@/components/chat/submission-id";
 import { sendMessage } from "@/server/chat/actions";
 
 // The message box (DESIGN.md: composer at --h-lg, inset shadow). Text stays in the box while saving and
-// after a failure, and a retry reuses the same message id so nothing is saved twice (PRD Section 7).
+// after a failure; a retry of the same text reuses its message id so nothing is saved twice (PRD Section 7).
 export function Composer() {
   const [text, setText] = useState("");
-  // Made on the first send and kept until it succeeds, so a retry reuses it. Not made during render,
-  // because Next.js prerenders this component and a random value there would differ per request.
-  const [messageId, setMessageId] = useState<string | null>(null);
+  // The last send that has not succeeded yet. Its id is made on send, not during render, because Next.js
+  // prerenders this component and a random value there would differ per request.
+  const [lastSend, setLastSend] = useState<Submission | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function submit(event?: FormEvent) {
     event?.preventDefault();
     if (pending || text.trim() === "") return;
-    const id = messageId ?? crypto.randomUUID();
-    setMessageId(id);
+    const submission = submissionFor(lastSend, text, () => crypto.randomUUID());
+    setLastSend(submission);
     startTransition(async () => {
-      const result = await sendMessage({ text, messageId: id });
+      const result = await sendMessage({ text: submission.text, messageId: submission.id });
       if (result.status === "saved") {
         setText("");
-        setMessageId(null);
+        setLastSend(null);
         setError(null);
       } else {
         setError(result.error);
